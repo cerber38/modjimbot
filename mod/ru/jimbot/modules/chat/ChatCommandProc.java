@@ -1,4 +1,4 @@
-/**
+п»ї/**
  * JimBot - Java IM Bot
  * Copyright (C) 2006-2009 JimBot project
  * This program is free software; you can redistribute it and/or
@@ -41,7 +41,7 @@ import ru.jimbot.util.Log;
 import ru.jimbot.util.MainProps;
 
 /**
- * Обработка команд чата
+ * РћР±СЂР°Р±РѕС‚РєР° РєРѕРјР°РЅРґ С‡Р°С‚Р°
  * 
  * @author Prolubnikov Dmitry
  */
@@ -57,22 +57,22 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     public RobAdmin radm = null;
     public Voting voting_events = null;
     public MyQuiz Quiz = null;
-    private ConcurrentHashMap <String,String> up; // Запоминаем последний пришедший приват
-    private ConcurrentHashMap <String, KickInfo> statKick; // Расширенная статистика киков
-    private ConcurrentHashMap <String, ModInfo> statMod; // Расширенная статистика времяных модераторов
-    private HashSet<String> warnFlag; // Флаг предупреждения о молчании
+    private ConcurrentHashMap <String,String> up; // Р—Р°РїРѕРјРёРЅР°РµРј РїРѕСЃР»РµРґРЅРёР№ РїСЂРёС€РµРґС€РёР№ РїСЂРёРІР°С‚
+    private ConcurrentHashMap <String, KickInfo> statKick; // Р Р°СЃС€РёСЂРµРЅРЅР°СЏ СЃС‚Р°С‚РёСЃС‚РёРєР° РєРёРєРѕРІ
+    private ConcurrentHashMap <String, ModInfo> statMod; // Р Р°СЃС€РёСЂРµРЅРЅР°СЏ СЃС‚Р°С‚РёСЃС‚РёРєР° РІСЂРµРјСЏРЅС‹С… РјРѕРґРµСЂР°С‚РѕСЂРѕРІ
+    private HashSet<String> warnFlag; // Р¤Р»Р°Рі РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏ Рѕ РјРѕР»С‡Р°РЅРёРё
     public int state=0;
     private CommandParser parser;
     public ChatProps psp;
     private boolean firstStartMsg = false;
     private boolean firstStartScript = false;
-    // Счетчики для контроля флуда: одинаковых сообщений, отброшеных сообщений
+    // РЎС‡РµС‚С‡РёРєРё РґР»СЏ РєРѕРЅС‚СЂРѕР»СЏ С„Р»СѓРґР°: РѕРґРёРЅР°РєРѕРІС‹С… СЃРѕРѕР±С‰РµРЅРёР№, РѕС‚Р±СЂРѕС€РµРЅС‹С… СЃРѕРѕР±С‰РµРЅРёР№
     private ConcurrentHashMap <String, FloodElement> floodMap, floodMap2, floodNoReg;
     private HashMap<String, CommandExtend> comMap;
     private HashMap<String, NewExtend> comNew;
-    // Для хранения доступных объектов авторизации
+    // Р”Р»СЏ С…СЂР°РЅРµРЅРёСЏ РґРѕСЃС‚СѓРїРЅС‹С… РѕР±СЉРµРєС‚РѕРІ Р°РІС‚РѕСЂРёР·Р°С†РёРё
     private HashMap<String, String> authObj = new HashMap<String, String>();
-    // Для хранения доступных команд
+    // Р”Р»СЏ С…СЂР°РЅРµРЅРёСЏ РґРѕСЃС‚СѓРїРЅС‹С… РєРѕРјР°РЅРґ
     private HashMap<String, Cmd> commands = new HashMap<String, Cmd>();
     int a = 0;
     long ButilochkaTime = System.currentTimeMillis();
@@ -131,169 +131,169 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     }
     
     /**
-     * Инициализация списка команд и полномочий
+     * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРїРёСЃРєР° РєРѕРјР°РЅРґ Рё РїРѕР»РЅРѕРјРѕС‡РёР№
      */
     private void init(){
-    	authObj.put("pmsg","Отправка приватных сообщений");
-    	authObj.put("reg","Смена ника");
-    	authObj.put("invite","Создание приглашения");
-    	authObj.put("kickone","Кик одного пользователя");
-    	authObj.put("kickall","Кик всех пользователей");
-    	authObj.put("ban","Забанить пользователя");
-    	authObj.put("settheme","Установить тему в комнате");
-    	authObj.put("adminsay","Разговаривать с админом");
-    	authObj.put("adminstat","Получать статистику от админа");
-    	authObj.put("info","Получать расшириную информацию о юзере");
-    	authObj.put("exthelp","Расширенная помощь");
-    	authObj.put("authread","Получение инфы о полномочиях");
-    	authObj.put("authwrite","Изменение полномочий пользователей");
-    	authObj.put("whouser","Просмотр инфы о смене ников юзером");
-    	authObj.put("room","Смена комнаты");
-    	authObj.put("whoinv","Команда !whoinvite");
-    	authObj.put("kickhist","Команда !kickhist");
-    	authObj.put("chgkick","Изменение времени кика");
-    	authObj.put("dblnick","Разрешено дублировать ник");
-    	authObj.put("anyroom","Переход в любую комнату");
-    	authObj.put("wroom","Создавать и изменять комнаты");
-        authObj.put("zakhist", " 5 закрываний пользователей");
-        authObj.put("banroom", "Закрывать пользователей");
-        authObj.put("anti_ban", "Анти ''ban''");
-        authObj.put("anti_kik", "Анти ''kick''");
-        authObj.put("anti_banroom", "Анти ''banroom''");
-        authObj.put("anti_chnick", "Анти ''chnick''");
-        authObj.put("fraza","Возможность добовлять фразы в игру бутылочка");
-        authObj.put("adm","Смотреть список админов в online");
-        authObj.put("chnick","Команда изменения ника другого пользователя");
-        authObj.put("invise", "Возможность прятаться");
-        authObj.put("setpass", "Установить пароль в комнате");
-        authObj.put("admlist", "Смотреть список адм сообщений");
-        authObj.put("robmsg", "Возможность добовлять фразы для админ-бота");
-        authObj.put("moder_time", "Назначать временного модератора");
-        authObj.put("xst","Изминить х-статус чата");
-        authObj.put("restart","Перезагрузка бота");
-        authObj.put("shophist","Смотреть историю покупок в магазине");
-        authObj.put("gift","Добавлять/удалять подарки в ларьке");
-        authObj.put("status_user", "Установка статусов");
-        authObj.put("ubanhist", "История разбанов");
-        authObj.put("shophist", "Список пакупок в магазине");
-        authObj.put("invitation", "Приглашать пользователей в чат");
-        authObj.put("allroom_message", "Сообщение во все комнаты");
-        authObj.put("setclan", "Создание/удаление кланов");
-        authObj.put("deladmmsg", "Удаление адм сообщений");
+    	authObj.put("pmsg","РћС‚РїСЂР°РІРєР° РїСЂРёРІР°С‚РЅС‹С… СЃРѕРѕР±С‰РµРЅРёР№");
+    	authObj.put("reg","РЎРјРµРЅР° РЅРёРєР°");
+    	authObj.put("invite","РЎРѕР·РґР°РЅРёРµ РїСЂРёРіР»Р°С€РµРЅРёСЏ");
+    	authObj.put("kickone","РљРёРє РѕРґРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ");
+    	authObj.put("kickall","РљРёРє РІСЃРµС… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№");
+    	authObj.put("ban","Р—Р°Р±Р°РЅРёС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ");
+    	authObj.put("settheme","РЈСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РµРјСѓ РІ РєРѕРјРЅР°С‚Рµ");
+    	authObj.put("adminsay","Р Р°Р·РіРѕРІР°СЂРёРІР°С‚СЊ СЃ Р°РґРјРёРЅРѕРј");
+    	authObj.put("adminstat","РџРѕР»СѓС‡Р°С‚СЊ СЃС‚Р°С‚РёСЃС‚РёРєСѓ РѕС‚ Р°РґРјРёРЅР°");
+    	authObj.put("info","РџРѕР»СѓС‡Р°С‚СЊ СЂР°СЃС€РёСЂРёРЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ СЋР·РµСЂРµ");
+    	authObj.put("exthelp","Р Р°СЃС€РёСЂРµРЅРЅР°СЏ РїРѕРјРѕС‰СЊ");
+    	authObj.put("authread","РџРѕР»СѓС‡РµРЅРёРµ РёРЅС„С‹ Рѕ РїРѕР»РЅРѕРјРѕС‡РёСЏС…");
+    	authObj.put("authwrite","РР·РјРµРЅРµРЅРёРµ РїРѕР»РЅРѕРјРѕС‡РёР№ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№");
+    	authObj.put("whouser","РџСЂРѕСЃРјРѕС‚СЂ РёРЅС„С‹ Рѕ СЃРјРµРЅРµ РЅРёРєРѕРІ СЋР·РµСЂРѕРј");
+    	authObj.put("room","РЎРјРµРЅР° РєРѕРјРЅР°С‚С‹");
+    	authObj.put("whoinv","РљРѕРјР°РЅРґР° !whoinvite");
+    	authObj.put("kickhist","РљРѕРјР°РЅРґР° !kickhist");
+    	authObj.put("chgkick","РР·РјРµРЅРµРЅРёРµ РІСЂРµРјРµРЅРё РєРёРєР°");
+    	authObj.put("dblnick","Р Р°Р·СЂРµС€РµРЅРѕ РґСѓР±Р»РёСЂРѕРІР°С‚СЊ РЅРёРє");
+    	authObj.put("anyroom","РџРµСЂРµС…РѕРґ РІ Р»СЋР±СѓСЋ РєРѕРјРЅР°С‚Сѓ");
+    	authObj.put("wroom","РЎРѕР·РґР°РІР°С‚СЊ Рё РёР·РјРµРЅСЏС‚СЊ РєРѕРјРЅР°С‚С‹");
+        authObj.put("zakhist", " 5 Р·Р°РєСЂС‹РІР°РЅРёР№ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№");
+        authObj.put("banroom", "Р—Р°РєСЂС‹РІР°С‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№");
+        authObj.put("anti_ban", "РђРЅС‚Рё ''ban''");
+        authObj.put("anti_kik", "РђРЅС‚Рё ''kick''");
+        authObj.put("anti_banroom", "РђРЅС‚Рё ''banroom''");
+        authObj.put("anti_chnick", "РђРЅС‚Рё ''chnick''");
+        authObj.put("fraza","Р’РѕР·РјРѕР¶РЅРѕСЃС‚СЊ РґРѕР±РѕРІР»СЏС‚СЊ С„СЂР°Р·С‹ РІ РёРіСЂСѓ Р±СѓС‚С‹Р»РѕС‡РєР°");
+        authObj.put("adm","РЎРјРѕС‚СЂРµС‚СЊ СЃРїРёСЃРѕРє Р°РґРјРёРЅРѕРІ РІ online");
+        authObj.put("chnick","РљРѕРјР°РЅРґР° РёР·РјРµРЅРµРЅРёСЏ РЅРёРєР° РґСЂСѓРіРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ");
+        authObj.put("invise", "Р’РѕР·РјРѕР¶РЅРѕСЃС‚СЊ РїСЂСЏС‚Р°С‚СЊСЃСЏ");
+        authObj.put("setpass", "РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїР°СЂРѕР»СЊ РІ РєРѕРјРЅР°С‚Рµ");
+        authObj.put("admlist", "РЎРјРѕС‚СЂРµС‚СЊ СЃРїРёСЃРѕРє Р°РґРј СЃРѕРѕР±С‰РµРЅРёР№");
+        authObj.put("robmsg", "Р’РѕР·РјРѕР¶РЅРѕСЃС‚СЊ РґРѕР±РѕРІР»СЏС‚СЊ С„СЂР°Р·С‹ РґР»СЏ Р°РґРјРёРЅ-Р±РѕС‚Р°");
+        authObj.put("moder_time", "РќР°Р·РЅР°С‡Р°С‚СЊ РІСЂРµРјРµРЅРЅРѕРіРѕ РјРѕРґРµСЂР°С‚РѕСЂР°");
+        authObj.put("xst","РР·РјРёРЅРёС‚СЊ С…-СЃС‚Р°С‚СѓСЃ С‡Р°С‚Р°");
+        authObj.put("restart","РџРµСЂРµР·Р°РіСЂСѓР·РєР° Р±РѕС‚Р°");
+        authObj.put("shophist","РЎРјРѕС‚СЂРµС‚СЊ РёСЃС‚РѕСЂРёСЋ РїРѕРєСѓРїРѕРє РІ РјР°РіР°Р·РёРЅРµ");
+        authObj.put("gift","Р”РѕР±Р°РІР»СЏС‚СЊ/СѓРґР°Р»СЏС‚СЊ РїРѕРґР°СЂРєРё РІ Р»Р°СЂСЊРєРµ");
+        authObj.put("status_user", "РЈСЃС‚Р°РЅРѕРІРєР° СЃС‚Р°С‚СѓСЃРѕРІ");
+        authObj.put("ubanhist", "РСЃС‚РѕСЂРёСЏ СЂР°Р·Р±Р°РЅРѕРІ");
+        authObj.put("shophist", "РЎРїРёСЃРѕРє РїР°РєСѓРїРѕРє РІ РјР°РіР°Р·РёРЅРµ");
+        authObj.put("invitation", "РџСЂРёРіР»Р°С€Р°С‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РІ С‡Р°С‚");
+        authObj.put("allroom_message", "РЎРѕРѕР±С‰РµРЅРёРµ РІРѕ РІСЃРµ РєРѕРјРЅР°С‚С‹");
+        authObj.put("setclan", "РЎРѕР·РґР°РЅРёРµ/СѓРґР°Р»РµРЅРёРµ РєР»Р°РЅРѕРІ");
+        authObj.put("deladmmsg", "РЈРґР°Р»РµРЅРёРµ Р°РґРј СЃРѕРѕР±С‰РµРЅРёР№");
     	
        	commands.put("!help", new Cmd("!help","",1));
-        commands.put("!справка", new Cmd("!справка", "", 1));
-        commands.put("!помощь", new Cmd("!помощь", "", 1));
-        commands.put("!команды", new Cmd("!команды", "", 1));
+        commands.put("!СЃРїСЂР°РІРєР°", new Cmd("!СЃРїСЂР°РІРєР°", "", 1));
+        commands.put("!РїРѕРјРѕС‰СЊ", new Cmd("!РїРѕРјРѕС‰СЊ", "", 1));
+        commands.put("!РєРѕРјР°РЅРґС‹", new Cmd("!РєРѕРјР°РЅРґС‹", "", 1));
         commands.put("!chat", new Cmd("!chat", "", 2));
-        commands.put("!чат", new Cmd("!чат", "", 2));
-        commands.put("!вход", new Cmd("!вход", "", 2));
+        commands.put("!С‡Р°С‚", new Cmd("!С‡Р°С‚", "", 2));
+        commands.put("!РІС…РѕРґ", new Cmd("!РІС…РѕРґ", "", 2));
         commands.put("!exit", new Cmd("!exit", "", 3));
-        commands.put("!выход", new Cmd("!выход", "", 3));
+        commands.put("!РІС‹С…РѕРґ", new Cmd("!РІС‹С…РѕРґ", "", 3));
         commands.put("!rules", new Cmd("!rules", "", 4));
-        commands.put("!правила", new Cmd("!правила", "", 4));
-        commands.put("!законы", new Cmd("!законы", "", 4));
+        commands.put("!РїСЂР°РІРёР»Р°", new Cmd("!РїСЂР°РІРёР»Р°", "", 4));
+        commands.put("!Р·Р°РєРѕРЅС‹", new Cmd("!Р·Р°РєРѕРЅС‹", "", 4));
         commands.put("!stat", new Cmd("!stat", "", 5));
-        commands.put("!стат", new Cmd("!стат", "", 5));
+        commands.put("!СЃС‚Р°С‚", new Cmd("!СЃС‚Р°С‚", "", 5));
         commands.put("!gofree", new Cmd("!gofree", "", 6));
-        commands.put("!свюин", new Cmd("!свюин", "", 6));
+        commands.put("!СЃРІСЋРёРЅ", new Cmd("!СЃРІСЋРёРЅ", "", 6));
         commands.put("!go", new Cmd("!go", "$n", 7));
-        commands.put("!юин", new Cmd("!юин", "$n", 7));
+        commands.put("!СЋРёРЅ", new Cmd("!СЋРёРЅ", "$n", 7));
         commands.put("!banlist", new Cmd("!banlist", "", 8));
-        commands.put("!банлист", new Cmd("!банлист", "", 8));
+        commands.put("!Р±Р°РЅР»РёСЃС‚", new Cmd("!Р±Р°РЅР»РёСЃС‚", "", 8));
         commands.put("!kicklist", new Cmd("!kicklist", "", 9));
-        commands.put("!киклист", new Cmd("!киклист", "", 9));
+        commands.put("!РєРёРєР»РёСЃС‚", new Cmd("!РєРёРєР»РёСЃС‚", "", 9));
         commands.put("!info", new Cmd("!info", "$c", 10));
-        commands.put("!инфо", new Cmd("!инфо", "$c", 10));
+        commands.put("!РёРЅС„Рѕ", new Cmd("!РёРЅС„Рѕ", "$c", 10));
         commands.put("!kick", new Cmd("!kick", "$c $n $s", 11));
-        commands.put("!кик", new Cmd("!кик", "$c $n $s", 11));
+        commands.put("!РєРёРє", new Cmd("!РєРёРє", "$c $n $s", 11));
         commands.put("!kickall", new Cmd("!kickall", "", 12));
-        commands.put("!киквсех", new Cmd("!киквсех", "", 12));
+        commands.put("!РєРёРєРІСЃРµС…", new Cmd("!РєРёРєРІСЃРµС…", "", 12));
         commands.put("!listauth", new Cmd("!listauth", "", 13));
-        commands.put("!листаут", new Cmd("!листаут", "", 13));
+        commands.put("!Р»РёСЃС‚Р°СѓС‚", new Cmd("!Р»РёСЃС‚Р°СѓС‚", "", 13));
         commands.put("!who", new Cmd("!who", "$n", 14));
-        commands.put("!кто", new Cmd("!кто", "$n", 14));
+        commands.put("!РєС‚Рѕ", new Cmd("!РєС‚Рѕ", "$n", 14));
         commands.put("!listgroup", new Cmd("!listgroup", "", 15));
-        commands.put("!листгрупп", new Cmd("!листгрупп", "", 15));
+        commands.put("!Р»РёСЃС‚РіСЂСѓРїРї", new Cmd("!Р»РёСЃС‚РіСЂСѓРїРї", "", 15));
         commands.put("!checkuser", new Cmd("!checkuser", "$n", 16));
-        commands.put("!проверка", new Cmd("!проверка", "$n", 16));
+        commands.put("!РїСЂРѕРІРµСЂРєР°", new Cmd("!РїСЂРѕРІРµСЂРєР°", "$n", 16));
         commands.put("!setgroup", new Cmd("!setgroup", "$n $c", 17));
-        commands.put("!группа", new Cmd("!группа", "$n $c", 17));
+        commands.put("!РіСЂСѓРїРїР°", new Cmd("!РіСЂСѓРїРїР°", "$n $c", 17));
         commands.put("!grant", new Cmd("!grant", "$n $c", 18));
-        commands.put("!добавить", new Cmd("!добавить", "$n $c", 18));
+        commands.put("!РґРѕР±Р°РІРёС‚СЊ", new Cmd("!РґРѕР±Р°РІРёС‚СЊ", "$n $c", 18));
         commands.put("!revoke", new Cmd("!revoke", "$n $c $s", 19));
-        commands.put("!лишить", new Cmd("!лишить", "$n $c $s", 19));
+        commands.put("!Р»РёС€РёС‚СЊ", new Cmd("!Р»РёС€РёС‚СЊ", "$n $c $s", 19));
         commands.put("!ban", new Cmd("!ban", "$c $s", 20));
-        commands.put("!бан", new Cmd("!бан", "$c $s", 20));
+        commands.put("!Р±Р°РЅ", new Cmd("!Р±Р°РЅ", "$c $s", 20));
         commands.put("!uban", new Cmd("!uban", "$c", 21));
-        commands.put("!убан", new Cmd("!убан", "$c", 21));
+        commands.put("!СѓР±Р°РЅ", new Cmd("!СѓР±Р°РЅ", "$c", 21));
         commands.put("!reg", new Cmd("!reg","$c $c",22));
-        commands.put("!ник", new Cmd("!ник", "$c $c", 22));
-        commands.put("!рег", new Cmd("!рег", "$c $c", 22));
+        commands.put("!РЅРёРє", new Cmd("!РЅРёРє", "$c $c", 22));
+        commands.put("!СЂРµРі", new Cmd("!СЂРµРі", "$c $c", 22));
         commands.put("+a", new Cmd("+a", "", 23));
-        commands.put("+а", new Cmd("+а", "", 23));
+        commands.put("+Р°", new Cmd("+Р°", "", 23));
         commands.put("+f", new Cmd("+f", "", 23));
-        commands.put("+ф", new Cmd("+ф", "", 23));
-        commands.put("!тут", new Cmd("!тут", "", 23));
+        commands.put("+С„", new Cmd("+С„", "", 23));
+        commands.put("!С‚СѓС‚", new Cmd("!С‚СѓС‚", "", 23));
         commands.put("+p", new Cmd("+p", "$n $s", 24));
-        commands.put("+р", new Cmd("+р", "$n $s", 24));
-        commands.put("!лс", new Cmd("!лс", "$n $s", 24));
+        commands.put("+СЂ", new Cmd("+СЂ", "$n $s", 24));
+        commands.put("!Р»СЃ", new Cmd("!Р»СЃ", "$n $s", 24));
         commands.put("+pp", new Cmd("+pp", "$s", 25));
-        commands.put("+рр", new Cmd("+рр", "$s", 25));
-        commands.put("!ответ", new Cmd("!ответ", "$s", 25));
+        commands.put("+СЂСЂ", new Cmd("+СЂСЂ", "$s", 25));
+        commands.put("!РѕС‚РІРµС‚", new Cmd("!РѕС‚РІРµС‚", "$s", 25));
         commands.put("!settheme", new Cmd("!settheme", "$s", 26));
-        commands.put("!тема", new Cmd("!тема", "$s", 26));
+        commands.put("!С‚РµРјР°", new Cmd("!С‚РµРјР°", "$s", 26));
         commands.put("!getinfo", new Cmd("!getinfo", "$c", 27));
-        commands.put("!аська", new Cmd("!аська", "$c", 27));
+        commands.put("!Р°СЃСЊРєР°", new Cmd("!Р°СЃСЊРєР°", "$c", 27));
         commands.put("!room", new Cmd("!room", "$n $c", 28));
-        commands.put("!комната", new Cmd("!комната", "$n $c", 28));
-        commands.put("!к", new Cmd("!к", "$n $c", 28));
+        commands.put("!РєРѕРјРЅР°С‚Р°", new Cmd("!РєРѕРјРЅР°С‚Р°", "$n $c", 28));
+        commands.put("!Рє", new Cmd("!Рє", "$n $c", 28));
         commands.put("!kickhist", new Cmd("!kickhist", "", 29));
-        commands.put("!кикист", new Cmd("!кикист", "", 29));
+        commands.put("!РєРёРєРёСЃС‚", new Cmd("!РєРёРєРёСЃС‚", "", 29));
         commands.put("!adm", new Cmd("!adm", "$s", 30));
-        commands.put("!админу", new Cmd("!админу", "$s", 30));
+        commands.put("!Р°РґРјРёРЅСѓ", new Cmd("!Р°РґРјРёРЅСѓ", "$s", 30));
         commands.put("!banhist", new Cmd("!banhist", "", 31));
-        commands.put("!банист", new Cmd("!банист", "", 31));
+        commands.put("!Р±Р°РЅРёСЃС‚", new Cmd("!Р±Р°РЅРёСЃС‚", "", 31));
         commands.put("+aa", new Cmd("+aa", "", 32));
-        commands.put("+аа", new Cmd("+аа", "", 32));
-        commands.put("!все", new Cmd("!все", "", 32));
+        commands.put("+Р°Р°", new Cmd("+Р°Р°", "", 32));
+        commands.put("!РІСЃРµ", new Cmd("!РІСЃРµ", "", 32));
         commands.put("!lroom", new Cmd("!lroom", "", 33));
-        commands.put("!комнаты", new Cmd("!комнаты", "", 33));
+        commands.put("!РєРѕРјРЅР°С‚С‹", new Cmd("!РєРѕРјРЅР°С‚С‹", "", 33));
         commands.put("!crroom", new Cmd("!crroom", "$n $s", 34));
-        commands.put("!создкомн", new Cmd("!создкомн", "$n $s", 34));
+        commands.put("!СЃРѕР·РґРєРѕРјРЅ", new Cmd("!СЃРѕР·РґРєРѕРјРЅ", "$n $s", 34));
         commands.put("!chroom", new Cmd("!chroom", "$n $s", 35));
-        commands.put("!измкомн", new Cmd("!измкомн", "$n $s", 35));
-        commands.put("!модер", new Cmd("!модер", "$n $n", 36));
-        commands.put("!модерлист", new Cmd("!модерлист", "", 37));
-        commands.put("!закрытые", new Cmd("!закрытые", "", 38));
-        // TODO: 39 - скрипты
-        // TODO: 40 - скрипты в базе
-        commands.put("!запереть", new Cmd("!запереть", "$n $n $s", 41));
-        commands.put("!бутылочка", new Cmd("!бутылочка","",42));
-        commands.put("!фраза", new Cmd("!фраза", "$s", 43));
-        commands.put("!админы", new Cmd("!админы", "", 44));
+        commands.put("!РёР·РјРєРѕРјРЅ", new Cmd("!РёР·РјРєРѕРјРЅ", "$n $s", 35));
+        commands.put("!РјРѕРґРµСЂ", new Cmd("!РјРѕРґРµСЂ", "$n $n", 36));
+        commands.put("!РјРѕРґРµСЂР»РёСЃС‚", new Cmd("!РјРѕРґРµСЂР»РёСЃС‚", "", 37));
+        commands.put("!Р·Р°РєСЂС‹С‚С‹Рµ", new Cmd("!Р·Р°РєСЂС‹С‚С‹Рµ", "", 38));
+        // TODO: 39 - СЃРєСЂРёРїС‚С‹
+        // TODO: 40 - СЃРєСЂРёРїС‚С‹ РІ Р±Р°Р·Рµ
+        commands.put("!Р·Р°РїРµСЂРµС‚СЊ", new Cmd("!Р·Р°РїРµСЂРµС‚СЊ", "$n $n $s", 41));
+        commands.put("!Р±СѓС‚С‹Р»РѕС‡РєР°", new Cmd("!Р±СѓС‚С‹Р»РѕС‡РєР°","",42));
+        commands.put("!С„СЂР°Р·Р°", new Cmd("!С„СЂР°Р·Р°", "$s", 43));
+        commands.put("!Р°РґРјРёРЅС‹", new Cmd("!Р°РґРјРёРЅС‹", "", 44));
         commands.put("!chnick", new Cmd("!chnick","$n $c",45));
-        commands.put("!смник", new Cmd("!смник","$n $c",45));
-        commands.put("!повысить", new Cmd("!повысить", "$n", 46));
-        commands.put("!понизить", new Cmd("!понизить", "$n", 47));
+        commands.put("!СЃРјРЅРёРє", new Cmd("!СЃРјРЅРёРє","$n $c",45));
+        commands.put("!РїРѕРІС‹СЃРёС‚СЊ", new Cmd("!РїРѕРІС‹СЃРёС‚СЊ", "$n", 46));
+        commands.put("!РїРѕРЅРёР·РёС‚СЊ", new Cmd("!РїРѕРЅРёР·РёС‚СЊ", "$n", 47));
         commands.put("!setpass", new Cmd("!setpass", "$c", 48));
-        commands.put("!пароль", new Cmd("!пароль", "$c", 48));
-        commands.put("!адмлист", new Cmd("!адмлист", "$c", 49));
-        commands.put("!робмсг", new Cmd("!робмсг", "$s", 50));
-        commands.put("!хстатус", new Cmd("!хстатус", "$n $s", 51));
-        commands.put("!перезагрузить", new Cmd("!перезагрузить", "", 52));
-        commands.put("!статус", new Cmd("!статус", "$s", 53));
-        commands.put("!разбанлист", new Cmd("!разбанлист", "", 54));
-        commands.put("!удалить", new Cmd("!удалить", "$n", 55));
-        commands.put("!пригласитьид", new Cmd("!пригласитьид", "$n $s", 56));
-        commands.put("!пригласитьуин", new Cmd("!пригласитьуин", "$c $s", 57));
-        commands.put("!везде", new Cmd("!везде", "$s", 58));
-        commands.put("!деладм", new Cmd("!деладм", "", 59));
+        commands.put("!РїР°СЂРѕР»СЊ", new Cmd("!РїР°СЂРѕР»СЊ", "$c", 48));
+        commands.put("!Р°РґРјР»РёСЃС‚", new Cmd("!Р°РґРјР»РёСЃС‚", "$c", 49));
+        commands.put("!СЂРѕР±РјСЃРі", new Cmd("!СЂРѕР±РјСЃРі", "$s", 50));
+        commands.put("!С…СЃС‚Р°С‚СѓСЃ", new Cmd("!С…СЃС‚Р°С‚СѓСЃ", "$n $s", 51));
+        commands.put("!РїРµСЂРµР·Р°РіСЂСѓР·РёС‚СЊ", new Cmd("!РїРµСЂРµР·Р°РіСЂСѓР·РёС‚СЊ", "", 52));
+        commands.put("!СЃС‚Р°С‚СѓСЃ", new Cmd("!СЃС‚Р°С‚СѓСЃ", "$s", 53));
+        commands.put("!СЂР°Р·Р±Р°РЅР»РёСЃС‚", new Cmd("!СЂР°Р·Р±Р°РЅР»РёСЃС‚", "", 54));
+        commands.put("!СѓРґР°Р»РёС‚СЊ", new Cmd("!СѓРґР°Р»РёС‚СЊ", "$n", 55));
+        commands.put("!РїСЂРёРіР»Р°СЃРёС‚СЊРёРґ", new Cmd("!РїСЂРёРіР»Р°СЃРёС‚СЊРёРґ", "$n $s", 56));
+        commands.put("!РїСЂРёРіР»Р°СЃРёС‚СЊСѓРёРЅ", new Cmd("!РїСЂРёРіР»Р°СЃРёС‚СЊСѓРёРЅ", "$c $s", 57));
+        commands.put("!РІРµР·РґРµ", new Cmd("!РІРµР·РґРµ", "$s", 58));
+        commands.put("!РґРµР»Р°РґРј", new Cmd("!РґРµР»Р°РґРј", "", 59));
     	WorkScript.getInstance(srv.getName()).installAllChatCommandScripts(this);
     }
     
     /**
-     * Выдает список полномочий для работы
+     * Р’С‹РґР°РµС‚ СЃРїРёСЃРѕРє РїРѕР»РЅРѕРјРѕС‡РёР№ РґР»СЏ СЂР°Р±РѕС‚С‹
      * @return
      */
     public HashMap<String, String> getAuthObjects(){
@@ -301,7 +301,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     }
     
     /**
-     * Выдает список команд
+     * Р’С‹РґР°РµС‚ СЃРїРёСЃРѕРє РєРѕРјР°РЅРґ
      * @return
      */
     public HashMap<String, Cmd> getCommands(){
@@ -309,10 +309,10 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     }
     
     /**
-     * Добавление нового объекта полномочий
+     * Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕРіРѕ РѕР±СЉРµРєС‚Р° РїРѕР»РЅРѕРјРѕС‡РёР№
      * @param name
      * @param comment
-     * @return - истина, если такой объект уже был в таблице
+     * @return - РёСЃС‚РёРЅР°, РµСЃР»Рё С‚Р°РєРѕР№ РѕР±СЉРµРєС‚ СѓР¶Рµ Р±С‹Р» РІ С‚Р°Р±Р»РёС†Рµ
      */
     public boolean addAuth(String name, String comment){
     	boolean f = authObj.containsKey(name);
@@ -321,10 +321,10 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     }
     
     /**
-     * Добавление новой команды
+     * Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕР№ РєРѕРјР°РЅРґС‹
      * @param name
      * @param c
-     * @return - истина, если команда уже существует
+     * @return - РёСЃС‚РёРЅР°, РµСЃР»Рё РєРѕРјР°РЅРґР° СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
      */
     public boolean addCommand(String name, Cmd c) {
     	boolean f = commands.containsKey(name);
@@ -333,7 +333,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     }
     
     /**
-     * Возвращает экземпляр парсера
+     * Р’РѕР·РІСЂР°С‰Р°РµС‚ СЌРєР·РµРјРїР»СЏСЂ РїР°СЂСЃРµСЂР°
      * @return
      */
     public CommandParser getParser(){
@@ -364,10 +364,10 @@ private void firstMsg(IcqProtocol proc)
 if(!firstStartMsg){
 String[] s = srv.getProps().getAdmins();
 for(int i=0;i<s.length;i++){
-String k = "Бот запущен - " + new Date(Time.getTimeStart());
+String k = "Р‘РѕС‚ Р·Р°РїСѓС‰РµРЅ - " + new Date(Time.getTimeStart());
 String ss = k;
 if(MainProps.checkNewVersion())
-ss += "Доступна новая версия!\n" + MainProps.getNewVerDesc();
+ss += "Р”РѕСЃС‚СѓРїРЅР° РЅРѕРІР°СЏ РІРµСЂСЃРёСЏ!\n" + MainProps.getNewVerDesc();
 else
 ss += "";
 proc.mq.add(s[i], ss);
@@ -384,7 +384,7 @@ firstStartMsg=true;
     }
     
     /**
-     * Основная процедура парсера команд
+     * РћСЃРЅРѕРІРЅР°СЏ РїСЂРѕС†РµРґСѓСЂР° РїР°СЂСЃРµСЂР° РєРѕРјР°РЅРґ
      */
     public void parse(IcqProtocol proc, String uin, String mmsg) {
     if(Quiz == null)
@@ -402,21 +402,21 @@ firstStartMsg=true;
     radm = new RobAdmin(srv);
     radm.start();
     }
-    firstMsg(proc);//Первое сообщение
-    firstScript(proc);//Запуск скриптов
+    firstMsg(proc);//РџРµСЂРІРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ
+    firstScript(proc);//Р—Р°РїСѓСЃРє СЃРєСЂРёРїС‚РѕРІ
     state++;
     /*psp.del_logs_time();*/
     Log.debug("CHAT: parse " + proc.baseUin + ", " + uin + ", " + mmsg); 
     if(psp.getBooleanProperty("chat.writeInMsgs"))
-    //Слишком длинные сообщения записывать в БД не нужно для избежания переполнений
+    //РЎР»РёС€РєРѕРј РґР»РёРЅРЅС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ Р·Р°РїРёСЃС‹РІР°С‚СЊ РІ Р‘Р” РЅРµ РЅСѓР¶РЅРѕ РґР»СЏ РёР·Р±РµР¶Р°РЅРёСЏ РїРµСЂРµРїРѕР»РЅРµРЅРёР№
     if(mmsg.length()>1000){srv.us.db.log(0,uin,"IN",mmsg.substring(0, 1000),0);} else {srv.us.db.log(0,uin,"IN",mmsg,0);}
     String tmsg = mmsg.trim();
-    if(tmsg.length()==0){Log.error("Пустое сообщение в парсере команд: " + uin + ">" + mmsg);return;}
+    if(tmsg.length()==0){Log.error("РџСѓСЃС‚РѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РІ РїР°СЂСЃРµСЂРµ РєРѕРјР°РЅРґ: " + uin + ">" + mmsg);return;}
     if(tmsg.charAt(0)=='!' || tmsg.charAt(0)=='+'){Log.info("CHAT COM_LOG: " + uin + ">>" + tmsg);}
     try {
     //banroom
     if (testClosed(uin)==0 & !srv.us.authorityCheck(uin,"room"))freedom(uin);
-    //Проверка на временого модератора
+    //РџСЂРѕРІРµСЂРєР° РЅР° РІСЂРµРјРµРЅРѕРіРѕ РјРѕРґРµСЂР°С‚РѕСЂР°
     int moder = srv.us.getUser(uin).id;
     if (srv.us.getUserGroup(moder).equals("modertime") & testModer(uin)==0){ModerNoTime(proc, uin);}
     
@@ -429,8 +429,8 @@ firstStartMsg=true;
     } 
     else
     {
-    // Для нового юзера
-    // Проверка на флуд
+    // Р”Р»СЏ РЅРѕРІРѕРіРѕ СЋР·РµСЂР°
+    // РџСЂРѕРІРµСЂРєР° РЅР° С„Р»СѓРґ
     if(floodNoReg.containsKey(uin)){
     FloodElement e = floodNoReg.get(uin);
     if(e.getDeltaTime()<(psp.getIntProperty("chat.floodTimeLimitNoReg")*1000))
@@ -438,14 +438,14 @@ firstStartMsg=true;
     e.addMsg(tmsg);
     floodNoReg.put(uin, e);
     Log.flood("FLOOD NO REG " + uin + "> " + tmsg);
-    return; // Слишком часто
+    return; // РЎР»РёС€РєРѕРј С‡Р°СЃС‚Рѕ
     }
     if(e.isDoubleMsg(tmsg) && e.getCount()>3)
     {
     e.addMsg(tmsg);
     floodNoReg.put(uin, e);
     Log.flood("FLOOD NO REG " + uin + "> " + tmsg);
-    return; // Повтор сообщений
+    return; // РџРѕРІС‚РѕСЂ СЃРѕРѕР±С‰РµРЅРёР№
     }
     e.addMsg(tmsg);
     floodNoReg.put(uin, e);
@@ -456,17 +456,17 @@ firstStartMsg=true;
     floodNoReg.put(uin, e);
     }
     /*
-     * Проверим включена ли капча?
+     * РџСЂРѕРІРµСЂРёРј РІРєР»СЋС‡РµРЅР° Р»Рё РєР°РїС‡Р°?
      */
     if(psp.getBooleanProperty("chat.captcha")){
 
        /**
-        *   Капча при первом сообщение от юзера
+        *   РљР°РїС‡Р° РїСЂРё РїРµСЂРІРѕРј СЃРѕРѕР±С‰РµРЅРёРµ РѕС‚ СЋР·РµСЂР°
         *   @author fraer72
         */
 
-      // Если это не команда - выводим приветствие, иначе обрабатываем команду
-      boolean captcha = false; // Второй заход в процедуру после ответа?
+      // Р•СЃР»Рё СЌС‚Рѕ РЅРµ РєРѕРјР°РЅРґР° - РІС‹РІРѕРґРёРј РїСЂРёРІРµС‚СЃС‚РІРёРµ, РёРЅР°С‡Рµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј РєРѕРјР°РЅРґСѓ
+      boolean captcha = false; // Р’С‚РѕСЂРѕР№ Р·Р°С…РѕРґ РІ РїСЂРѕС†РµРґСѓСЂСѓ РїРѕСЃР»Рµ РѕС‚РІРµС‚Р°?
       if(srv.us.getUser(uin).state != UserWork.STATE_CAPTCHA && tmsg.charAt(0) != '!' && comNew.containsKey(uin))
       {
       if(comNew.get(uin).getMsg().equalsIgnoreCase(mmsg))
@@ -477,7 +477,7 @@ firstStartMsg=true;
       }
       else
       {
-      proc.mq.add(uin,"Вы неправильно ответили на проверочный вопрос, попытайтесь еще раз.:)");
+      proc.mq.add(uin,"Р’С‹ РЅРµРїСЂР°РІРёР»СЊРЅРѕ РѕС‚РІРµС‚РёР»Рё РЅР° РїСЂРѕРІРµСЂРѕС‡РЅС‹Р№ РІРѕРїСЂРѕСЃ, РїРѕРїС‹С‚Р°Р№С‚РµСЃСЊ РµС‰Рµ СЂР°Р·.:)");
       comNew.remove(uin);
       return;
       }
@@ -502,7 +502,7 @@ firstStartMsg=true;
       }
       }
  
-            // Проверка на флуд
+            // РџСЂРѕРІРµСЂРєР° РЅР° С„Р»СѓРґ
             if(floodMap.containsKey(uin))
             {
             FloodElement e = floodMap.get(uin);
@@ -517,7 +517,7 @@ firstStartMsg=true;
             }
             testFlood(proc,uin);
             mmsg = WorkScript.getInstance(srv.getName()).startMessagesScript(mmsg, srv);
-            if(mmsg.equals("")) return; // Сообщение было удалено в скрипте
+            if(mmsg.equals("")) return; // РЎРѕРѕР±С‰РµРЅРёРµ Р±С‹Р»Рѕ СѓРґР°Р»РµРЅРѕ РІ СЃРєСЂРёРїС‚Рµ
             int tp = 0;
             if(comMap.containsKey(uin))
             if(!comMap.get(uin).isExpire())
@@ -573,7 +573,7 @@ firstStartMsg=true;
                 commandGofree(proc, uin);
                 break;
            case 7:
-            	//TODO Выделить объект полномочий
+            	//TODO Р’С‹РґРµР»РёС‚СЊ РѕР±СЉРµРєС‚ РїРѕР»РЅРѕРјРѕС‡РёР№
             	if(!psp.testAdmin(uin)) break;
                 commandGo(proc, uin, parser.parseArgs(tmsg));
                 break;
@@ -686,11 +686,11 @@ firstStartMsg=true;
            case 38:
                 commandZakHist(proc, uin);
                 break;
-           case 39: // Обработка команды макросом
+           case 39: // РћР±СЂР°Р±РѕС‚РєР° РєРѕРјР°РЅРґС‹ РјР°РєСЂРѕСЃРѕРј
             	String ret = WorkScript.getInstance(srv.getName()).startChatCommandScript(parser.parseCommand2(tmsg).script, tmsg, uin, proc, this);
             	if(!ret.equals("") && !ret.equals("ok")) proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.parse.2"));
             	break;
-           case 40: // Скрипты в базе
+           case 40: // РЎРєСЂРёРїС‚С‹ РІ Р±Р°Р·Рµ
                 String re = scr.startScript(parser.parseCommand2(tmsg).script, tmsg, uin, proc, this);
                 if(!re.equals("") && !re.equals("ok")) proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.parse.2"));
                 break;
@@ -752,7 +752,7 @@ firstStartMsg=true;
                 commandDelAdmMsg(proc, uin);
                 break;
                 default:
-     //Дополнительные команды из других классов
+     //Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РєРѕРјР°РЅРґС‹ РёР· РґСЂСѓРіРёС… РєР»Р°СЃСЃРѕРІ
      if(scr.commandExec(proc, uin, mmsg)) return;
      if(voting_events.commandVoting(proc, uin, mmsg)) return;
      if(shop.commandShop(proc, uin, mmsg)) return;
@@ -761,7 +761,7 @@ firstStartMsg=true;
      if(gift.commandShop(proc, uin, mmsg)) return;
      if(clan.commandClan(proc, uin, mmsg)) return;
      if(srv.us.getUser(uin).state==UserWork.STATE_CHAT){
-     //Сообщения начинающиеся с "!" и "+" не выводим в чат
+     //РЎРѕРѕР±С‰РµРЅРёСЏ РЅР°С‡РёРЅР°СЋС‰РёРµСЃСЏ СЃ "!" Рё "+" РЅРµ РІС‹РІРѕРґРёРј РІ С‡Р°С‚
      try{
      if(mmsg.substring(0, 1).equals("!")){proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.parse.3"));return;}
      } catch (Exception ex){ex.printStackTrace();}
@@ -772,7 +772,7 @@ firstStartMsg=true;
      s += srv.us.getUser(uin).localnick + psp.getStringProperty("chat.delimiter")+" " + mmsg;
      if(s.length()>psp.getIntProperty("chat.MaxMsgSize")){
      s = s.substring(0,psp.getIntProperty("chat.MaxMsgSize"));
-     proc.mq.add(uin,"Слишком длинное сообщение было обрезано: " + s);
+     proc.mq.add(uin,"РЎР»РёС€РєРѕРј РґР»РёРЅРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ Р±С‹Р»Рѕ РѕР±СЂРµР·Р°РЅРѕ: " + s);
      }
      s = s.replace('\n',' ');
      s = s.replace('\r',' ');
@@ -798,7 +798,7 @@ firstStartMsg=true;
      }
     
     /**
-     * Команды чата
+     * РљРѕРјР°РЅРґС‹ С‡Р°С‚Р°
      */
 
 
@@ -856,7 +856,7 @@ firstStartMsg=true;
 
 
      /*
-     * Вывод случайной фразы для бутылочки
+     * Р’С‹РІРѕРґ СЃР»СѓС‡Р°Р№РЅРѕР№ С„СЂР°Р·С‹ РґР»СЏ Р±СѓС‚С‹Р»РѕС‡РєРё
      */
     public int n()
     {
@@ -943,7 +943,7 @@ firstStartMsg=true;
     Users uss = srv.us.getUser(id);    
     try{
     L += Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.1") + uss.localnick;
-    L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.2", new Object[] {(uss.data==0 ? "Не указанна" : (("|" + new Date(uss.data)).toString() + "|"))});
+    L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.2", new Object[] {(uss.data==0 ? "РќРµ СѓРєР°Р·Р°РЅРЅР°" : (("|" + new Date(uss.data)).toString() + "|"))});
     L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.3", new Object[] {uss.sn});
     L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.4", new Object[] {uss.id});
     L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.5", new Object[] {uss.group});
@@ -1226,11 +1226,11 @@ firstStartMsg=true;
      }
             
     
-     //смена ника - юзер уже в чате, пароль не нужен
+     //СЃРјРµРЅР° РЅРёРєР° - СЋР·РµСЂ СѓР¶Рµ РІ С‡Р°С‚Рµ, РїР°СЂРѕР»СЊ РЅРµ РЅСѓР¶РµРЅ
      if(uss.state != UserWork.STATE_CAPTCHA  && uss.state != UserWork.STATE_NO_REG)
      {
      if(!auth(proc,uin, "reg")) return;
-     if(uss.state!=UserWork.STATE_CHAT) return; // Менять ник тока в чате
+     if(uss.state!=UserWork.STATE_CHAT) return; // РњРµРЅСЏС‚СЊ РЅРёРє С‚РѕРєР° РІ С‡Р°С‚Рµ
      if(lnick.length()>maxNick)
      {
      lnick = lnick.substring(0,maxNick);
@@ -1255,7 +1255,7 @@ firstStartMsg=true;
      uss.localnick = lnick;
      Log.talk(uin + " update " + mmsg);
      proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandReg.8"));
-     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandReg.9", new Object[] {oldNick,lnick}), "", uss.room); //Сообщение для всех
+     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandReg.9", new Object[] {oldNick,lnick}), "", uss.room); //РЎРѕРѕР±С‰РµРЅРёРµ РґР»СЏ РІСЃРµС…
      srv.us.db.log(uss.id,uin,"REG",lnick,uss.room);
      srv.us.db.event(uss.id, uin, "REG", 0, "", lnick);
      uss.basesn = proc.baseUin;
@@ -1279,10 +1279,10 @@ firstStartMsg=true;
      {
      ex.printStackTrace();
      Log.talk(uin + " Reg error: " + mmsg);
-     //proc.mq.add(uin,"Ошибка");
+     //proc.mq.add(uin,"РћС€РёР±РєР°");
      }
 
-     //вызовем goChat
+     //РІС‹Р·РѕРІРµРј goChat
      goChat(proc, uin, mmsg, v);
      return;
 
@@ -1292,7 +1292,7 @@ firstStartMsg=true;
      {
      ex.printStackTrace();
      Log.talk(uin + " Reg error: " + mmsg);
-     proc.mq.add(uin,"Ошибка");
+     proc.mq.add(uin,"РћС€РёР±РєР°");
      }
      */
      
@@ -1326,7 +1326,7 @@ firstStartMsg=true;
     } 
     }
     s += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandA.4", new Object[] {cnt});
-    s += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandA.5", new Object[] {"«"+Integer.toString(srv.us.count()) +"»"});
+    s += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandA.5", new Object[] {"В«"+Integer.toString(srv.us.count()) +"В»"});
     proc.mq.add(uin, s);       
     }
     
@@ -1355,7 +1355,7 @@ firstStartMsg=true;
     }
     }
     s += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAA.2", new Object[] {cnt});
-    s += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAA.3", new Object[] {"«" + srv.us.statUsersCount()+ "»"});
+    s += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAA.3", new Object[] {"В«" + srv.us.statUsersCount()+ "В»"});
     proc.mq.add(uin, s);
     }
     
@@ -1381,7 +1381,7 @@ firstStartMsg=true;
     txt = txt.substring(0,psp.getIntProperty("chat.MaxMsgSize"));
     proc.mq.add(uin, Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.3", new Object[] {txt}));
     }
-    //TODO: Понять почему иногда возбуждается исключение null.... или переделать всю систему
+    //TODO: РџРѕРЅСЏС‚СЊ РїРѕС‡РµРјСѓ РёРЅРѕРіРґР° РІРѕР·Р±СѓР¶РґР°РµС‚СЃСЏ РёСЃРєР»СЋС‡РµРЅРёРµ null.... РёР»Рё РїРµСЂРµРґРµР»Р°С‚СЊ РІСЃСЋ СЃРёСЃС‚РµРјСѓ
         /*if(psp.getBooleanProperty("lichnoe.on.off"))
         {
         String s = psp.getStringProperty("chat.lichnoe");
@@ -1424,7 +1424,7 @@ firstStartMsg=true;
     txt = txt.substring(0,psp.getIntProperty("chat.MaxMsgSize"));
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.3", new Object[] {txt}));
     }
-    //TODO: Понять почему иногда возбуждается исключение null.... или переделать всю систему
+    //TODO: РџРѕРЅСЏС‚СЊ РїРѕС‡РµРјСѓ РёРЅРѕРіРґР° РІРѕР·Р±СѓР¶РґР°РµС‚СЃСЏ РёСЃРєР»СЋС‡РµРЅРёРµ null.... РёР»Рё РїРµСЂРµРґРµР»Р°С‚СЊ РІСЃСЋ СЃРёСЃС‚РµРјСѓ
         /*if(psp.getBooleanProperty("lichnoe.on.off"))
         {
         String s = psp.getStringProperty("chat.lichnoe");
@@ -1459,7 +1459,7 @@ firstStartMsg=true;
     Rooms r = srv.us.getRoom(room);
     r.setTopic(s);
     srv.us.saveRoom(r, "");
-    Log.info("Установлена тема комнаты " + room + ": " + s);
+    Log.info("РЈСЃС‚Р°РЅРѕРІР»РµРЅР° С‚РµРјР° РєРѕРјРЅР°С‚С‹ " + room + ": " + s);
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandSettheme.0", new Object[] {uss.localnick,s}), "", room);
     }
     
@@ -1514,7 +1514,7 @@ firstStartMsg=true;
    return;
    }
    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandRoom.3", new Object[] {uss.localnick}));
-   srv.us.db.event(uss.id, uin, "PASS", u.id, u.sn, "Пытался ввести пароль");
+   srv.us.db.event(uss.id, uin, "PASS", u.id, u.sn, "РџС‹С‚Р°Р»СЃСЏ РІРІРµСЃС‚Рё РїР°СЂРѕР»СЊ");
    return;
    }
    if( srv.us.getRoom(i).getUser_id() != 0 && srv.us.getRoom(i).getUser_id() != uss.clansman && !psp.testAdmin(uin) )
@@ -1529,7 +1529,7 @@ firstStartMsg=true;
    srv.us.updateUser(uss);
    srv.cq.changeUserRoom(uin, i);
    srv.cq.addMsg(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandRoom.6", new Object[] {uss.id,uss.localnick,srv.us.getRoom(i).getName()}), uin, uss.room);
-   proc.mq.add(uin, Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandRoom.7", new Object[] {i,srv.us.getRoom(i).getName(),(srv.us.getRoom(i).getTopic().equals("") ? "" : ("\nТема: " + srv.us.getRoom(i).getTopic())),"\nПользователей в комнате - |" + AllUsersRoom(i) + "|"}));
+   proc.mq.add(uin, Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandRoom.7", new Object[] {i,srv.us.getRoom(i).getName(),(srv.us.getRoom(i).getTopic().equals("") ? "" : ("\nРўРµРјР°: " + srv.us.getRoom(i).getTopic())),"\nРџРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РІ РєРѕРјРЅР°С‚Рµ - |" + AllUsersRoom(i) + "|"}));
    } 
    else
    {
@@ -1597,7 +1597,7 @@ firstStartMsg=true;
     }
     
   /**
-     * !lroom - Выводит список зарегистрированных комнат
+     * !lroom - Р’С‹РІРѕРґРёС‚ СЃРїРёСЃРѕРє Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹С… РєРѕРјРЅР°С‚
      * @param proc
      * @param uin
      */
@@ -1613,7 +1613,7 @@ firstStartMsg=true;
     Set<Integer> rid = srv.us.getRooms();
     Integer[] rooms = (Integer[]) rid.toArray(new Integer[0]);
     Arrays.sort(rooms);
-    //TODO список комнат по порядку
+    //TODO СЃРїРёСЃРѕРє РєРѕРјРЅР°С‚ РїРѕ РїРѕСЂСЏРґРєСѓ
     for (Integer i : rooms)
     {
     int cnt = 0;
@@ -1627,13 +1627,13 @@ firstStartMsg=true;
     cnt++;
     }
     }
-    s += i + " - " + srv.us.getRoom(i).getName() + " «" + cnt + " чел.»" + "\n";
+    s += i + " - " + srv.us.getRoom(i).getName() + " В«" + cnt + " С‡РµР».В»" + "\n";
     }
     proc.mq.add(uin, s);
     }
     
     /**
-     * !crroom - Создание новой комнаты
+     * !crroom - РЎРѕР·РґР°РЅРёРµ РЅРѕРІРѕР№ РєРѕРјРЅР°С‚С‹
      * @param proc
      * @param uin
      * @param v
@@ -1653,7 +1653,7 @@ firstStartMsg=true;
     }
     
     /**
-     * !chroom - Изменение названия комнаты
+     * !chroom - РР·РјРµРЅРµРЅРёРµ РЅР°Р·РІР°РЅРёСЏ РєРѕРјРЅР°С‚С‹
      * @param proc
      * @param uin
      * @param v
@@ -1674,7 +1674,7 @@ firstStartMsg=true;
 
     
     /**
-     * Проверка, были ли входящие приватные сообщения и от кого
+     * РџСЂРѕРІРµСЂРєР°, Р±С‹Р»Рё Р»Рё РІС…РѕРґСЏС‰РёРµ РїСЂРёРІР°С‚РЅС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ Рё РѕС‚ РєРѕРіРѕ
      */
     private String testPM(String sn){
         if(up.get(sn)==null)
@@ -1684,18 +1684,18 @@ firstStartMsg=true;
     }
     
     /**
-     * Запоминание источника нового входящего сообщения
+     * Р—Р°РїРѕРјРёРЅР°РЅРёРµ РёСЃС‚РѕС‡РЅРёРєР° РЅРѕРІРѕРіРѕ РІС…РѕРґСЏС‰РµРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ
      */
     private void setPM(String sn, String from_sn){
         up.put(sn,from_sn);
     }
     
     /**
-     * Проверка ника на правильность
+     * РџСЂРѕРІРµСЂРєР° РЅРёРєР° РЅР° РїСЂР°РІРёР»СЊРЅРѕСЃС‚СЊ
      */
     public boolean testNick(String sn, String nick){
         Users uss = srv.us.getUser(sn);
-        if(psp.testAdmin(sn)) return true; // Админам можно любой ник :)
+        if(psp.testAdmin(sn)) return true; // РђРґРјРёРЅР°Рј РјРѕР¶РЅРѕ Р»СЋР±РѕР№ РЅРёРє :)
         String[] ss = psp.getStringProperty("chat.badNicks").split(";");
         String nick1 = radm.changeChar(nick.toLowerCase());
         for(int i=0;i<ss.length;i++){
@@ -1725,10 +1725,10 @@ firstStartMsg=true;
 
 
     /**
-     * Вывод списка объектов полномочий
+     * Р’С‹РІРѕРґ СЃРїРёСЃРєР° РѕР±СЉРµРєС‚РѕРІ РїРѕР»РЅРѕРјРѕС‡РёР№
      */
     public String listAuthObjects(){
-        String s="Объекты полномочий:\n";
+        String s="РћР±СЉРµРєС‚С‹ РїРѕР»РЅРѕРјРѕС‡РёР№:\n";
         for(String c:authObj.keySet()){
         	s += c + " - " + authObj.get(c)+"\n";
         }
@@ -1736,7 +1736,7 @@ firstStartMsg=true;
     }
 
     /**
-     * Проверка объекта на наличие в списке
+     * РџСЂРѕРІРµСЂРєР° РѕР±СЉРµРєС‚Р° РЅР° РЅР°Р»РёС‡РёРµ РІ СЃРїРёСЃРєРµ
      */
     public boolean testAuthObject(String tst)
     {
@@ -1744,7 +1744,7 @@ firstStartMsg=true;
     }
     
     /**
-     * Есть такая группа?
+     * Р•СЃС‚СЊ С‚Р°РєР°СЏ РіСЂСѓРїРїР°?
      * @param tst
      * @return
      */
@@ -1757,7 +1757,7 @@ firstStartMsg=true;
     }
     
     /**
-     * Проверка юзера, кикнут ли он
+     * РџСЂРѕРІРµСЂРєР° СЋР·РµСЂР°, РєРёРєРЅСѓС‚ Р»Рё РѕРЅ
      */
     public int testKick(String sn){
     	long tc = srv.us.getUser(sn).lastKick;
@@ -1766,7 +1766,7 @@ firstStartMsg=true;
     }
     
     /**
-     * Кик юзера по времени
+     * РљРёРє СЋР·РµСЂР° РїРѕ РІСЂРµРјРµРЅРё
      */
     public void setKick(String sn, int min, int user_id, String r){
         Users u = srv.us.getUser(sn);
@@ -1785,7 +1785,7 @@ firstStartMsg=true;
     }
     
     /**
-     * Список юзеров в состоянии кика
+     * РЎРїРёСЃРѕРє СЋР·РµСЂРѕРІ РІ СЃРѕСЃС‚РѕСЏРЅРёРё РєРёРєР°
      */
     public String listKickUsers(){
         String r=Messages.getInstance(srv.getName()).getString("ChatCommandProc.listKickUsers.0") + "\n";
@@ -1810,11 +1810,11 @@ firstStartMsg=true;
 
     
     /**
-     * Парсер сообщений после запроса инфы юзера
+     * РџР°СЂСЃРµСЂ СЃРѕРѕР±С‰РµРЅРёР№ РїРѕСЃР»Рµ Р·Р°РїСЂРѕСЃР° РёРЅС„С‹ СЋР·РµСЂР°
      */
     public void parseInfo(Users u, int type){
     	switch(type) {
-    	case 1: // Основная инфа
+    	case 1: // РћСЃРЅРѕРІРЅР°СЏ РёРЅС„Р°
     		Log.info("User: " + u.sn + ", " + u.nick);
     		Users uu = srv.us.getUser(u.sn);
     		uu.sn = u.sn;
@@ -1829,13 +1829,13 @@ firstStartMsg=true;
     }
     
     /**
-     * Проверка молчунов
+     * РџСЂРѕРІРµСЂРєР° РјРѕР»С‡СѓРЅРѕРІ
      * @param uin
      */
     public void testState(String uin){
         if (psp.testAdmin(uin))
         {
-        return;//если юзак сис админ
+        return;//РµСЃР»Рё СЋР·Р°Рє СЃРёСЃ Р°РґРјРёРЅ
         }
         long t = floodMap.get(uin).getDeltaTime();
         if(t>(psp.getIntProperty("chat.autoKickTimeWarn")*60000) &&
@@ -1853,7 +1853,7 @@ firstStartMsg=true;
     }
     
     /**
-     * Юзер - главный админ?
+     * Р®Р·РµСЂ - РіР»Р°РІРЅС‹Р№ Р°РґРјРёРЅ?
      * @param proc
      * @param uin
      * @return
@@ -1869,7 +1869,7 @@ firstStartMsg=true;
     }
     
     /**
-     * Проверка полномочий
+     * РџСЂРѕРІРµСЂРєР° РїРѕР»РЅРѕРјРѕС‡РёР№
      * @param proc
      * @param uin
      * @param obj
@@ -1886,7 +1886,7 @@ firstStartMsg=true;
     }
     
     /**
-     * Тихая проверка полномочий. Не выводит сообщений.
+     * РўРёС…Р°СЏ РїСЂРѕРІРµСЂРєР° РїРѕР»РЅРѕРјРѕС‡РёР№. РќРµ РІС‹РІРѕРґРёС‚ СЃРѕРѕР±С‰РµРЅРёР№.
      * @param proc
      * @param uin
      * @param obj
@@ -1901,7 +1901,7 @@ firstStartMsg=true;
     
     
     /**
-     * Вход в чат
+     * Р’С…РѕРґ РІ С‡Р°С‚
      * @param proc
      * @param uin
      */
@@ -1915,7 +1915,7 @@ firstStartMsg=true;
     proc.mq.add(uin, Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandgoChat.0", new Object[] {psp.getStringProperty("chat.name")}));
     return;
     }
-    if (uss.state==UserWork.STATE_CHAT) return; //Юзер уже в чате
+    if (uss.state==UserWork.STATE_CHAT) return; //Р®Р·РµСЂ СѓР¶Рµ РІ С‡Р°С‚Рµ
     String pass = "";
     if (uss.state==UserWork.STATE_NO_CHAT)
     {
@@ -1964,7 +1964,7 @@ firstStartMsg=true;
     room_in_chat = true;
     comNew.remove(uin);
     }
-    //TODO список комнат перед входом в чат
+    //TODO СЃРїРёСЃРѕРє РєРѕРјРЅР°С‚ РїРµСЂРµРґ РІС…РѕРґРѕРј РІ С‡Р°С‚
     Set<Integer> rid = srv.us.getRooms();
     Integer[] rooms=(Integer[])rid.toArray(new Integer[0]);
     Arrays.sort(rooms);
@@ -1984,7 +1984,7 @@ firstStartMsg=true;
     cnt++;
     }
     }
-    list += "[" + i + "] - " + srv.us.getRoom(i).getName() + " «" + cnt + "чел.»\n";
+    list += "[" + i + "] - " + srv.us.getRoom(i).getName() + " В«" + cnt + "С‡РµР».В»\n";
     }
     proc.mq.add(uin, list + "\n----\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandgoChat.8"));
     comNew.put(uin, new NewExtend(uin, mmsg, mmsg, v, 2*60000));
@@ -2011,9 +2011,9 @@ firstStartMsg=true;
     if(psp.getBooleanProperty("chat.showChangeUserStatus"))
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandgoChat.10", new Object[] {uss.localnick}), uss.sn, uss.room);
     }
-    Log.talk(uss.localnick + " Вошел в чат");
-    srv.us.db.log(uss.id,uin,"STATE_IN",uss.localnick + " вошел(а) в чат",uss.room);
-    srv.us.db.event(uss.id, uin, "STATE_IN", 0, "", uss.localnick + " Вошел в чат");
+    Log.talk(uss.localnick + " Р’РѕС€РµР» РІ С‡Р°С‚");
+    srv.us.db.log(uss.id,uin,"STATE_IN",uss.localnick + " РІРѕС€РµР»(Р°) РІ С‡Р°С‚",uss.room);
+    srv.us.db.event(uss.id, uin, "STATE_IN", 0, "", uss.localnick + " Р’РѕС€РµР» РІ С‡Р°С‚");
     srv.cq.addUser(uin,proc.baseUin, uss.room);
     if(f)
     {
@@ -2031,7 +2031,7 @@ firstStartMsg=true;
     
     
     /**
-     * Выход из чата
+     * Р’С‹С…РѕРґ РёР· С‡Р°С‚Р°
      * @param proc
      * @param uin
      */
@@ -2046,19 +2046,19 @@ firstStartMsg=true;
     proc.RemoveContactList(uin);
     }
     } else
-    return; // Юзера нет в чате - игнорируем команду
+    return; // Р®Р·РµСЂР° РЅРµС‚ РІ С‡Р°С‚Рµ - РёРіРЅРѕСЂРёСЂСѓРµРј РєРѕРјР°РЅРґСѓ
     uss.state = UserWork.STATE_NO_CHAT;
     srv.us.updateUser(uss);
-    Log.talk(uss.localnick + " Ушел(а) из чата");
-    srv.us.db.log(uss.id,uin,"STATE_OUT",uss.localnick + " Ушел(а) из чата",uss.room);
-    srv.us.db.event(uss.id, uin, "STATE_OUT", 0, "", uss.localnick + " Ушел(а) из чата");
+    Log.talk(uss.localnick + " РЈС€РµР»(Р°) РёР· С‡Р°С‚Р°");
+    srv.us.db.log(uss.id,uin,"STATE_OUT",uss.localnick + " РЈС€РµР»(Р°) РёР· С‡Р°С‚Р°",uss.room);
+    srv.us.db.event(uss.id, uin, "STATE_OUT", 0, "", uss.localnick + " РЈС€РµР»(Р°) РёР· С‡Р°С‚Р°");
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandexitChat.0", new Object[] {uss.localnick}), uss.sn, uss.room);
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandexitChat.1"));
     srv.cq.delUser(uin);
     }
     
     /**
-     * Смена базового уина юзера
+     * РЎРјРµРЅР° Р±Р°Р·РѕРІРѕРіРѕ СѓРёРЅР° СЋР·РµСЂР°
      */
     public void changeBaseUin(String uin, String buin){
         Users u = srv.us.getUser(uin);
@@ -2068,10 +2068,10 @@ firstStartMsg=true;
     }
     
     /**
-     * Процедура проверки на срабатывание условий флуда. Включает кик при необходимости
+     * РџСЂРѕС†РµРґСѓСЂР° РїСЂРѕРІРµСЂРєРё РЅР° СЃСЂР°Р±Р°С‚С‹РІР°РЅРёРµ СѓСЃР»РѕРІРёР№ С„Р»СѓРґР°. Р’РєР»СЋС‡Р°РµС‚ РєРёРє РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё
      * @param proc
      * @param uin
-     * @return истина, если юзер выпнут за флуд
+     * @return РёСЃС‚РёРЅР°, РµСЃР»Рё СЋР·РµСЂ РІС‹РїРЅСѓС‚ Р·Р° С„Р»СѓРґ
      */
     private boolean testFlood(IcqProtocol proc, String uin){
     	if(warnFlag.contains(uin)) warnFlag.remove(uin);
@@ -2091,7 +2091,7 @@ firstStartMsg=true;
     }
     
     /**
-     * КИК с записью в лог
+     * РљРРљ СЃ Р·Р°РїРёСЃСЊСЋ РІ Р»РѕРі
      */
     public void lkick(IcqProtocol proc, String uin, String txt, int id) {
         kick(proc, uin);
@@ -2100,7 +2100,7 @@ firstStartMsg=true;
     }
     
     /**
-     * КИК с автоматическим определением времени
+     * РљРРљ СЃ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРёРј РѕРїСЂРµРґРµР»РµРЅРёРµРј РІСЂРµРјРµРЅРё
      */
     public void akick(IcqProtocol proc, String uin, int user_id){
         int def = psp.getIntProperty("chat.defaultKickTime");
@@ -2119,7 +2119,7 @@ firstStartMsg=true;
     }
     
     /**
-     * КИК с выставлением времени
+     * РљРРљ СЃ РІС‹СЃС‚Р°РІР»РµРЅРёРµРј РІСЂРµРјРµРЅРё
      */
     public void tkick(IcqProtocol proc, String uin, int t, int user_id, String r){
         Users uss = srv.us.getUser(uin);
@@ -2176,7 +2176,7 @@ firstStartMsg=true;
         srv.us.db.event(uss.id, uin, "BAN", srv.us.getUser(adm_uin).id, adm_uin, m);
         uss.state=UserWork.STATE_BANNED;
         srv.us.updateUser(uss);
-        // Удалим из КЛ
+        // РЈРґР°Р»РёРј РёР· РљР›
         Log.info("Delete contact " + uin);
         proc.RemoveContactList(uin);
         srv.getIcqProcess(uss.basesn).mq.add(uss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.ban.0") +
@@ -2212,7 +2212,7 @@ firstStartMsg=true;
                 return false;
             }
         } catch (Exception ex){
-            return false; //если это новый пользователь
+            return false; //РµСЃР»Рё СЌС‚Рѕ РЅРѕРІС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ
         }
     }
     
@@ -2220,17 +2220,17 @@ firstStartMsg=true;
         try{
             return (srv.us.getUser(uin).state==UserWork.STATE_BANNED);
         } catch (Exception ex) {
-            return false; //если это новый пользователь
+            return false; //РµСЃР»Рё СЌС‚Рѕ РЅРѕРІС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ
         }
     }
     
     /**
-     * Обработка сообщений о флуде - слишком частые сообщения должны быть блокированы
+     * РћР±СЂР°Р±РѕС‚РєР° СЃРѕРѕР±С‰РµРЅРёР№ Рѕ С„Р»СѓРґРµ - СЃР»РёС€РєРѕРј С‡Р°СЃС‚С‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ Р±Р»РѕРєРёСЂРѕРІР°РЅС‹
      */
     public void parseFloodNotice(String uin, String msg, IcqProtocol proc){
     	if(isBan(uin)) return;
         if(testKick(uin)>0) return;
-        if(!srv.us.testUser(uin)) return; // Юзер не зареган
+        if(!srv.us.testUser(uin)) return; // Р®Р·РµСЂ РЅРµ Р·Р°СЂРµРіР°РЅ
         proc.mq.add(uin, Messages.getInstance(srv.getName()).getString("ChatCommandProc.parseFloodNotice.0"));
     	if(floodMap2.containsKey(uin)){
     		FloodElement e = floodMap2.get(uin);
@@ -2245,7 +2245,7 @@ firstStartMsg=true;
     }
     
     /**
-     * Создает простой арифметический пример для защиты от ботов при регистрации
+     * РЎРѕР·РґР°РµС‚ РїСЂРѕСЃС‚РѕР№ Р°СЂРёС„РјРµС‚РёС‡РµСЃРєРёР№ РїСЂРёРјРµСЂ РґР»СЏ Р·Р°С‰РёС‚С‹ РѕС‚ Р±РѕС‚РѕРІ РїСЂРё СЂРµРіРёСЃС‚СЂР°С†РёРё
      * @return
      */
     public String getCaptcha(){
@@ -2256,17 +2256,17 @@ firstStartMsg=true;
     }
     
     /**
-     * Число прописью
+     * Р§РёСЃР»Рѕ РїСЂРѕРїРёСЃСЊСЋ
      * @param i
      * @return
      */
     public String intToString(int k){
-        String[] ss = {"ноль","один","два","три","четыре","пять","шесть","семь","восемь","девять","десять",
-                "одиннадцать","двенадцать","тринадцать","четырнадцать","пятнадцать","шестнадцать",
-                "семнадцать","восемнадцать","девятнадцать","двадцать","тридцать","сорок","пятьдесят",
-                "шестьдесят","семьдесят","восемьдесят","девяносто","сто","двести","тристо","четыресто",
-                "пятьсот","шестьсот","семьсот","восемьсот","девятьсот","тысяча"};
-        String[] ss2 = {"одна","две"};
+        String[] ss = {"РЅРѕР»СЊ","РѕРґРёРЅ","РґРІР°","С‚СЂРё","С‡РµС‚С‹СЂРµ","РїСЏС‚СЊ","С€РµСЃС‚СЊ","СЃРµРјСЊ","РІРѕСЃРµРјСЊ","РґРµРІСЏС‚СЊ","РґРµСЃСЏС‚СЊ",
+                "РѕРґРёРЅРЅР°РґС†Р°С‚СЊ","РґРІРµРЅР°РґС†Р°С‚СЊ","С‚СЂРёРЅР°РґС†Р°С‚СЊ","С‡РµС‚С‹СЂРЅР°РґС†Р°С‚СЊ","РїСЏС‚РЅР°РґС†Р°С‚СЊ","С€РµСЃС‚РЅР°РґС†Р°С‚СЊ",
+                "СЃРµРјРЅР°РґС†Р°С‚СЊ","РІРѕСЃРµРјРЅР°РґС†Р°С‚СЊ","РґРµРІСЏС‚РЅР°РґС†Р°С‚СЊ","РґРІР°РґС†Р°С‚СЊ","С‚СЂРёРґС†Р°С‚СЊ","СЃРѕСЂРѕРє","РїСЏС‚СЊРґРµСЃСЏС‚",
+                "С€РµСЃС‚СЊРґРµСЃСЏС‚","СЃРµРјСЊРґРµСЃСЏС‚","РІРѕСЃРµРјСЊРґРµСЃСЏС‚","РґРµРІСЏРЅРѕСЃС‚Рѕ","СЃС‚Рѕ","РґРІРµСЃС‚Рё","С‚СЂРёСЃС‚Рѕ","С‡РµС‚С‹СЂРµСЃС‚Рѕ",
+                "РїСЏС‚СЊСЃРѕС‚","С€РµСЃС‚СЊСЃРѕС‚","СЃРµРјСЊСЃРѕС‚","РІРѕСЃРµРјСЊСЃРѕС‚","РґРµРІСЏС‚СЊСЃРѕС‚","С‚С‹СЃСЏС‡Р°"};
+        String[] ss2 = {"РѕРґРЅР°","РґРІРµ"};
         String s = "";
         int c1 = k/1000;
         int c2 = k - c1*1000;
@@ -2280,15 +2280,15 @@ firstStartMsg=true;
         if (c1>0) {
             switch (i3+(i2==1 ? 10 : 0)){
             case 1:
-                s += "тысяча ";
+                s += "С‚С‹СЃСЏС‡Р° ";
                 break;
             case 2:
             case 3:
             case 4:
-                s += "тысячи ";
+                s += "С‚С‹СЃСЏС‡Рё ";
                 break;
             default:
-                s += "тысяч ";
+                s += "С‚С‹СЃСЏС‡ ";
             }
         }
         
@@ -2304,13 +2304,13 @@ firstStartMsg=true;
     }
 
     //**************************************************************************
-    // ДОПОЛНИТЕЛЬНЫЕ КОМАНДЫ
+    // Р”РћРџРћР›РќРРўР•Р›Р¬РќР«Р• РљРћРњРђРќР”Р«
     //**************************************************************************
 
 
        /**
-       * Закрывание пользователя на время
-       * !запереть <id> <id> <id>
+       * Р—Р°РєСЂС‹РІР°РЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РЅР° РІСЂРµРјСЏ
+       * !Р·Р°РїРµСЂРµС‚СЊ <id> <id> <id>
        * @author fraer72
        */
 
@@ -2323,38 +2323,38 @@ firstStartMsg=true;
         String r = (String) v.get(2);
         long t = System.currentTimeMillis()+(time*60000);
         Users u = srv.us.getUser(i1);
-        if (psp.testAdmin(u.sn) || qauth(proc, u.sn, "anti_banroom")) {proc.mq.add(uin, "Вы не можете закрыть пользователя, он владеет иммунитетом");return;}
+        if (psp.testAdmin(u.sn) || qauth(proc, u.sn, "anti_banroom")) {proc.mq.add(uin, "Р’С‹ РЅРµ РјРѕР¶РµС‚Рµ Р·Р°РєСЂС‹С‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РѕРЅ РІР»Р°РґРµРµС‚ РёРјРјСѓРЅРёС‚РµС‚РѕРј");return;}
         if (u.id == 0)
         {
-        proc.mq.add(uin, "Пользователь не найден");
+        proc.mq.add(uin, "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ");
         return;
         }
         if (u.state != UserWork.STATE_CHAT)
         {
-        proc.mq.add(uin, "Этого пользователя нет в чате.");
+        proc.mq.add(uin, "Р­С‚РѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РЅРµС‚ РІ С‡Р°С‚Рµ.");
         return;
         }
         if (time == 0)
         {
-        proc.mq.add(uin, "Необходимо указать время");
+        proc.mq.add(uin, "РќРµРѕР±С…РѕРґРёРјРѕ СѓРєР°Р·Р°С‚СЊ РІСЂРµРјСЏ");
         return;
         }
         if (time > psp.getIntProperty("chat.defaultBanroomTime")) {
-        proc.mq.add(uin, "Максимальное время закрытия - " + psp.getIntProperty("chat.defaultBanroomTime") + " минут");
+        proc.mq.add(uin, "РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ РІСЂРµРјСЏ Р·Р°РєСЂС‹С‚РёСЏ - " + psp.getIntProperty("chat.defaultBanroomTime") + " РјРёРЅСѓС‚");
         return;
         }
         if (r.equals("") || r.equals(" "))
         {
-        proc.mq.add(uin, "Необходимо добавить причину закрытия");
+        proc.mq.add(uin, "РќРµРѕР±С…РѕРґРёРјРѕ РґРѕР±Р°РІРёС‚СЊ РїСЂРёС‡РёРЅСѓ Р·Р°РєСЂС‹С‚РёСЏ");
         return;
         }
         if (uin.equals(u.sn))
         {
-        proc.mq.add(uin, "Нельзя закрывать самого себя :)");
+        proc.mq.add(uin, "РќРµР»СЊР·СЏ Р·Р°РєСЂС‹РІР°С‚СЊ СЃР°РјРѕРіРѕ СЃРµР±СЏ :)");
         return;
         }
-        srv.cq.addMsg(u.localnick + "|" + u.id + "|" + " заперт в комнате: " + srv.us.getRoom(psp.getIntProperty("room.tyrma")).getName() + "|" + psp.getIntProperty("room.tyrma") + "| на " + time + " минут по причине: " + r + ", пользователем: " + srv.us.getUser(uin).localnick, u.sn, u.room);
-        String nick = u.localnick + "(Зек)";
+        srv.cq.addMsg(u.localnick + "|" + u.id + "|" + " Р·Р°РїРµСЂС‚ РІ РєРѕРјРЅР°С‚Рµ: " + srv.us.getRoom(psp.getIntProperty("room.tyrma")).getName() + "|" + psp.getIntProperty("room.tyrma") + "| РЅР° " + time + " РјРёРЅСѓС‚ РїРѕ РїСЂРёС‡РёРЅРµ: " + r + ", РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј: " + srv.us.getUser(uin).localnick, u.sn, u.room);
+        String nick = u.localnick + "(Р—РµРє)";
         u.localnick = nick;
         srv.us.db.event(u.id, uin, "REG", 0, "", nick);
         u.room = psp.getIntProperty("room.tyrma");
@@ -2362,17 +2362,17 @@ firstStartMsg=true;
         srv.us.revokeUser(u.id, "room");
         srv.us.updateUser(u);
         srv.cq.changeUserRoom(u.sn, psp.getIntProperty("room.tyrma"));
-        srv.us.db.event(u.id, uin, "Banroom", 0, "", " заперт в комнате: " + psp.getIntProperty("room.tyrma") + " на " + time + " минут\nпричина: " + r + ", пользователем: " + srv.us.getUser(uin).localnick);
-        srv.us.db.log(u.id, uin, "Banroom", u.localnick + "|" + u.id + "|" + " заперт в комнате " + srv.us.getRoom(psp.getIntProperty("room.tyrma")).getName() + "|" + psp.getIntProperty("room.tyrma") + "| на " + time + " минут", u.room);
-        srv.cq.addMsg(u.localnick + "|" + u.id + "|" + " заперт на " + time + " минут по причине: " + r + ", пользователем: " + srv.us.getUser(uin).localnick, u.sn, u.room);
-        srv.getIcqProcess(u.basesn).mq.add(u.sn, "За " + r + " ты заперт в комнате " + psp.getIntProperty("room.tyrma") + " на " + time + " минут");
-        proc.mq.add(uin, "Пользователь " + u.localnick + " успешно заперт в комнате " + psp.getIntProperty("room.tyrma"));
+        srv.us.db.event(u.id, uin, "Banroom", 0, "", " Р·Р°РїРµСЂС‚ РІ РєРѕРјРЅР°С‚Рµ: " + psp.getIntProperty("room.tyrma") + " РЅР° " + time + " РјРёРЅСѓС‚\nРїСЂРёС‡РёРЅР°: " + r + ", РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј: " + srv.us.getUser(uin).localnick);
+        srv.us.db.log(u.id, uin, "Banroom", u.localnick + "|" + u.id + "|" + " Р·Р°РїРµСЂС‚ РІ РєРѕРјРЅР°С‚Рµ " + srv.us.getRoom(psp.getIntProperty("room.tyrma")).getName() + "|" + psp.getIntProperty("room.tyrma") + "| РЅР° " + time + " РјРёРЅСѓС‚", u.room);
+        srv.cq.addMsg(u.localnick + "|" + u.id + "|" + " Р·Р°РїРµСЂС‚ РЅР° " + time + " РјРёРЅСѓС‚ РїРѕ РїСЂРёС‡РёРЅРµ: " + r + ", РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј: " + srv.us.getUser(uin).localnick, u.sn, u.room);
+        srv.getIcqProcess(u.basesn).mq.add(u.sn, "Р—Р° " + r + " С‚С‹ Р·Р°РїРµСЂС‚ РІ РєРѕРјРЅР°С‚Рµ " + psp.getIntProperty("room.tyrma") + " РЅР° " + time + " РјРёРЅСѓС‚");
+        proc.mq.add(uin, "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ " + u.localnick + " СѓСЃРїРµС€РЅРѕ Р·Р°РїРµСЂС‚ РІ РєРѕРјРЅР°С‚Рµ " + psp.getIntProperty("room.tyrma"));
         }
 
        /**
-       * Список закрытых пользователей
-       * !закрытые
-       * @author Юрий
+       * РЎРїРёСЃРѕРє Р·Р°РєСЂС‹С‚С‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+       * !Р·Р°РєСЂС‹С‚С‹Рµ
+       * @author Р®СЂРёР№
        */
 
        public void commandZakHist(IcqProtocol proc, String uin) {
@@ -2386,7 +2386,7 @@ firstStartMsg=true;
        }
        try
        {
-       proc.mq.add(uin, "Всего пользователей в тюрьме: " + srv.us.statBanroomColCount() + srv.us.getZakHist());
+       proc.mq.add(uin, "Р’СЃРµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РІ С‚СЋСЂСЊРјРµ: " + srv.us.statBanroomColCount() + srv.us.getZakHist());
        }
        catch (Exception ex)
        {
@@ -2396,28 +2396,28 @@ firstStartMsg=true;
        }
 
        /**
-       * Проверяем закрыт пользователь или нет
+       * РџСЂРѕРІРµСЂСЏРµРј Р·Р°РєСЂС‹С‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РёР»Рё РЅРµС‚
        */
         private void freedom(String uin)
         {
         Users u = srv.us.getUser(uin);
         if (u.state==srv.us.STATE_CHAT)
         {
-        srv.cq.addMsg("Пользователь |" + u.id + "|" + u.localnick + " был выпущен из заключения.", "", psp.getIntProperty("room.tyrma"));
-        srv.cq.addMsg("Пользователь |" + u.id + "|" + u.localnick + " был выпущен из заключения.", "", 0);
+        srv.cq.addMsg("РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ |" + u.id + "|" + u.localnick + " Р±С‹Р» РІС‹РїСѓС‰РµРЅ РёР· Р·Р°РєР»СЋС‡РµРЅРёСЏ.", "", psp.getIntProperty("room.tyrma"));
+        srv.cq.addMsg("РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ |" + u.id + "|" + u.localnick + " Р±С‹Р» РІС‹РїСѓС‰РµРЅ РёР· Р·Р°РєР»СЋС‡РµРЅРёСЏ.", "", 0);
         }
-        String nick = u.localnick.replace("(Зек)","");
+        String nick = u.localnick.replace("(Р—РµРє)","");
         u.localnick = nick;
         srv.us.db.event(u.id, uin, "REG", 0, "", nick);
         srv.us.grantUser(u.id, "room");
         u.room=0;
         srv.cq.changeUserRoom(u.sn,0);
         srv.us.updateUser(u);
-        srv.us.db.log(u.id,uin,"FREE","был(а) выпущен(а) из заключения.",0);
+        srv.us.db.log(u.id,uin,"FREE","Р±С‹Р»(Р°) РІС‹РїСѓС‰РµРЅ(Р°) РёР· Р·Р°РєР»СЋС‡РµРЅРёСЏ.",0);
         }
 
        /**
-       * Проверяем закрыт пользователь или нет
+       * РџСЂРѕРІРµСЂСЏРµРј Р·Р°РєСЂС‹С‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РёР»Рё РЅРµС‚
        */
 
         private int testClosed(String sn)
@@ -2428,7 +2428,7 @@ firstStartMsg=true;
         }
 
        /**
-       * Проверяем имеет ли пользователь временые полномочия
+       * РџСЂРѕРІРµСЂСЏРµРј РёРјРµРµС‚ Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РІСЂРµРјРµРЅС‹Рµ РїРѕР»РЅРѕРјРѕС‡РёСЏ
        */
         private int testModer(String sn)
         {
@@ -2439,8 +2439,8 @@ firstStartMsg=true;
         }
 
        /**
-       * Модер на определенное время
-       * !модер <id> <id>
+       * РњРѕРґРµСЂ РЅР° РѕРїСЂРµРґРµР»РµРЅРЅРѕРµ РІСЂРµРјСЏ
+       * !РјРѕРґРµСЂ <id> <id>
        * @author fraer72
        */
      public void ModerTime(IcqProtocol proc, String uin, Vector v, String mmsg)
@@ -2454,17 +2454,17 @@ firstStartMsg=true;
         Users u = srv.us.getUser(i1);
         if (u.id == 0)
         {
-        proc.mq.add(uin, "Пользователь не найден");
+        proc.mq.add(uin, "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ");
         return;
         }
         if (u.state != UserWork.STATE_CHAT)
         {
-        proc.mq.add(uin, "Этого пользователя нет в чате.");
+        proc.mq.add(uin, "Р­С‚РѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РЅРµС‚ РІ С‡Р°С‚Рµ.");
         return;
         }
         if (time == 0)
         {
-        proc.mq.add(uin, "Необходимо указать время");
+        proc.mq.add(uin, "РќРµРѕР±С…РѕРґРёРјРѕ СѓРєР°Р·Р°С‚СЊ РІСЂРµРјСЏ");
         return;
         }
         setGrouptime(u.sn,day);
@@ -2474,13 +2474,13 @@ firstStartMsg=true;
         srv.us.setUserPropsValue(u.id, "grant", "") &&
         srv.us.setUserPropsValue(u.id, "revoke", "");
         srv.us.clearCashAuth(u.id);
-        srv.getIcqProcess(u.basesn).mq.add(u.sn, "Тебе назначены права мода на " + time + " (день)дней");
-        proc.mq.add(uin,"Пользователь " + u.localnick + " успешно назначены прова мода на " + time + " (день)дней");
+        srv.getIcqProcess(u.basesn).mq.add(u.sn, "РўРµР±Рµ РЅР°Р·РЅР°С‡РµРЅС‹ РїСЂР°РІР° РјРѕРґР° РЅР° " + time + " (РґРµРЅСЊ)РґРЅРµР№");
+        proc.mq.add(uin,"РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ " + u.localnick + " СѓСЃРїРµС€РЅРѕ РЅР°Р·РЅР°С‡РµРЅС‹ РїСЂРѕРІР° РјРѕРґР° РЅР° " + time + " (РґРµРЅСЊ)РґРЅРµР№");
         }
 
        /**
         * @author mmaximm
-        * Устанавливаем дату действия группы
+        * РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РґР°С‚Сѓ РґРµР№СЃС‚РІРёСЏ РіСЂСѓРїРїС‹
         * @param uin
         * @param day
         */
@@ -2497,7 +2497,7 @@ firstStartMsg=true;
         srv.us.updateUser(us);
     }
        /**
-       * Снятие полномочий при окрнчании времени модераторства
+       * РЎРЅСЏС‚РёРµ РїРѕР»РЅРѕРјРѕС‡РёР№ РїСЂРё РѕРєСЂРЅС‡Р°РЅРёРё РІСЂРµРјРµРЅРё РјРѕРґРµСЂР°С‚РѕСЂСЃС‚РІР°
        * @author fraer72
        */
        private void ModerNoTime(IcqProtocol proc, String uin)
@@ -2510,21 +2510,21 @@ firstStartMsg=true;
        srv.us.setUserPropsValue(srv.us.getUser(uin).id, "revoke", "");
        srv.us.clearCashAuth(srv.us.getUser(uin).id);
        //srv.us.updateUser(srv.us.getUser(uin));
-       proc.mq.add(uin,"Время твоего модераторства в чате оконченно");
+       proc.mq.add(uin,"Р’СЂРµРјСЏ С‚РІРѕРµРіРѕ РјРѕРґРµСЂР°С‚РѕСЂСЃС‚РІР° РІ С‡Р°С‚Рµ РѕРєРѕРЅС‡РµРЅРЅРѕ");
        }
        }
        
      /**
-     * Список юзеров c полномочиями временого мода
+     * РЎРїРёСЃРѕРє СЋР·РµСЂРѕРІ c РїРѕР»РЅРѕРјРѕС‡РёСЏРјРё РІСЂРµРјРµРЅРѕРіРѕ РјРѕРґР°
      * @author fraer72
      */
         public String listModUsers(){
-        String msg = "Спиcок временых модераторов:\n";
+        String msg = "РЎРїРёcРѕРє РІСЂРµРјРµРЅС‹С… РјРѕРґРµСЂР°С‚РѕСЂРѕРІ:\n";
         Integer i = 0;
         for(Users u:srv.us.getModList())
         {
         i = i + 1;
-        msg += i + ") - |" + u.id + "|" + u.localnick + " - |Назначен " + (new Date(u.lastKick)).toString() + ", на " + (u.lastMod-System.currentTimeMillis())/(1000*3600*24) + " день(суток)|\n";
+        msg += i + ") - |" + u.id + "|" + u.localnick + " - |РќР°Р·РЅР°С‡РµРЅ " + (new Date(u.lastKick)).toString() + ", РЅР° " + (u.lastMod-System.currentTimeMillis())/(1000*3600*24) + " РґРµРЅСЊ(СЃСѓС‚РѕРє)|\n";
         if(statMod.containsKey(u.sn))
         {
         msg += '\n';
@@ -2537,8 +2537,8 @@ firstStartMsg=true;
 
 
      /**
-     * Бутылочка
-     * !бутылочка
+     * Р‘СѓС‚С‹Р»РѕС‡РєР°
+     * !Р±СѓС‚С‹Р»РѕС‡РєР°
      */
     public void commandBytilochka(IcqProtocol proc, String uin, Vector v, String mmsg)
     {
@@ -2546,7 +2546,7 @@ firstStartMsg=true;
     {
     return;
     }
-    if((System.currentTimeMillis()-ButilochkaTime)<1000*psp.getIntProperty("time.igra.bytilochka")){proc.mq.add(uin, "Играть можно раз в  " + psp.getIntProperty("time.igra.bytilochka") + " секунд");return;}//Время
+    if((System.currentTimeMillis()-ButilochkaTime)<1000*psp.getIntProperty("time.igra.bytilochka")){proc.mq.add(uin, "РРіСЂР°С‚СЊ РјРѕР¶РЅРѕ СЂР°Р· РІ  " + psp.getIntProperty("time.igra.bytilochka") + " СЃРµРєСѓРЅРґ");return;}//Р’СЂРµРјСЏ
     try {
     int c = 0;
     String g = "";
@@ -2564,7 +2564,7 @@ firstStartMsg=true;
     }
     }
     }
-    if(c==1){proc.mq.add(uin, "В комнате нет людей, неским играть");return;}//Если в комнате нет людей
+    if(c==1){proc.mq.add(uin, "Р’ РєРѕРјРЅР°С‚Рµ РЅРµС‚ Р»СЋРґРµР№, РЅРµСЃРєРёРј РёРіСЂР°С‚СЊ");return;}//Р•СЃР»Рё РІ РєРѕРјРЅР°С‚Рµ РЅРµС‚ Р»СЋРґРµР№
     String[] gg = g.split(";");
     int o = (int) ((Math.random() * gg.length));
     a = n();
@@ -2572,39 +2572,39 @@ firstStartMsg=true;
     Users u = srv.us.getUser(Integer.parseInt(gg[o]));
     if (uss.id == 0)
     {
-    proc.mq.add(uin, "Пользователь не найден");
+    proc.mq.add(uin, "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ");
     return;
     }
     if (uss.state != UserWork.STATE_CHAT)
     {
-    proc.mq.add(uin, "Этого пользователя нет в чате.");
+    proc.mq.add(uin, "Р­С‚РѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РЅРµС‚ РІ С‡Р°С‚Рµ.");
     return;
     }
     if (uss.room != psp.getIntProperty("room.igra.bytilochka"))
     {
-    proc.mq.add(uin, "Играть можно только в " + psp.getIntProperty("room.igra.bytilochka") + " комнате");
+    proc.mq.add(uin, "РРіСЂР°С‚СЊ РјРѕР¶РЅРѕ С‚РѕР»СЊРєРѕ РІ " + psp.getIntProperty("room.igra.bytilochka") + " РєРѕРјРЅР°С‚Рµ");
     return;
     }
     if (u.id == uss.id)
     {
-    proc.mq.add(uin, uss.localnick + "|" + uss.id + "|" + " ну ка крутани еще");
+    proc.mq.add(uin, uss.localnick + "|" + uss.id + "|" + " РЅСѓ РєР° РєСЂСѓС‚Р°РЅРё РµС‰Рµ");
     return;
     }
-    // Оповещаем чат
-    srv.cq.addMsg("БУТЫЛОЧКА>> Пользователь " + uss.localnick + "|" + uss.id + "|" + " должен " + A + " пользователя(ю) " + u.localnick + "|" + u.id + "|", uss.sn, uss.room);
-    proc.mq.add(uin, "Ты должен " + A + " пользователя(ю) " + u.localnick + "|" + u.id + "|");
+    // РћРїРѕРІРµС‰Р°РµРј С‡Р°С‚
+    srv.cq.addMsg("Р‘РЈРўР«Р›РћР§РљРђ>> РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ " + uss.localnick + "|" + uss.id + "|" + " РґРѕР»Р¶РµРЅ " + A + " РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ(СЋ) " + u.localnick + "|" + u.id + "|", uss.sn, uss.room);
+    proc.mq.add(uin, "РўС‹ РґРѕР»Р¶РµРЅ " + A + " РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ(СЋ) " + u.localnick + "|" + u.id + "|");
     ButilochkaTime = System.currentTimeMillis();
     }
     catch (Exception ex)
     {
     ex.printStackTrace();
-    proc.mq.add(uin, "Ошибка " + ex.getMessage());
+    proc.mq.add(uin, "РћС€РёР±РєР° " + ex.getMessage());
     }
     }
 
     /**
-     * Фразы для бутылочки
-     * !фраза текст
+     * Р¤СЂР°Р·С‹ РґР»СЏ Р±СѓС‚С‹Р»РѕС‡РєРё
+     * !С„СЂР°Р·Р° С‚РµРєСЃС‚
      */
     public void commandFraza(IcqProtocol proc, String uin, Vector v)
     {
@@ -2614,7 +2614,7 @@ firstStartMsg=true;
     int k = sn.length();
     if (sn.equals("") || sn.equals(" "))
     {
-    proc.mq.add(uin, "Ну что же ты пишешь пустую фразу");
+    proc.mq.add(uin, "РќСѓ С‡С‚Рѕ Р¶Рµ С‚С‹ РїРёС€РµС€СЊ РїСѓСЃС‚СѓСЋ С„СЂР°Р·Сѓ");
     return;
     }
     if (!(k > 50))
@@ -2623,12 +2623,12 @@ firstStartMsg=true;
     long z = srv.us.db.getLastIndex("butilochka");
     int p = (int) (z + 1)-1;
     srv.us.db.AddAButilochka(p, sn);
-    proc.mq.add(uin, "Фраза успешно добавленна в БД\nФраз в БД: "+p);
-    }catch (Exception ex){ex.printStackTrace();proc.mq.add(uin,"При добавлении фразы возникла ошибка: " + ex.getMessage());}
+    proc.mq.add(uin, "Р¤СЂР°Р·Р° СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅРЅР° РІ Р‘Р”\nР¤СЂР°Р· РІ Р‘Р”: "+p);
+    }catch (Exception ex){ex.printStackTrace();proc.mq.add(uin,"РџСЂРё РґРѕР±Р°РІР»РµРЅРёРё С„СЂР°Р·С‹ РІРѕР·РЅРёРєР»Р° РѕС€РёР±РєР°: " + ex.getMessage());}
     }
     else
     {
-    proc.mq.add(uin, "Слишком длинная фраза (> 50). Фраза не сохранена");
+    proc.mq.add(uin, "РЎР»РёС€РєРѕРј РґР»РёРЅРЅР°СЏ С„СЂР°Р·Р° (> 50). Р¤СЂР°Р·Р° РЅРµ СЃРѕС…СЂР°РЅРµРЅР°");
     }
     }
 
@@ -2647,15 +2647,15 @@ firstStartMsg=true;
     Users us = srv.us.getUser(i);
     if (us.state == UserWork.STATE_CHAT && !srv.us.getUserGroup(us.id).equals("user"))
     {
-    list += "- " + us.id + " - " + us.localnick + " » |" + us.room + "| - [" + us.group + "]" + "\n";
+    list += "- " + us.id + " - " + us.localnick + " В» |" + us.room + "| - [" + us.group + "]" + "\n";
     }
     }
-    proc.mq.add(uin, "В данный момент в чате online :\nИд|Ник|Комната\n" + list);
+    proc.mq.add(uin, "Р’ РґР°РЅРЅС‹Р№ РјРѕРјРµРЅС‚ РІ С‡Р°С‚Рµ online :\nРРґ|РќРёРє|РљРѕРјРЅР°С‚Р°\n" + list);
     }
     catch (Exception ex)
     {
     ex.printStackTrace();
-    proc.mq.add(uin, "Ошибка " + ex.getMessage());
+    proc.mq.add(uin, "РћС€РёР±РєР° " + ex.getMessage());
     }
     }
 
@@ -2672,15 +2672,15 @@ firstStartMsg=true;
     int len = nick.length();
 	Users u = srv.us.getUser(i);
     Users uss = srv.us.getUser(uin);
-    if (psp.testAdmin(u.sn) || qauth(proc, u.sn, "anti_chnick")) {proc.mq.add(uin, "Вы не можете сменить ник пользователя, он владеет иммунитетом");return;}
+    if (psp.testAdmin(u.sn) || qauth(proc, u.sn, "anti_chnick")) {proc.mq.add(uin, "Р’С‹ РЅРµ РјРѕР¶РµС‚Рµ СЃРјРµРЅРёС‚СЊ РЅРёРє РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РѕРЅ РІР»Р°РґРµРµС‚ РёРјРјСѓРЅРёС‚РµС‚РѕРј");return;}
 	if(u.id==0)
     {
-	proc.mq.add(uin,"Пользователь не найден");
+	proc.mq.add(uin,"РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ");
 	return;
 	}
     if (uin.equals(u.sn))
     {
-    proc.mq.add(uin, "Для смены своего ника используй !рег <ник>");
+    proc.mq.add(uin, "Р”Р»СЏ СЃРјРµРЅС‹ СЃРІРѕРµРіРѕ РЅРёРєР° РёСЃРїРѕР»СЊР·СѓР№ !СЂРµРі <РЅРёРє>");
     return;
     }
     if (!(len>psp.getIntProperty("max.chnick")))
@@ -2690,21 +2690,21 @@ firstStartMsg=true;
 	srv.us.updateUser(u);
 	srv.us.db.event(u.id, uin, "REG", 0, "", nick);
 	if(u.state==UserWork.STATE_CHAT){
-	srv.cq.addMsg("У пользователя " + oldNick + " ник изменен на " + nick+ " изменил его пользователь " +uss.localnick, "", u.room);
+	srv.cq.addMsg("РЈ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ " + oldNick + " РЅРёРє РёР·РјРµРЅРµРЅ РЅР° " + nick+ " РёР·РјРµРЅРёР» РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ " +uss.localnick, "", u.room);
 	}
-	proc.mq.add(uin,"Ник успешно изменен");
-    } else proc.mq.add(uin,"Слишком длинный ник(>"+ psp.getIntProperty("max.chnick")+" ). Ник не изменён.");
+	proc.mq.add(uin,"РќРёРє СѓСЃРїРµС€РЅРѕ РёР·РјРµРЅРµРЅ");
+    } else proc.mq.add(uin,"РЎР»РёС€РєРѕРј РґР»РёРЅРЅС‹Р№ РЅРёРє(>"+ psp.getIntProperty("max.chnick")+" ). РќРёРє РЅРµ РёР·РјРµРЅС‘РЅ.");
     }
     catch (Exception ex)
     {
     ex.printStackTrace();
-    proc.mq.add(uin,"Ошибка "+ex.getMessage());
+    proc.mq.add(uin,"РћС€РёР±РєР° "+ex.getMessage());
     }
     }
 
      /**
-     * Повысить рейтинг
-     * !повысить <id>
+     * РџРѕРІС‹СЃРёС‚СЊ СЂРµР№С‚РёРЅРі
+     * !РїРѕРІС‹СЃРёС‚СЊ <id>
      */
 
         public void commandOchkiplys(IcqProtocol proc, String uin, Vector v)
@@ -2719,36 +2719,36 @@ firstStartMsg=true;
         Users us = srv.us.getUser(uin);
         if (u.id == 0)
         {
-        proc.mq.add(uin, "Пользователь не найден");
+        proc.mq.add(uin, "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ");
         return;
         }
         if (us.id == i)
         {
-        proc.mq.add(uin, "Повышать рейтинг саму себе нельзя");
+        proc.mq.add(uin, "РџРѕРІС‹С€Р°С‚СЊ СЂРµР№С‚РёРЅРі СЃР°РјСѓ СЃРµР±Рµ РЅРµР»СЊР·СЏ");
         return;
         }
         if (srv.us.getCountgolosChange(us.id, u.id) >= 1)
         {
-        proc.mq.add(uin, "Вы можете только раз в сутки голосовать за одного и того же пользователя");
+        proc.mq.add(uin, "Р’С‹ РјРѕР¶РµС‚Рµ С‚РѕР»СЊРєРѕ СЂР°Р· РІ СЃСѓС‚РєРё РіРѕР»РѕСЃРѕРІР°С‚СЊ Р·Р° РѕРґРЅРѕРіРѕ Рё С‚РѕРіРѕ Р¶Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ");
         return;
         }
         int reiting = u.ball + 1;
         u.ball = reiting;
         srv.us.updateUser(u);
-        srv.us.db.event(us.id, uin, "GOLOS", u.id, u.sn, "дал бал");
-        proc.mq.add(uin, "Рейтинг пользователя " + u.localnick + "|" + u.id + "| повышен");
-        srv.getIcqProcess(u.basesn).mq.add(u.sn, "Пользователь " + us.localnick + "|" + us.id + "| повысил тебе рейтинг, он составляет " + u.ball + " баллов");
+        srv.us.db.event(us.id, uin, "GOLOS", u.id, u.sn, "РґР°Р» Р±Р°Р»");
+        proc.mq.add(uin, "Р РµР№С‚РёРЅРі РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ " + u.localnick + "|" + u.id + "| РїРѕРІС‹С€РµРЅ");
+        srv.getIcqProcess(u.basesn).mq.add(u.sn, "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ " + us.localnick + "|" + us.id + "| РїРѕРІС‹СЃРёР» С‚РµР±Рµ СЂРµР№С‚РёРЅРі, РѕРЅ СЃРѕСЃС‚Р°РІР»СЏРµС‚ " + u.ball + " Р±Р°Р»Р»РѕРІ");
         } 
         catch (Exception ex)
         {
         ex.printStackTrace();
-        proc.mq.add(uin, "Ошибка " + ex.getMessage());
+        proc.mq.add(uin, "РћС€РёР±РєР° " + ex.getMessage());
         }
         }
 
      /**
-     * Понизить рейтинг
-     * !понизить <id>
+     * РџРѕРЅРёР·РёС‚СЊ СЂРµР№С‚РёРЅРі
+     * !РїРѕРЅРёР·РёС‚СЊ <id>
      */
 
         public void commandOchkiminys(IcqProtocol proc, String uin, Vector v)
@@ -2764,36 +2764,36 @@ firstStartMsg=true;
         Users us = srv.us.getUser(uin);
         if (u.id == 0)
         {
-        proc.mq.add(uin, "Пользователь не найден");
+        proc.mq.add(uin, "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ");
         return;
         }
         if (us.id == i)
         {
-        proc.mq.add(uin, "Понижать рейтинг саму себе нельзя");
+        proc.mq.add(uin, "РџРѕРЅРёР¶Р°С‚СЊ СЂРµР№С‚РёРЅРі СЃР°РјСѓ СЃРµР±Рµ РЅРµР»СЊР·СЏ");
         return;
         }
         if (srv.us.getCountgolosChange(us.id, u.id) >= 1)
         {
-        proc.mq.add(uin, "Вы можете только раз в сутки голосовать за одного и того же пользователя");
+        proc.mq.add(uin, "Р’С‹ РјРѕР¶РµС‚Рµ С‚РѕР»СЊРєРѕ СЂР°Р· РІ СЃСѓС‚РєРё РіРѕР»РѕСЃРѕРІР°С‚СЊ Р·Р° РѕРґРЅРѕРіРѕ Рё С‚РѕРіРѕ Р¶Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ");
         return;
         }
         int reiting = u.ball - 1;
         u.ball = reiting;
         srv.us.updateUser(u);
-        srv.us.db.event(us.id, uin, "GOLOS", u.id, u.sn, "снял бал");
-        proc.mq.add(uin, "Рейтинг пользователя " + u.localnick + "|" + u.id + "| понижен");
-        srv.getIcqProcess(u.basesn).mq.add(u.sn, "Пользователь " + us.localnick + "|" + us.id + "| понизил тебе рейтинг, он составляет " + u.ball + " баллов");
+        srv.us.db.event(us.id, uin, "GOLOS", u.id, u.sn, "СЃРЅСЏР» Р±Р°Р»");
+        proc.mq.add(uin, "Р РµР№С‚РёРЅРі РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ " + u.localnick + "|" + u.id + "| РїРѕРЅРёР¶РµРЅ");
+        srv.getIcqProcess(u.basesn).mq.add(u.sn, "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ " + us.localnick + "|" + us.id + "| РїРѕРЅРёР·РёР» С‚РµР±Рµ СЂРµР№С‚РёРЅРі, РѕРЅ СЃРѕСЃС‚Р°РІР»СЏРµС‚ " + u.ball + " Р±Р°Р»Р»РѕРІ");
         } 
         catch (Exception ex)
         {
         ex.printStackTrace();
-        proc.mq.add(uin, "Ошибка " + ex.getMessage());
+        proc.mq.add(uin, "РћС€РёР±РєР° " + ex.getMessage());
         }
         }
 
        /**
-       * Установка пароля на комнату
-       * !пароль <pass>
+       * РЈСЃС‚Р°РЅРѕРІРєР° РїР°СЂРѕР»СЏ РЅР° РєРѕРјРЅР°С‚Сѓ
+       * !РїР°СЂРѕР»СЊ <pass>
        * @author jimbot
        */
 
@@ -2805,13 +2805,13 @@ firstStartMsg=true;
         Rooms r = srv.us.getRoom(room);
         r.setPass(s);
         srv.us.saveRoom(r, s);
-        Log.info("Установлен пароль на комнату " + room + ": " + s);
-        proc.mq.add(uin,"Пароль "+s+" на комнату успешно установлен.");
+        Log.info("РЈСЃС‚Р°РЅРѕРІР»РµРЅ РїР°СЂРѕР»СЊ РЅР° РєРѕРјРЅР°С‚Сѓ " + room + ": " + s);
+        proc.mq.add(uin,"РџР°СЂРѕР»СЊ "+s+" РЅР° РєРѕРјРЅР°С‚Сѓ СѓСЃРїРµС€РЅРѕ СѓСЃС‚Р°РЅРѕРІР»РµРЅ.");
         }
 
        /**
-       * Список админ сообщений
-       * !адмлист
+       * РЎРїРёСЃРѕРє Р°РґРјРёРЅ СЃРѕРѕР±С‰РµРЅРёР№
+       * !Р°РґРјР»РёСЃС‚
        * @author fraer72
        */
        public void commandAdmList(IcqProtocol proc, String uin)
@@ -2821,11 +2821,11 @@ firstStartMsg=true;
        try
        {
        proc.mq.add(uin, srv.us.getVseAdmMsg());
-       }catch (Exception ex){ex.printStackTrace();proc.mq.add(uin, "Ошибка " + ex.getMessage());}
+       }catch (Exception ex){ex.printStackTrace();proc.mq.add(uin, "РћС€РёР±РєР° " + ex.getMessage());}
        }
 
     /**
-     * Фразы для админ бота
+     * Р¤СЂР°Р·С‹ РґР»СЏ Р°РґРјРёРЅ Р±РѕС‚Р°
      */
     public void commandRobMsg(IcqProtocol proc, String uin, Vector v)
     {
@@ -2835,7 +2835,7 @@ firstStartMsg=true;
     int k = sn.length();
     if (sn.equals("") || sn.equals(" "))
     {
-    proc.mq.add(uin, "Ну что же ты пишешь пустую фразу");
+    proc.mq.add(uin, "РќСѓ С‡С‚Рѕ Р¶Рµ С‚С‹ РїРёС€РµС€СЊ РїСѓСЃС‚СѓСЋ С„СЂР°Р·Сѓ");
     return;
     }
     if (!(k > 250))
@@ -2844,12 +2844,12 @@ firstStartMsg=true;
     long z = srv.us.db.getLastIndex("robadmin");
     int p = (int) (z + 1)-1;
     radm.AddAdmin(p,sn);
-    proc.mq.add(uin, "Фраза успешно добавленна в БД\nФраз в БД: "+p);
-    }catch (Exception ex){ex.printStackTrace();proc.mq.add(uin,"При добавлении фразы возникла ошибка: " + ex.getMessage());}
+    proc.mq.add(uin, "Р¤СЂР°Р·Р° СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅРЅР° РІ Р‘Р”\nР¤СЂР°Р· РІ Р‘Р”: "+p);
+    }catch (Exception ex){ex.printStackTrace();proc.mq.add(uin,"РџСЂРё РґРѕР±Р°РІР»РµРЅРёРё С„СЂР°Р·С‹ РІРѕР·РЅРёРєР»Р° РѕС€РёР±РєР°: " + ex.getMessage());}
     }
     else
     {
-    proc.mq.add(uin, "Слишком длинная фраза (> 250). Фраза не сохранена");
+    proc.mq.add(uin, "РЎР»РёС€РєРѕРј РґР»РёРЅРЅР°СЏ С„СЂР°Р·Р° (> 250). Р¤СЂР°Р·Р° РЅРµ СЃРѕС…СЂР°РЅРµРЅР°");
     }
     }
 
@@ -2866,7 +2866,7 @@ firstStartMsg=true;
    String text = (String)v.get(1);
    if(text.equals("") || text.equals(" "))
    {
-   proc.mq.add(uin,"Текст статуса отсутствует");
+   proc.mq.add(uin,"РўРµРєСЃС‚ СЃС‚Р°С‚СѓСЃР° РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚");
    return;
    }  
    psp.setIntProperty("icq.xstatus", nomer);
@@ -2878,17 +2878,17 @@ firstStartMsg=true;
    {
    srv.con.uins.proc.get(uins).setXStatus(nomer, text);
    }
-   proc.mq.add(uin,"Статус чата изменён успешно");
+   proc.mq.add(uin,"РЎС‚Р°С‚СѓСЃ С‡Р°С‚Р° РёР·РјРµРЅС‘РЅ СѓСЃРїРµС€РЅРѕ");
    } 
    catch (Exception ex)
    {
    ex.printStackTrace();
-   proc.mq.add(uin,"Произошла ошибка при смене статуса");
+   proc.mq.add(uin,"РџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР° РїСЂРё СЃРјРµРЅРµ СЃС‚Р°С‚СѓСЃР°");
    }
    }
    else
    {
-   proc.mq.add(uin,"Числа должно быть от 1 до 34");
+   proc.mq.add(uin,"Р§РёСЃР»Р° РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ РѕС‚ 1 РґРѕ 34");
    }
    }
 
@@ -2904,8 +2904,8 @@ firstStartMsg=true;
   }
 
     /**
-    * Установка статуса
-    * !статус <текст>
+    * РЈСЃС‚Р°РЅРѕРІРєР° СЃС‚Р°С‚СѓСЃР°
+    * !СЃС‚Р°С‚СѓСЃ <С‚РµРєСЃС‚>
     * @author fraer72
     */
     public void commandStatus(IcqProtocol proc, String uin, Vector v) {
@@ -2923,36 +2923,36 @@ firstStartMsg=true;
     if (lstatus.equals(""))
     {
     Users uss = srv.us.getUser(uin);
-    srv.cq.addMsg(uss.localnick + "|" + uss.id + "|" + " убрал статус", uss.sn, uss.room);
-    Log.talk(uss.localnick + "|" + uss.id + "|" + " убрал статус");
-    proc.mq.add(uin, "Вы убрали статус");
+    srv.cq.addMsg(uss.localnick + "|" + uss.id + "|" + " СѓР±СЂР°Р» СЃС‚Р°С‚СѓСЃ", uss.sn, uss.room);
+    Log.talk(uss.localnick + "|" + uss.id + "|" + " СѓР±СЂР°Р» СЃС‚Р°С‚СѓСЃ");
+    proc.mq.add(uin, "Р’С‹ СѓР±СЂР°Р»Рё СЃС‚Р°С‚СѓСЃ");
     uss.status  = "";
     srv.us.updateUser(uss);
     return;
     }
     if (len > psp.getIntProperty("about.user.st"))
     {
-    proc.mq.add(uin, "Слишком длинный статус (> "+psp.getIntProperty("about.user.st") +"). Статус не изменён.");
+    proc.mq.add(uin, "РЎР»РёС€РєРѕРј РґР»РёРЅРЅС‹Р№ СЃС‚Р°С‚СѓСЃ (> "+psp.getIntProperty("about.user.st") +"). РЎС‚Р°С‚СѓСЃ РЅРµ РёР·РјРµРЅС‘РЅ.");
     return;
     }
     Users uss = srv.us.getUser(uin);
-    srv.cq.addMsg(uss.localnick + "|" + uss.id + "|" + " меняет статус на |" + lstatus + "|", uss.sn, uss.room);
-    Log.talk(uss.localnick + "|" + uss.id + "|" + " меняет статус на |" + lstatus + "|");
+    srv.cq.addMsg(uss.localnick + "|" + uss.id + "|" + " РјРµРЅСЏРµС‚ СЃС‚Р°С‚СѓСЃ РЅР° |" + lstatus + "|", uss.sn, uss.room);
+    Log.talk(uss.localnick + "|" + uss.id + "|" + " РјРµРЅСЏРµС‚ СЃС‚Р°С‚СѓСЃ РЅР° |" + lstatus + "|");
     uss.status  = lstatus;
     srv.us.updateUser(uss);
-    proc.mq.add(uin, "Вы сменили статус на |" + lstatus + "|");
+    proc.mq.add(uin, "Р’С‹ СЃРјРµРЅРёР»Рё СЃС‚Р°С‚СѓСЃ РЅР° |" + lstatus + "|");
     }
     catch (Exception ex)
     {
     ex.printStackTrace();
     Log.talk("Error save msg: " + ex.getMessage());
-    proc.mq.add(uin, "Ошибка изменения инфы " + ex.getMessage());
+    proc.mq.add(uin, "РћС€РёР±РєР° РёР·РјРµРЅРµРЅРёСЏ РёРЅС„С‹ " + ex.getMessage());
     }
     }
 
      /**
-     * Показ разбаненных пользователей
-     * !разбанлист
+     * РџРѕРєР°Р· СЂР°Р·Р±Р°РЅРµРЅРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+     * !СЂР°Р·Р±Р°РЅР»РёСЃС‚
      */
     public void commandUbanHist(IcqProtocol proc, String uin) {
     if (!isChat(proc, uin) && !psp.testAdmin(uin))
@@ -2974,9 +2974,9 @@ firstStartMsg=true;
     }
 
        /**
-       * Удаление комнат без перезагрузки чата
-       * !удалить <id>
-       * @author Юрий
+       * РЈРґР°Р»РµРЅРёРµ РєРѕРјРЅР°С‚ Р±РµР· РїРµСЂРµР·Р°РіСЂСѓР·РєРё С‡Р°С‚Р°
+       * !СѓРґР°Р»РёС‚СЊ <id>
+       * @author Р®СЂРёР№
        */
 
       public void commandDeleteRoom(IcqProtocol proc, String uin, Vector v)
@@ -2993,20 +2993,20 @@ firstStartMsg=true;
         Users uss = srv.us.getUser(uin);
         if (!srv.us.checkRoom(room))
         {
-        proc.mq.add(uin, "Такой комнаты не существует!");
+        proc.mq.add(uin, "РўР°РєРѕР№ РєРѕРјРЅР°С‚С‹ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚!");
         return;
         }
-        srv.cq.addMsg("Была удалена комната " + srv.us.getRoom(room).getName() + "|" + room + "| пользователем " + uss.localnick + "|" + uss.id + "|", uin, uss.room);
-        //srv.cq.addMsg("Была удалена комната " + srv.us.getRoom(room).getName() + "|" + room + "| пользователем " + uss.localnick + "|" + uss.id + "|", uin, 0);
-        proc.mq.add(uin, "Комната " + room + " была успешно удалена");
+        srv.cq.addMsg("Р‘С‹Р»Р° СѓРґР°Р»РµРЅР° РєРѕРјРЅР°С‚Р° " + srv.us.getRoom(room).getName() + "|" + room + "| РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј " + uss.localnick + "|" + uss.id + "|", uin, uss.room);
+        //srv.cq.addMsg("Р‘С‹Р»Р° СѓРґР°Р»РµРЅР° РєРѕРјРЅР°С‚Р° " + srv.us.getRoom(room).getName() + "|" + room + "| РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј " + uss.localnick + "|" + uss.id + "|", uin, 0);
+        proc.mq.add(uin, "РљРѕРјРЅР°С‚Р° " + room + " Р±С‹Р»Р° СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅР°");
         Rooms r = new Rooms();
         r.setId(room);
         srv.us.deleteRoom(r);
         }
 
         /**
-        *  !пригласитьид <id <msg>
-        *  Приглашение в чат по иду
+        *  !РїСЂРёРіР»Р°СЃРёС‚СЊРёРґ <id <msg>
+        *  РџСЂРёРіР»Р°С€РµРЅРёРµ РІ С‡Р°С‚ РїРѕ РёРґСѓ
         *  @author fraer72
         */
         public void commandInvitation_ID(IcqProtocol proc, String uin, Vector v, String tmsg) {
@@ -3025,25 +3025,25 @@ firstStartMsg=true;
         Users uss = srv.us.getUser(i);
         if(uss.id == 0)
         {
-        proc.mq.add(uin,"Такого пользователя не существует");
+        proc.mq.add(uin,"РўР°РєРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚");
         return;
         }
         if (uss.state==UserWork.STATE_CHAT)
         {
-        proc.mq.add(uin,"Пользователь уже сидит в чате!");
+        proc.mq.add(uin,"РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СѓР¶Рµ СЃРёРґРёС‚ РІ С‡Р°С‚Рµ!");
         return;
         }
         if (s.length() > psp.getIntProperty("chat.MaxMsgSize"))
         {
         s = s.substring(0, psp.getIntProperty("chat.MaxMsgSize"));
-        proc.mq.add(uin, "Слишком длинное сообщение было обрезано: " + s);
+        proc.mq.add(uin, "РЎР»РёС€РєРѕРј РґР»РёРЅРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ Р±С‹Р»Рѕ РѕР±СЂРµР·Р°РЅРѕ: " + s);
         }
         if(s.equals(""))
         {
-        proc.mq.add(uin,srv.us.getUser(uin).localnick  + " Необходимо добавить сообщение!\nПример: !позвать <id> давай к нам");
+        proc.mq.add(uin,srv.us.getUser(uin).localnick  + " РќРµРѕР±С…РѕРґРёРјРѕ РґРѕР±Р°РІРёС‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ!\nРџСЂРёРјРµСЂ: !РїРѕР·РІР°С‚СЊ <id> РґР°РІР°Р№ Рє РЅР°Рј");
         return;
         }
-        //TODO: Понять почему иногда возбуждается исключение null.... или переделать всю систему
+        //TODO: РџРѕРЅСЏС‚СЊ РїРѕС‡РµРјСѓ РёРЅРѕРіРґР° РІРѕР·Р±СѓР¶РґР°РµС‚СЃСЏ РёСЃРєР»СЋС‡РµРЅРёРµ null.... РёР»Рё РїРµСЂРµРґРµР»Р°С‚СЊ РІСЃСЋ СЃРёСЃС‚РµРјСѓ
             /*if(psp.getBooleanProperty("Priglashenie.on.off"))
             {
             String ss = psp.getStringProperty("chat.Priglashenie");
@@ -3051,25 +3051,25 @@ firstStartMsg=true;
             for (int i1=0;i1<sss.length;i1++)
             {
             Users usss = srv.us.getUser(sss[i1]);
-            srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Пользователя " + uss.localnick +  "|" + uss.id + "|" + " зовет в чат " + srv.us.getUser(uin).localnick + "|" + srv.us.getUser(uin).id + "| "
-            + "\n Сообщение: "+s);
+            srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"РџРѕР»СЊР·РѕРІР°С‚РµР»СЏ " + uss.localnick +  "|" + uss.id + "|" + " Р·РѕРІРµС‚ РІ С‡Р°С‚ " + srv.us.getUser(uin).localnick + "|" + srv.us.getUser(uin).id + "| "
+            + "\n РЎРѕРѕР±С‰РµРЅРёРµ: "+s);
             }
             }*/
-        srv.us.db.event(uss.id, uin, "PRIG", us.id, us.sn, "позвал в чат");
-        srv.us.db.log(uss.id,uin,"PRIG",">> Вас зовут в чат " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "|",uss.room);
-        srv.getIcqProcess(uss.basesn).mq.add(uss.sn,"Пользователь " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "| зовет вас в чат " + " и вам от него сообщение: " + s);
-        proc.mq.add(uin,"Вы позвали в чат пользователя " + uss.localnick + " |" + uss.id + "|");
+        srv.us.db.event(uss.id, uin, "PRIG", us.id, us.sn, "РїРѕР·РІР°Р» РІ С‡Р°С‚");
+        srv.us.db.log(uss.id,uin,"PRIG",">> Р’Р°СЃ Р·РѕРІСѓС‚ РІ С‡Р°С‚ " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "|",uss.room);
+        srv.getIcqProcess(uss.basesn).mq.add(uss.sn,"РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "| Р·РѕРІРµС‚ РІР°СЃ РІ С‡Р°С‚ " + " Рё РІР°Рј РѕС‚ РЅРµРіРѕ СЃРѕРѕР±С‰РµРЅРёРµ: " + s);
+        proc.mq.add(uin,"Р’С‹ РїРѕР·РІР°Р»Рё РІ С‡Р°С‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ " + uss.localnick + " |" + uss.id + "|");
         }
         catch (Exception ex)
         {
         ex.printStackTrace();
-        proc.mq.add(uin,"Ошибка "+ex.getMessage());
+        proc.mq.add(uin,"РћС€РёР±РєР° "+ex.getMessage());
         }
         }
 
         /*
-         *  !пригласитьуин <uin> <msg>
-         *  Приглашение в чат по уину
+         *  !РїСЂРёРіР»Р°СЃРёС‚СЊСѓРёРЅ <uin> <msg>
+         *  РџСЂРёРіР»Р°С€РµРЅРёРµ РІ С‡Р°С‚ РїРѕ СѓРёРЅСѓ
          *  @author fraer72
          */
         public void commandInvitation_UIN(IcqProtocol proc, String uin, Vector v, String tmsg) {
@@ -3088,20 +3088,20 @@ firstStartMsg=true;
         Users us = srv.us.getUser(uin);
         if(s.equals(""))
         {
-        proc.mq.add(uin,srv.us.getUser(uin).localnick  + " Необходимо добавить сообщение!\nПример: !пригласить <uin> давай к нам");
+        proc.mq.add(uin,srv.us.getUser(uin).localnick  + " РќРµРѕР±С…РѕРґРёРјРѕ РґРѕР±Р°РІРёС‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ!\nРџСЂРёРјРµСЂ: !РїСЂРёРіР»Р°СЃРёС‚СЊ <uin> РґР°РІР°Р№ Рє РЅР°Рј");
         return;
         }
         if (radm.testMat1(radm.changeChar(s)))
         {
-        proc.mq.add(uin,"В сообщении ''МАТ''");
+        proc.mq.add(uin,"Р’ СЃРѕРѕР±С‰РµРЅРёРё ''РњРђРў''");
         return;
         }
         if (s.length() > psp.getIntProperty("chat.MaxMsgSize"))
         {
         s = s.substring(0, psp.getIntProperty("chat.MaxMsgSize"));
-        proc.mq.add(uin, "Слишком длинное сообщение было обрезано: " + s);
+        proc.mq.add(uin, "РЎР»РёС€РєРѕРј РґР»РёРЅРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ Р±С‹Р»Рѕ РѕР±СЂРµР·Р°РЅРѕ: " + s);
         }
-        //TODO: Понять почему иногда возбуждается исключение null.... или переделать всю систему
+        //TODO: РџРѕРЅСЏС‚СЊ РїРѕС‡РµРјСѓ РёРЅРѕРіРґР° РІРѕР·Р±СѓР¶РґР°РµС‚СЃСЏ РёСЃРєР»СЋС‡РµРЅРёРµ null.... РёР»Рё РїРµСЂРµРґРµР»Р°С‚СЊ РІСЃСЋ СЃРёСЃС‚РµРјСѓ
             /*if(psp.getBooleanProperty("Priglashenie.on.off"))
             {
             String ss = psp.getStringProperty("chat.Priglashenie");
@@ -3109,24 +3109,24 @@ firstStartMsg=true;
             for (int i=0;i<sss.length;i++)
             {
             Users usss = srv.us.getUser(sss[i]);
-            srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Отправлено приглашение в чат на уин " + uins+ " от пользователя " + srv.us.getUser(uin).localnick + "|" + srv.us.getUser(uin).id + "| "
-            + "\n Сообщение: "+s);
+            srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"РћС‚РїСЂР°РІР»РµРЅРѕ РїСЂРёРіР»Р°С€РµРЅРёРµ РІ С‡Р°С‚ РЅР° СѓРёРЅ " + uins+ " РѕС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ " + srv.us.getUser(uin).localnick + "|" + srv.us.getUser(uin).id + "| "
+            + "\n РЎРѕРѕР±С‰РµРЅРёРµ: "+s);
             }
             }*/
-        srv.us.db.event(uss.id, uin, "PRIG", us.id, us.sn, "позвал в чат");
-        proc.mq.add(uins,"Пользователь " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "| приглашает вас в чат " + " и вам от него сообщение: " + s);
-        proc.mq.add(uin,"Приглашение на уин: "+uins+"  отправлено");
+        srv.us.db.event(uss.id, uin, "PRIG", us.id, us.sn, "РїРѕР·РІР°Р» РІ С‡Р°С‚");
+        proc.mq.add(uins,"РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "| РїСЂРёРіР»Р°С€Р°РµС‚ РІР°СЃ РІ С‡Р°С‚ " + " Рё РІР°Рј РѕС‚ РЅРµРіРѕ СЃРѕРѕР±С‰РµРЅРёРµ: " + s);
+        proc.mq.add(uin,"РџСЂРёРіР»Р°С€РµРЅРёРµ РЅР° СѓРёРЅ: "+uins+"  РѕС‚РїСЂР°РІР»РµРЅРѕ");
         }
         catch (Exception ex)
         {
         ex.printStackTrace();
-        proc.mq.add(uin,"Ошибка "+ex.getMessage());
+        proc.mq.add(uin,"РћС€РёР±РєР° "+ex.getMessage());
         }
         }
 
         /*
-         * Отправка сообщения во все комнаты
-         * !везде <text>
+         * РћС‚РїСЂР°РІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РІРѕ РІСЃРµ РєРѕРјРЅР°С‚С‹
+         * !РІРµР·РґРµ <text>
          * @author Sushka
          */
         public void commandSend(IcqProtocol proc, String uin, Vector v) {
@@ -3146,7 +3146,7 @@ firstStartMsg=true;
         }
         if (radm.testMat1(radm.changeChar(smsg)))
         {
-        proc.mq.add(uin,"В сообщении ''МАТ''");
+        proc.mq.add(uin,"Р’ СЃРѕРѕР±С‰РµРЅРёРё ''РњРђРў''");
         return;
         }
         Set<Integer> rid = new HashSet();
@@ -3162,19 +3162,19 @@ firstStartMsg=true;
         }
         for (int i : rid)
         {
-        srv.cq.addMsg("{Админ сообщение: " + smsg + "}", uin, i);
+        srv.cq.addMsg("{РђРґРјРёРЅ СЃРѕРѕР±С‰РµРЅРёРµ: " + smsg + "}", uin, i);
         }
-        proc.mq.add(uin, "Сообщение отправленно успешно");
+        proc.mq.add(uin, "РЎРѕРѕР±С‰РµРЅРёРµ РѕС‚РїСЂР°РІР»РµРЅРЅРѕ СѓСЃРїРµС€РЅРѕ");
         } 
         catch (Exception ex)
         {
         ex.printStackTrace();
-        proc.mq.add(uin, "Ошибка - " + ex.getMessage());
+        proc.mq.add(uin, "РћС€РёР±РєР° - " + ex.getMessage());
         }
         }
 
         /**
-         * Очистка списка адм сообщений
+         * РћС‡РёСЃС‚РєР° СЃРїРёСЃРєР° Р°РґРј СЃРѕРѕР±С‰РµРЅРёР№
          * @param proc
          * @param uin
          */
@@ -3189,7 +3189,7 @@ firstStartMsg=true;
         return;
         }
         srv.us.db.executeQuery( " TRUNCATE `admmsg` " );
-        proc.mq.add(uin, "Таблицы \"admmsg\" очищена" );
+        proc.mq.add(uin, "РўР°Р±Р»РёС†С‹ \"admmsg\" РѕС‡РёС‰РµРЅР°" );
         }
 
         }
