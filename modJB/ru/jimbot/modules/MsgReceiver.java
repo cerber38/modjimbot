@@ -49,7 +49,10 @@ public class MsgReceiver implements ProtocolListener {
 
     iprot.sendMsg( sendSN, MainProps.VERSION + "\n(c) Spec, 2006-2009\n" +
     "Поддержка проекта: http://jimbot.ru" +
-    "\n[~~~~~~~]\nАвтор мода fraer72\nПоддержка мода - www.toch72.ru\n[~~~~~~~]\n" );
+    "\nПоддержка мода - www.toch72.ru"  +
+    "\nХостинг чатов:" +
+    "\n1) http://exstazy.ru/" +
+    "\n2) http://wortep.ru/");
     Log.info( "CHAT COM_LOG: " + sendSN + ">> " + mmsg[ 0 ] );
     }else{
     Log.flood("FLOOD from " + sendSN + ">> " + msg);
