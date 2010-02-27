@@ -584,7 +584,7 @@ firstStartMsg=true;
                 break;
            case 9:
                 if(!isChat(proc,uin) && !psp.testAdmin(uin)) break;
-                if(!auth(proc,uin, "moder_time")) return;
+                if(!auth(proc,uin, "kickone")) return;
                 proc.mq.add(uin, listKickUsers());
                 break;
            case 10:
@@ -680,7 +680,7 @@ firstStartMsg=true;
                 break;
            case 37:
                 if(!isChat(proc,uin) && !psp.testAdmin(uin)) break;
-                if(!auth(proc,uin, "kickone")) return;
+                if(!auth(proc,uin, "moder_time")) return;
                 proc.mq.add(uin, listModUsers());
                 break;
            case 38:
@@ -868,26 +868,48 @@ firstStartMsg=true;
     }
 
      /**
-     * !help
+       * @author HellFaust
+       * !help (!справка) - Вывод списка команд
+       */
+    public void commandHelp(IcqProtocol proc, String uin){ 
+    Users uss = srv.us.getUser(uin);
+    String c = "Список доступных комманд:\n";
+    if (psp.testAdmin(uin)){
+    c += srv.us.getAllCommand();
+    }
+    else
+    {
+    String g = "all";
+    c += srv.us.getCommand(g);
+    String [] s = srv.us.getAuth(uss.id).split(";");
+    for(int i = 0; i < s.length; i++){
+    c += srv.us.getCommand(s[i]);
+    }
+    }
+    //Log.info(uin + "  [" + uss.id + "] - " +uss.localnick + " - запрос списка команд");
+    cutsend(proc, uin, c);
+    }
+
+    /**
+     * Резка сообщений
+     * @author jimbot
+     * @param proc
+     * @param uin
+     * @param s
      */
-    public void commandHelp(IcqProtocol proc, String uin)
-    {
-    if(srv.us.getUser(uin).id == 0){return;}
-    String[] s = psp.loadText("./text/" + srv.getName() + "/help1.txt").split("<br>");
-    for (int i = 0; i < s.length; i++)
-    {
-    proc.mq.add(uin, s[i]);
+    public void cutsend(IcqProtocol proc, String uin, String s) { 
+    char[] c = s.toCharArray();
+    s = "";
+    for (int i = 0; i < c.length; i++){
+    if( i == 1000 || i == 2000 || i == 3000 || i == 4000 ||  i == 5000 || i == 6000 ){
+    proc.mq.add(uin, s+c[i]);
+    s = "";
+    }else s += c[i];
     }
-    if (srv.us.authorityCheck(uin, "exthelp"))
-    {
-    s = psp.loadText("./text/" + srv.getName() + "/help2.txt").split("<br>");
-    for (int i = 0; i < s.length; i++)
-    {
-    proc.mq.add(uin, s[i]);
+    proc.mq.add(uin, s);
     }
-    }
-    }
-    
+
+
     /**
      * !gofree
      * @param proc

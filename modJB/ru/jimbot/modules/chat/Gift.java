@@ -43,7 +43,7 @@ commands.put("!добподарок", new Cmd("!добподарок","$c $n",2)
 , где аргумент $c - <название подарка>, $n - <цена> */
 commands.put("!вещи", new Cmd("!вещи","",3));//вещи купленные в ларьке
 commands.put("!подарить", new Cmd("!подарить","$n $n $s",4));/* Подарить пользователю подарок, где
-, аргумент $n - <ид пользователя>, $n - <номер подарка>*/
+, аргумент $n - <ид пользователя>, $n - <номер подарка> $ - <примичение к подарку>*/
 commands.put("!всеподарки", new Cmd("!всеподарки","$n",5));// все подарки подаренные пользователю
 commands.put("!делподарок", new Cmd("!делподарок","$n",6));/*удалить подарок из списка покупок
 , аргумент $n - <ид-подарка в ларьке> */
@@ -168,7 +168,7 @@ return f;
 
     private void AddGifts(IcqProtocol proc, String uin, Vector v) {
     if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
-    if(!cmd.auth(proc,uin, "addgift")) return;
+    if(!cmd.auth(proc,uin, "gift")) return;
     try{
     long z = cmd.srv.us.db.getLastIndex("gift");
     int id = (int) z;

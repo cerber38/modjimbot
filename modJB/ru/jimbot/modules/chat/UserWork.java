@@ -1274,4 +1274,64 @@ public class UserWork {
 
 
   ////////
+
+        /**
+         * @author HellFaust
+         * Получение всех команд
+         * @return
+         */
+
+      public String getAllCommand(){
+      String s = "";
+      try{
+      PreparedStatement pst;
+      pst = db.getDb().prepareStatement("SELECT command, info FROM help");
+      ResultSet rs = pst.executeQuery();
+      while(rs.next()){
+      s += rs.getString(1) + " - " + rs.getString(2) + "\n";
+      }
+      }catch(Exception ex){
+      ex.printStackTrace();
+      }
+      return s;
+      }
+
+      /**
+       * @author HellFaust
+       * Получение команд
+       * @param auth
+       * @return
+       */
+
+      public String getCommand(String auth){ 
+      String s = "";
+      String e = auth;
+      if (e.equals("") || e.equals(" ")) return s;
+      try{
+      PreparedStatement pst;
+      pst = db.getDb().prepareStatement("SELECT `command`, `info` FROM `help` WHERE auth ='" + auth + "'");
+      ResultSet rs = pst.executeQuery();
+      while(rs.next()){
+      s += rs.getString(1) + " - " + rs.getString(2) + "\n";
+      }
+      }catch(Exception ex){
+      ex.printStackTrace();
+      }
+      return s;
+      }
+
+      /**
+       * @author HellFaust
+       * Получение полномочий пользователя для выборки доступных команд
+       * @param auth
+       * @return
+       */
+      public String getAuth(int user_id){
+      String s = "";
+      for(String sc:getUserAuthObjects(user_id)){
+      s += sc + ";";
+      }
+      return s;
+      }
+
 }
