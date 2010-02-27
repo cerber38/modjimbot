@@ -13,12 +13,14 @@ import java.sql.*;
 //Установка скрипта как обработчика команды
 if(in.equals("install")){
 cmd.addCommand("!стена", new Cmd("!стена","",39,name));
+cmd.addAuth("Wall","Стена :)");
 out="Ok";
 return;
 }
 
 // Проверим полномочия
 if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
+if(!cmd.auth(proc,uin, "Wall")) return;
 
 try
 {

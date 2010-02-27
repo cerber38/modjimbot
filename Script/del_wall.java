@@ -14,14 +14,14 @@ import java.sql.*;
 if(in.equals("install"))
 {
 cmd.addCommand("!делстена", new Cmd("!делстена","",39,name));
-cmd.addAuth("Wall","Стена :)");
+cmd.addAuth("WallDel","Очистка стены :)");
 out="Ok";
 return;
 }
 
 // Проверим полномочия
 if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
-if(!cmd.auth(proc,uin, "Wall")) return;
+if(!cmd.auth(proc,uin, "WallDel")) return;
 
 try{
 cmd.srv.us.db.executeQuery(" TRUNCATE `wall` ");

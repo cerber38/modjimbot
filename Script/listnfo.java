@@ -12,7 +12,7 @@ import java.sql.*;
 
 //Установка скрипта как обработчика команды
 if(in.equals("install")){
-   cmd.addCommand("!листинф", new Cmd("!листинф","$n",39,name));
+   cmd.addCommand("!листинф", new Cmd("!листинф","",39,name));
    cmd.addAuth("infbot","Создании, удалении информации для админ бота");
    out="Ok";
    return;
