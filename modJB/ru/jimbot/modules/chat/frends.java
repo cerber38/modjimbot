@@ -49,6 +49,18 @@ commands.put("!заявки", new Cmd("!заявки","",5));// вывод ли�
 commands.put("!аллдруг", new Cmd("!аллдруг","$n",6));// вывод всех друзей
 }
 
+/**
+ * Добавление новой команды
+ * @param name
+ * @param c
+ * @return - истина, если команда уже существует
+ */
+public boolean addCommand(String name, Cmd c)
+{
+boolean f = commands.containsKey(name);
+commands.put(name, c);
+return f;
+}
 
 public boolean commandFrends(IcqProtocol proc, String uin, String mmsg) {
 String msg = mmsg.trim();

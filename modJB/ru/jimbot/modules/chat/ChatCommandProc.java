@@ -51,11 +51,11 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     public frends frends;
     public AboutUser abv;
     public ClanCommand clan;
-    private Shop shop;
+    public Shop shop;
     public Gift gift;
     public ChatServer srv;
+    public Voting voting;
     public RobAdmin radm = null;
-    public Voting voting_events = null;
     public MyQuiz Quiz = null;
     private ConcurrentHashMap <String,String> up; // Запоминаем последний пришедший приват
     private ConcurrentHashMap <String, KickInfo> statKick; // Расширенная статистика киков
@@ -392,10 +392,10 @@ firstStartMsg=true;
     Quiz = new MyQuiz(srv);
     Quiz.start();
     }
-    if(voting_events == null)
+    if(voting == null)
     {
-    voting_events = new Voting(this);
-    voting_events.start();
+    voting = new Voting(this);
+    voting.start();
     }
     if(radm == null)
     {
@@ -754,7 +754,7 @@ firstStartMsg=true;
                 default:
      //Дополнительные команды из других классов
      if(scr.commandExec(proc, uin, mmsg)) return;
-     if(voting_events.commandVoting(proc, uin, mmsg)) return;
+     if(voting.commandVoting(proc, uin, mmsg)) return;
      if(shop.commandShop(proc, uin, mmsg)) return;
      if(frends.commandFrends(proc, uin, mmsg)) return;
      if(abv.commandAboutUser(proc, uin, mmsg)) return;

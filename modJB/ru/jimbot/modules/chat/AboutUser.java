@@ -47,6 +47,18 @@ commands.put("!данные", new Cmd("!данные","",1));
 commands.put("!личное", new Cmd("!личное","$n",2));
 }
 
+/**
+ * Добавление новой команды
+ * @param name
+ * @param c
+ * @return - истина, если команда уже существует
+ */
+public boolean addCommand(String name, Cmd c)
+{
+boolean f = commands.containsKey(name);
+commands.put(name, c);
+return f;
+}
 
 public boolean commandAboutUser(IcqProtocol proc, String uin, String mmsg) {
 String tmsg = mmsg.trim();

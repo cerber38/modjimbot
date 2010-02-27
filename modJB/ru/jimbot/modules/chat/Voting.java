@@ -14,7 +14,7 @@ import ru.jimbot.protocol.IcqProtocol;
  */
 
 public class Voting implements Runnable {
-private HashMap commands = new HashMap();
+private HashMap<String, Cmd> commands = new HashMap<String, Cmd>();
 private HashMap<String, VotingMap> VotingMap;
 private ConcurrentHashMap <String, Integer> Repetition;// Масив для хранения информации
 private ConcurrentHashMap <String, String> Msg;// Масив для хранения сообщений пользователя
@@ -49,6 +49,18 @@ commands.put("!голосование", new Cmd("!голосование","$n",1
 где аргумент $n пользователь против котого будет голосование*/
 }
 
+/**
+ * Добавление новой команды
+ * @param name
+ * @param c
+ * @return - истина, если команда уже существует
+ */
+public boolean addCommand(String name, Cmd c)
+{
+boolean f = commands.containsKey(name);
+commands.put(name, c);
+return f;
+}
 
 public boolean commandVoting(IcqProtocol proc, String uin, String mmsg) {
 String tmsg = mmsg.trim();
@@ -198,17 +210,17 @@ return f;
     {
     YES += 1;
     ALL_Voice += 1;
-    proc.mq.add(uin,uss.localnick + " ваш голос учтен :)n");
+    proc.mq.add(uin,uss.localnick + " ваш голос учтен :)");
     }
     if(voice.equals("нет"))
     {
-    proc.mq.add(uin,uss.localnick + " ваш голос учтен :)n" );
+    proc.mq.add(uin,uss.localnick + " ваш голос учтен :)" );
     NO += 1;
     ALL_Voice += 1;
     }
     if(voice.equals("0"))
     {
-    proc.mq.add(uin,uss.localnick + " вы воздержались. Спасибо за внимание :)n");
+    proc.mq.add(uin,uss.localnick + " вы воздержались. Спасибо за внимание :)");
     ALL_Voice += 1;
     }
     Repetition.remove(uin);
@@ -276,7 +288,7 @@ return f;
     if(ALL_Voice == VotingUsersRoom())
     {
     if(YES > NO){
-    cmd.srv.cq.addMsg("Результаты голосования:nЗА|ПРОТИВn" +
+    cmd.srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
     YES + "|" + NO + "\n" +u .localnick + " вылетел из чата на 30 минут", "", ROOM_Voice);
     //Дадим кик
     cmd.tkick(cmd.srv.getIcqProcess(u.basesn), u.sn, 30, moder, R);
@@ -289,7 +301,7 @@ return f;
     else
     {
     cmd.srv.getIcqProcess(u.basesn).mq.add(u.sn,u.localnick + " вам повезло, вы остаетесь в чате.");
-    cmd.srv.cq.addMsg("Результаты голосования:nЗА|ПРОТИВn" +
+    cmd.srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
     YES + "|" + NO + "\n" +u .localnick + " остается в чате", "", ROOM_Voice);
     //
     YES = 0;
@@ -308,7 +320,7 @@ return f;
     {
     Users u = cmd.srv.us.getUser(ID_Voice);
     if(YES > NO){
-    cmd.srv.cq.addMsg("Результаты голосования:nЗА|ПРОТИВn" +
+    cmd.srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
     YES + "|" + NO + "\n" +u .localnick + " вылетел из чата на 30 минут", "", ROOM_Voice);
     //Дадим кик
     cmd.tkick(cmd.srv.getIcqProcess(u.basesn), u.sn, 30, moder, R);
@@ -321,7 +333,7 @@ return f;
     else
     {
     cmd.srv.getIcqProcess(u.basesn).mq.add(u.sn,u.localnick + " вам повезло, вы остаетесь в чате.");
-    cmd.srv.cq.addMsg("Результаты голосования:nЗА|ПРОТИВn" +
+    cmd.srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
     YES + "|" + NO + "\n" + u .localnick + " остается в чате", "", ROOM_Voice);
     //
     YES = 0;
