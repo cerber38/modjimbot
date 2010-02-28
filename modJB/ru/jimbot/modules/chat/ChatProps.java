@@ -133,7 +133,6 @@ public class ChatProps implements AbstractProps {
         //////////////////////////////////////////////////////
         //ДОПОЛНИТЕЛЬНЫЕ КОМАНДЫ
         //////////////////////////////////////////////////////
-
         setIntProperty("chat.defaultBanroomTime",300);
         setIntProperty("room.tyrma",5);
         setIntProperty("time.dellog",5);
@@ -183,6 +182,8 @@ public class ChatProps implements AbstractProps {
         setIntProperty("Clan.Ball_2", 1 );
         setIntProperty("Clan.Ball_3", 100 );
         setBooleanProperty("chat.captcha", false);
+        setIntProperty("room.igra.bytilochka", 777 );
+        setIntProperty("time.igra.bytilochka", 30 );
 
     }
 
@@ -318,6 +319,10 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.INTEGER_TYPE,"Clan.Ball_1","Рейтинг клана (прибавится/отнимется)  при (вступление/уходе) пользователя",getIntProperty("Clan.Ball_1"),""),
         new UserPreference(UserPreference.INTEGER_TYPE,"Clan.Ball_2","Максимально число возможных балов клану при команде +кланбал",getIntProperty("Clan.Ball_2"),""),
         new UserPreference(UserPreference.INTEGER_TYPE,"Clan.Ball_3","Максимально количество баллов для поднятия рейтинга клана",getIntProperty("Clan.Ball_3"),""),
+        //Настройки бутылочки
+        new UserPreference(UserPreference.CATEGORY_TYPE,"but", "Настройки бутылочки =)" +"","",""),
+        new UserPreference(UserPreference.INTEGER_TYPE,"room.igra.bytilochka","Комната - ",getIntProperty("room.igra.bytilochka"),""),
+        new UserPreference(UserPreference.INTEGER_TYPE,"time.igra.bytilochkat","Интервал - ",getIntProperty("time.igra.bytilochka")," секунд"),
         };
         return p;
         }

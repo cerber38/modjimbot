@@ -2586,22 +2586,12 @@ firstStartMsg=true;
     }
     }
     }
-    if(c==1){proc.mq.add(uin, "В комнате нет людей, неским играть");return;}//Если в комнате нет людей
+    //if(c==1){proc.mq.add(uin, "В комнате нет людей, неским играть");return;}//Если в комнате нет людей
     String[] gg = g.split(";");
     int o = (int) ((Math.random() * gg.length));
     a = n();
     String A = srv.us.GetButilochka(a);
     Users u = srv.us.getUser(Integer.parseInt(gg[o]));
-    if (uss.id == 0)
-    {
-    proc.mq.add(uin, "Пользователь не найден");
-    return;
-    }
-    if (uss.state != UserWork.STATE_CHAT)
-    {
-    proc.mq.add(uin, "Этого пользователя нет в чате.");
-    return;
-    }
     if (uss.room != psp.getIntProperty("room.igra.bytilochka"))
     {
     proc.mq.add(uin, "Играть можно только в " + psp.getIntProperty("room.igra.bytilochka") + " комнате");
