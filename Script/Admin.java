@@ -12,6 +12,8 @@ import ru.jimbot.modules.chat.MsgElement;
 import ru.jimbot.modules.chat.ChatProps;
 import ru.jimbot.modules.chat.ChatCommandProc;
 import java.util.Random; 
+import ru.jimbot.modules.chat.Users;
+import java.sql.*;
 
     // RobAdmin adm;
     adm.NICK = "Админ:D";
