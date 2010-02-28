@@ -184,7 +184,7 @@ public class ChatProps implements AbstractProps {
         setBooleanProperty("chat.captcha", false);
         setIntProperty("room.igra.bytilochka", 777 );
         setIntProperty("time.igra.bytilochka", 30 );
-
+        setBooleanProperty("id.on.off", false);
     }
 
     public UserPreference[] getUserPreference(){
@@ -193,7 +193,7 @@ public class ChatProps implements AbstractProps {
             new UserPreference(UserPreference.BOOLEAN_TYPE,"main.StartBot","Запускать чат-бот",getBooleanProperty("main.StartBot"),""),
             new UserPreference(UserPreference.CATEGORY_TYPE,"bot", "Настройки бота","",""),
             new UserPreference(UserPreference.INTEGER_TYPE,"icq.status","ICQ статус",getIntProperty("icq.status"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"icq.xstatus","x-статус (0-36)",getIntProperty("icq.xstatus"),""),
+            new UserPreference(UserPreference.INTEGER_TYPE,"icq.xstatus","x-статус (0-34)",getIntProperty("icq.xstatus"),""),
             new UserPreference(UserPreference.STRING_TYPE,"icq.STATUS_MESSAGE1","Сообщение x-статуса 1",getStringProperty("icq.STATUS_MESSAGE1"),""),
             new UserPreference(UserPreference.STRING_TYPE,"icq.STATUS_MESSAGE2","Сообщение x-статуса 2",getStringProperty("icq.STATUS_MESSAGE2"),""),
             new UserPreference(UserPreference.INTEGER_TYPE,"icq.AUTORETRY_COUNT","Число переподключений движка при обрыве",getIntProperty("icq.AUTORETRY_COUNT"),""),
@@ -262,6 +262,7 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.STRING_TYPE,"chat.name","Название чата",getStringProperty("chat.name"),""),
         new UserPreference(UserPreference.INTEGER_TYPE,"max.chnick","Максимальная длина ника при команде !chnick.",getIntProperty("max.chnick"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"chat.captcha","Включить/Выключить капчу",getBooleanProperty("chat.captcha"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"id.on.off","Включить/Выключить id рядом с ником в сообщении",getBooleanProperty("id.on.off"),""),
         //банрум
         new UserPreference(UserPreference.CATEGORY_TYPE,"banroom", "Настройки закрытия в комнате", "",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"room.tyrma","Комната Тюрьма в чате",getIntProperty("room.tyrma"),""),
@@ -271,11 +272,11 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.BOOLEAN_TYPE,"adm.Informer","Включить/Выключить информер",getBooleanProperty("adm.Informer"),""),
         new UserPreference(UserPreference.INTEGER_TYPE,"adm.Informer.time","Интервал информера",getIntProperty("adm.Informer.time")," (минут)"),
         //лс && invitation
-/*new UserPreference(UserPreference.CATEGORY_TYPE,"lich", "Настройки по оповещениям сообщений","",""),
-            new UserPreference(UserPreference.BOOLEAN_TYPE,"lichnoe.on.off","Включить/выключить оповещение админа о привате",getBooleanProperty("lichnoe.on.off"),""),
-            new UserPreference(UserPreference.STRING_TYPE,"chat.lichnoe","Куда присылать личные сообщения",getStringProperty("chat.lichnoe"),""),
-            new UserPreference(UserPreference.BOOLEAN_TYPE,"Priglashenie.on.off","Включить/выключить оповещение приглашений.",getBooleanProperty("Priglashenie.on.off"),""),
-            new UserPreference(UserPreference.STRING_TYPE,"chat.Priglashenie","Куда присылать оповешение приглашений.",getStringProperty("chat.Priglashenie"),""),*/
+        new UserPreference(UserPreference.CATEGORY_TYPE,"lich", "Настройки по оповещениям сообщений","",""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"lichnoe.on.off","Включить/выключить оповещение админа о привате",getBooleanProperty("lichnoe.on.off"),""),
+        new UserPreference(UserPreference.STRING_TYPE,"chat.lichnoe","Куда присылать личные сообщения",getStringProperty("chat.lichnoe"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"Priglashenie.on.off","Включить/выключить оповещение приглашений.",getBooleanProperty("Priglashenie.on.off"),""),
+        new UserPreference(UserPreference.STRING_TYPE,"chat.Priglashenie","Куда присылать оповешение приглашений.",getStringProperty("chat.Priglashenie"),""),
         //Викторина
         new UserPreference(UserPreference.CATEGORY_TYPE,"victorina", "Игра викторина","",""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"vic.on.off","Включить/выключить викторина",getBooleanProperty("vic.on.off"),""),
@@ -321,8 +322,8 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.INTEGER_TYPE,"Clan.Ball_3","Максимально количество баллов для поднятия рейтинга клана",getIntProperty("Clan.Ball_3"),""),
         //Настройки бутылочки
         new UserPreference(UserPreference.CATEGORY_TYPE,"but", "Настройки бутылочки =)" +"","",""),
-        new UserPreference(UserPreference.INTEGER_TYPE,"room.igra.bytilochka","Комната - ",getIntProperty("room.igra.bytilochka"),""),
-        new UserPreference(UserPreference.INTEGER_TYPE,"time.igra.bytilochkat","Интервал - ",getIntProperty("time.igra.bytilochka")," секунд"),
+        new UserPreference(UserPreference.INTEGER_TYPE,"room.igra.bytilochka","Комната игры",getIntProperty("room.igra.bytilochka"),""),
+        new UserPreference(UserPreference.INTEGER_TYPE,"time.igra.bytilochkat","Интервал игры",getIntProperty("time.igra.bytilochka")," секунд"),
         };
         return p;
         }

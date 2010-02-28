@@ -769,7 +769,11 @@ firstStartMsg=true;
      if(mmsg.indexOf("/me")==0)
      s = mmsg.replaceFirst("/me", "*" + srv.us.getUser(uin).localnick);
      else
+     if(psp.getBooleanProperty("id.on.off")){
+     s += srv.us.getUser(uin).localnick + "|" + srv.us.getUser(uin).id + "|" + psp.getStringProperty("chat.delimiter")+" " + mmsg;
+     }else{
      s += srv.us.getUser(uin).localnick + psp.getStringProperty("chat.delimiter")+" " + mmsg;
+     }
      if(s.length()>psp.getIntProperty("chat.MaxMsgSize")){
      s = s.substring(0,psp.getIntProperty("chat.MaxMsgSize"));
      proc.mq.add(uin,"Слишком длинное сообщение было обрезано: " + s);
@@ -1404,7 +1408,7 @@ firstStartMsg=true;
     proc.mq.add(uin, Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.3", new Object[] {txt}));
     }
     //TODO: Понять почему иногда возбуждается исключение null.... или переделать всю систему
-        /*if(psp.getBooleanProperty("lichnoe.on.off"))
+        if(psp.getBooleanProperty("lichnoe.on.off"))
         {
         String s = psp.getStringProperty("chat.lichnoe");
         String[] ss = s.split(";");
@@ -1413,7 +1417,7 @@ firstStartMsg=true;
         Users usss = srv.us.getUser(ss[i]);
         srv.getIcqProcess(usss.basesn).mq.add(usss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.4", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,uin,uss.localnick,uss.id,txt}));
         }
-        }*/
+        }
     Log.talk("CHAT: " + uss.sn + ">>" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
     srv.us.db.log(uss.id,uin,"LICH",">> " + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}),uss.room);
     srv.getIcqProcess(uss.basesn).mq.add(uss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
@@ -2586,7 +2590,7 @@ firstStartMsg=true;
     }
     }
     }
-    //if(c==1){proc.mq.add(uin, "В комнате нет людей, неским играть");return;}//Если в комнате нет людей
+    if(c==1){proc.mq.add(uin, "В комнате нет людей, неским играть");return;}//Если в комнате нет людей
     String[] gg = g.split(";");
     int o = (int) ((Math.random() * gg.length));
     a = n();
@@ -3055,18 +3059,17 @@ firstStartMsg=true;
         proc.mq.add(uin,srv.us.getUser(uin).localnick  + " Необходимо добавить сообщение!\nПример: !позвать <id> давай к нам");
         return;
         }
-        //TODO: Понять почему иногда возбуждается исключение null.... или переделать всю систему
-            /*if(psp.getBooleanProperty("Priglashenie.on.off"))
+            if(psp.getBooleanProperty("Priglashenie.on.off"))
             {
             String ss = psp.getStringProperty("chat.Priglashenie");
             String[] sss = ss.split(";");
             for (int i1=0;i1<sss.length;i1++)
             {
             Users usss = srv.us.getUser(sss[i1]);
-            srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Пользователя " + uss.localnick +  "|" + uss.id + "|" + " зовет в чат " + srv.us.getUser(uin).localnick + "|" + srv.us.getUser(uin).id + "| "
+            srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Пользователя " + us.localnick +  "|" + us.id + "|" + " зовет в чат " + uss.localnick+ "|" + uss.localnick + "| "
             + "\n Сообщение: "+s);
             }
-            }*/
+            }
         srv.us.db.event(uss.id, uin, "PRIG", us.id, us.sn, "позвал в чат");
         srv.us.db.log(uss.id,uin,"PRIG",">> Вас зовут в чат " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "|",uss.room);
         srv.getIcqProcess(uss.basesn).mq.add(uss.sn,"Пользователь " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "| зовет вас в чат " + " и вам от него сообщение: " + s);
@@ -3113,8 +3116,7 @@ firstStartMsg=true;
         s = s.substring(0, psp.getIntProperty("chat.MaxMsgSize"));
         proc.mq.add(uin, "Слишком длинное сообщение было обрезано: " + s);
         }
-        //TODO: Понять почему иногда возбуждается исключение null.... или переделать всю систему
-            /*if(psp.getBooleanProperty("Priglashenie.on.off"))
+            if(psp.getBooleanProperty("Priglashenie.on.off"))
             {
             String ss = psp.getStringProperty("chat.Priglashenie");
             String[] sss = ss.split(";");
@@ -3124,7 +3126,7 @@ firstStartMsg=true;
             srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Отправлено приглашение в чат на уин " + uins+ " от пользователя " + srv.us.getUser(uin).localnick + "|" + srv.us.getUser(uin).id + "| "
             + "\n Сообщение: "+s);
             }
-            }*/
+            }
         srv.us.db.event(uss.id, uin, "PRIG", us.id, us.sn, "позвал в чат");
         proc.mq.add(uins,"Пользователь " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "| приглашает вас в чат " + " и вам от него сообщение: " + s);
         proc.mq.add(uin,"Приглашение на уин: "+uins+"  отправлено");
