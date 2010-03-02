@@ -56,6 +56,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     public ChatServer srv;
     public Voting voting;
     public RobAdmin radm = null;
+    public AutoStatus xstatus = null;
     public MyQuiz Quiz = null;
     private ConcurrentHashMap <String,String> up; // Запоминаем последний пришедший приват
     private ConcurrentHashMap <String, KickInfo> statKick; // Расширенная статистика киков
@@ -401,6 +402,13 @@ firstStartMsg=true;
     {
     radm = new RobAdmin(srv);
     radm.start();
+    }
+    if(psp.getBooleanProperty("auto_status.on.off")){
+    if(xstatus == null)
+    {
+    xstatus = new AutoStatus(srv);
+    xstatus.start();
+    }
     }
     firstMsg(proc);//Первое сообщение
     firstScript(proc);//Запуск скриптов
@@ -2873,6 +2881,11 @@ firstStartMsg=true;
    public void commandXst(IcqProtocol proc, String uin, Vector v){
    if(!isChat(proc,uin) && !psp.testAdmin(uin)) return;
    if(!auth(proc,uin, "xst")) return;
+   if(xstatus != null)
+   {
+   proc.mq.add(uin,"Запущена авто смена xstatus`ов. Вы не можете сменить статус.");
+   return;
+   }
    int nomer = (Integer)v.get(0);
    if (nomer == 0)
    {

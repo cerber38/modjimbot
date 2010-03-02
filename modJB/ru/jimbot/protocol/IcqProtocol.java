@@ -353,6 +353,15 @@ props.setStringProperty("icq.STATUS_MESSAGE2", xStatusText);
 OscarInterface.changeXStatus(con, new XStatusModeEnum(xStatusId));
 }
 
+/**
+ * Для авто-смены статуса
+ * @param number
+ */
+
+public void setXStatusNumber( int number ){
+OscarInterface.changeXStatus(con, new XStatusModeEnum(number));
+}
+
 public void onEmailUserInfo(MetaEmailUserInfoEvent e) {}
 public void onInterestsUserInfo(MetaInterestsUserInfoEvent e) {}
 public void onMoreUserInfo(MetaMoreUserInfoEvent e) {}

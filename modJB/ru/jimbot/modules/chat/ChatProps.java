@@ -185,6 +185,8 @@ public class ChatProps implements AbstractProps {
         setIntProperty("room.igra.bytilochka", 777 );
         setIntProperty("time.igra.bytilochka", 30 );
         setBooleanProperty("id.on.off", false);
+        setIntProperty("auto_status.time", 5 );
+        setBooleanProperty("auto_status.on.off", false);
     }
 
     public UserPreference[] getUserPreference(){
@@ -263,6 +265,8 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.INTEGER_TYPE,"max.chnick","Максимальная длина ника при команде !chnick.",getIntProperty("max.chnick"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"chat.captcha","Включить/Выключить капчу",getBooleanProperty("chat.captcha"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"id.on.off","Включить/Выключить id рядом с ником в сообщении",getBooleanProperty("id.on.off"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"auto_status.on.off","Включить/Выключить авто смену x-status`ов",getBooleanProperty("auto_status.on.off"),""),
+        new UserPreference(UserPreference.INTEGER_TYPE,"auto_status.time","Интервал смены x-status`ов",getIntProperty("auto_status.time"),""),
         //банрум
         new UserPreference(UserPreference.CATEGORY_TYPE,"banroom", "Настройки закрытия в комнате", "",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"room.tyrma","Комната Тюрьма в чате",getIntProperty("room.tyrma"),""),
@@ -309,9 +313,9 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.BOOLEAN_TYPE,"Spisok.Moder.on.off","Включить/Выключить продажу группы ''moder''",getBooleanProperty("Spisok.Moder.on.off"),""),
         new UserPreference(UserPreference.INTEGER_TYPE,"ball.grant.8","Группа ''moder''",getIntProperty("ball.grant.8")," баллов"),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"Spisok.Admin.on.off","Включить/Выключить продажу группы ''admin''",getBooleanProperty("Spisok.Admin.on.off"),""),
-        new UserPreference(UserPreference.INTEGER_TYPE,"ball.grant.9","Группа ''admin''",getIntProperty("ball.grant.9")," бвллов"),
+        new UserPreference(UserPreference.INTEGER_TYPE,"ball.grant.9","Группа ''admin''",getIntProperty("ball.grant.9")," баллов"),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"Spisok.Status.on.off","Включить/Выключить продажу полномочия ''status_user''",getBooleanProperty("Spisok.Status.on.off"),""),
-        new UserPreference(UserPreference.INTEGER_TYPE,"ball.grant.10","Полномочие ''status_user''",getIntProperty("ball.grant.10")," бвллов"),
+        new UserPreference(UserPreference.INTEGER_TYPE,"ball.grant.10","Полномочие ''status_user''",getIntProperty("ball.grant.10")," баллов"),
         //Настройки кланов
         new UserPreference(UserPreference.CATEGORY_TYPE,"clan", "Настройки кланов" +"","",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"Clan.MaxCount","Максимальное количество кланов",getIntProperty("Clan.MaxCount"),""),

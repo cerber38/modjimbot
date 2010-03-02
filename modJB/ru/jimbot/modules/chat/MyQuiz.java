@@ -101,7 +101,7 @@ public boolean TestOtvet(String s)
 String[] i = s.split(" ");//разделитель
 String aa = i[0];//до разделителя
 String Otvet = aa.toLowerCase();//опустим регистр
-if(Otvet.equals(GetAnswer(n)))//проверим
+if(Otvet.trim().equals(GetAnswer(n)))//проверим
 {
 return true;//если ответ пользователя верный
 }
