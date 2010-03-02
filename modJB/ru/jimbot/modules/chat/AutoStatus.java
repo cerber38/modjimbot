@@ -7,7 +7,9 @@ package ru.jimbot.modules.chat;
 
 import com.mysql.jdbc.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Enumeration;
 import java.util.Random;
+import java.util.Vector;
 import ru.jimbot.Manager;
 
 /**
@@ -30,6 +32,7 @@ private ChatServer srv;
 private int id = 0;
 private int number = 0;
 private String text = "";
+private Vector hist = new Vector();
 
 public AutoStatus(ChatServer s) {
         srv = s;
@@ -40,18 +43,36 @@ private int getRND(int i)
 return r.nextInt(i);
 }
 
-public int Random_ID()
+/**
+ * Тест на повтор
+ * @param id
+ */
+
+private void test(int id){
+    for(Enumeration e = hist.elements(); e.hasMoreElements();) {
+    if((Integer)e.nextElement() == id ){
+    setXStatus();
+    time = System.currentTimeMillis();
+    }
+    }
+}
+
+private int Random_ID()
 {
 long i = srv.us.db.getLastIndex("xstatus");
+if(getRND((int)i)==0){
+return 1;
+}
 return getRND((int)i);
 }
 
 private void setXStatus(){
 id = Random_ID();// Случайный ид
+test(id);
 number = GetNumber(id);// Номер
 text = GetText(id);// Текст
 // Проверим номер
-if(number < 0 || number > 34){
+if(number < 0 || number > 37){
 return; // Если номер не верный!
 }
 // Проверим текст
@@ -69,6 +90,7 @@ if(srv.con.uins.proc.get(uins).isOnLine())// Если номер онлайн, �
 srv.con.uins.proc.get(uins).setXStatusNumber(number);// меняем статус.
 }
 }
+hist.add(id);
 }
 
 public void start()
