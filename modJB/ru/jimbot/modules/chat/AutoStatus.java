@@ -48,35 +48,39 @@ return r.nextInt(i);
  * @param id
  */
 
-private void test(int id){
+private boolean TestRepetition (int id){
     for(Enumeration e = hist.elements(); e.hasMoreElements();) {
     if((Integer)e.nextElement() == id ){
     setXStatus();
     time = System.currentTimeMillis();
+    return false;
     }
     }
+    return true;
 }
 
 private int Random_ID()
 {
 long i = srv.us.db.getLastIndex("xstatus");
-if(getRND((int)i)==0){
-return 1;
-}
+    /*if(getRND((int)i)==0){
+    return 1;
+    }*/
 return getRND((int)i);
 }
 
 private void setXStatus(){
 id = Random_ID();// Случайный ид
-test(id);
+if(TestRepetition(id)){
 number = GetNumber(id);// Номер
 text = GetText(id);// Текст
 // Проверим номер
-if(number < 0 || number > 37){
+if(number < 1 || number > 37){
+hist.add(id);
 return; // Если номер не верный!
 }
 // Проверим текст
 if(text.trim().equals("")){
+hist.add(id);
 return; // Если текст не верный!
 }
 ChatProps.getInstance(srv.getName()).setIntProperty( "icq.xstatus", number );
@@ -91,6 +95,7 @@ srv.con.uins.proc.get(uins).setXStatusNumber(number);// меняем стату�
 }
 }
 hist.add(id);
+}
 }
 
 public void start()
@@ -124,10 +129,24 @@ th=null;
 }
 
     private void timeEvent() {
-     if((time - System.currentTimeMillis())>ChatProps.getInstance(srv.getName()).getIntProperty( "auto_status.time")){
+       if((time - System.currentTimeMillis())>ChatProps.getInstance(srv.getName()).getIntProperty( "auto_status.time")){
+        if(getCountStatus() == 0){
+            time = System.currentTimeMillis();
+           return; // Если нет статусов в БД
+        }
+           if(hist.size() >= getCountStatus()){
+            hist.removeAllElements();
+        }
         setXStatus();
          time = System.currentTimeMillis();
      }
+    }
+
+    public int getCountStatus()
+    {
+    String q = "SELECT count(*) FROM `xstatus` WHERE id";
+    Vector<String[]> v = srv.us.db.getValues(q);
+    return Integer.parseInt(v.get(0)[0]);
     }
 
     public String GetText(int id)
@@ -148,18 +167,18 @@ th=null;
 
     public int GetNumber(int id)
     {
-    int number = 0;
+    int numbers = 0;
     try {
     PreparedStatement pst =  (PreparedStatement) srv.us.db.getDb().prepareStatement("select * from xstatus where id=" + id);
     ResultSet rs = pst.executeQuery();
     if(rs.next())
     {
-    number = rs.getInt(2);
+    numbers = rs.getInt(2);
     }
     rs.close();
     pst.close();
     } catch (Exception ex) {}
-    return number;
+    return numbers;
     }
 
 }
