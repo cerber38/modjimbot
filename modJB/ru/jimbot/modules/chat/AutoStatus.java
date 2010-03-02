@@ -129,7 +129,7 @@ th=null;
 }
 
     private void timeEvent() {
-       if((time - System.currentTimeMillis())>ChatProps.getInstance(srv.getName()).getIntProperty( "auto_status.time")){
+       if((time - System.currentTimeMillis())>ChatProps.getInstance(srv.getName()).getIntProperty( "auto_status.time")*60000){
         if(getCountStatus() == 0){
             time = System.currentTimeMillis();
            return; // Если нет статусов в БД
