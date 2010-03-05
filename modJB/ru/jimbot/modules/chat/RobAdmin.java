@@ -126,7 +126,7 @@ public class RobAdmin implements Runnable {
     public void say(String m, int room){
         cTime = System.currentTimeMillis();
         String s = NICK + ChatProps.getInstance(srv.getName()).getStringProperty("chat.delimiter") + " " + m;
-        Log.info(s);
+        Log.getLogger(srv.getName()).info(s);
         srv.us.db.log(0,"admin","OUT", s, room);
         srv.cq.addMsg(s,"",room);
     }

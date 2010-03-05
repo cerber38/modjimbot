@@ -49,7 +49,7 @@ Statement stmt = null;
 String q = "select id, leader_clan, room_clan, name_clan, ball_clan, info_clan from clans";
 try{
 stmt = (Statement) db.getDb().createStatement( ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY );
-Log.debug("EXEC: " + q);
+Log.getDefault().debug("EXEC: " + q);
 rst = stmt.executeQuery( q );
 while(rst.next()){
 Clan c = new Clan();
@@ -91,7 +91,7 @@ return Cl.get(id);
   */
 public boolean CreateClan( Clan c ){
 String q = "insert into clans values(?,?,?,?,?,?)";
-Log.debug( "INSERT clans id=" + c.getId() );
+Log.getDefault().debug( "INSERT clans id=" + c.getId() );
 boolean f = false;
 try {
 PreparedStatement pst = db.getDb().prepareStatement( q );
@@ -122,7 +122,7 @@ return f;
 public boolean UpdateClan(Clan c)
 {
 String q = "update clans set leader_clan=?, room_clan=?, name_clan=?, ball_clan=?, info_clan=? where id=?";
-Log.debug( "UPDATE clan id=" + c.getId() );
+Log.getDefault().debug( "UPDATE clan id=" + c.getId() );
 boolean f = false;
 try {
 PreparedStatement pst = db.getDb().prepareStatement( q );
@@ -158,7 +158,7 @@ return Cl.keySet();
 public boolean DeleteClan( Clan c )
 {
 String q = "delete from clans where id=?";
-Log.debug( "DELETE clan id=" + c.getId() );
+Log.getDefault().debug( "DELETE clan id=" + c.getId() );
 boolean f = false;
 try{
 PreparedStatement pst = db.getDb().prepareStatement( q );

@@ -68,7 +68,7 @@ public class MsgOutQueue implements Runnable {
 
     public void add(String uin, String msg, int type) {
         if(q.size()>MSG_OUT_LIMIT /*Props.getIntProperty("bot.msgOutLimit")*/) {
-        	Log.info("OUT MESSAGE IS LOST: " + proc.baseUin + ">>" + uin + " : " + msg);
+        	Log.getLogger(proc.serviceName).info("OUT MESSAGE IS LOST: " + proc.baseUin + ">>" + uin + " : " + msg);
         	lostMsg++;
         	return;
         }
@@ -114,7 +114,7 @@ public class MsgOutQueue implements Runnable {
             	proc.sendMsg(m.uin,m.text);
             }   		
     	} catch (Exception ex){
-    		Log.info("ERROR send msg over " + proc.baseUin);
+    		Log.getLogger(proc.serviceName).info("ERROR send msg over " + proc.baseUin);
     		stopCon=System.currentTimeMillis();
     		ex.printStackTrace();
     	}
@@ -146,13 +146,13 @@ public class MsgOutQueue implements Runnable {
                     MainProps.nextServer();
                     proc.server = MainProps.getServer();
                     proc.port = MainProps.getPort();
-                    Log.info("Попытка нового подключения... " + proc.server + ":" + proc.port);
+                    Log.getLogger(proc.serviceName).info("Попытка нового подключения... " + proc.server + ":" + proc.port);
                     proc.reConnect();
                     stopCon=System.currentTimeMillis();
                     p_restart = (p_restart>=PAUSE_RESTART) ? PAUSE_RESTART : p_restart*2;
                 }
             } else {
-                Log.info("Ожидание подключения...");
+                Log.getLogger(proc.serviceName).info("Ожидание подключения...");
                 stopCon = System.currentTimeMillis();
             }
         } catch (Exception ex){

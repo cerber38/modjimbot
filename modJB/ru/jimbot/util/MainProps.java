@@ -33,6 +33,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Vector;
+import ru.jimbot.modules.chat.ChatProps;
 import ru.jimbot.table.UserPreference;
 
 /**
@@ -179,7 +180,39 @@ public class MainProps {
     	setStringProperty("srv.serviceType"+c, type);
     	return c;
     }
-    
+
+    /**
+     * Авто создание log4j.PROPERTIES для заданного сервиса
+     * @param name
+     */
+
+    public static void AddLogProperties (String name){
+    try {
+    String config = Log.Log4jProperties;
+    config = config.replace("$SERVICE", name);
+    OutputStreamWriter NewFile = new OutputStreamWriter( new FileOutputStream( "./services/" + name + "/log4j.PROPERTIES", true ), "windows-1251" );
+    NewFile.write( config );
+    NewFile.close();
+    }
+    catch ( Exception ex )
+    {
+    Log.getLogger(name).error( "Ошибка создания файла \"log4j.PROPERTIES\" " , ex );
+    }
+    }
+
+    /**
+     * Авто создание директорий
+     * @param name
+     */
+
+    public static void AddDirectory (String name){
+    String Directory = "./services/" + name + "/scripts/command/";
+    File NEW = new File(Directory);
+    if(!NEW.exists())
+    NEW.mkdirs();
+    }
+
+
     public static void delService(String name) {
     	// Сдвигаем элементы после удаленного на его место
     	boolean f = false;
@@ -285,11 +318,11 @@ public class MainProps {
 //            appProps.load(fi);
             appProps.loadFromXML(fi);
             fi.close();
-            Log.info("Load preferences ok");
+            Log.getDefault().info("Load preferences ok");
             loadServerList();
         } catch (Exception ex) {
             ex.printStackTrace();
-            Log.error("Error opening preferences: ");
+            Log.getDefault().error("Error opening preferences: ");
         }
     }
     
@@ -301,10 +334,10 @@ public class MainProps {
 //            appProps.store(fo,"jImBot properties");
             appProps.storeToXML(fo, "jImBot properties");
             fo.close();
-            Log.info("Save preferences ok");
+            Log.getDefault().info("Save preferences ok");
         } catch (Exception ex) {
             ex.printStackTrace();
-            Log.error("Error saving preferences: ");
+            Log.getDefault().error("Error saving preferences: ");
         }
     }
     
@@ -333,7 +366,7 @@ public class MainProps {
             conn.disconnect();
             s = bout.toString("windows-1251");
         } catch (Exception ex) {
-            Log.error("Ошибка HTTP при чтении новой версии", ex);
+            Log.getDefault().error("Ошибка HTTP при чтении новой версии", ex);
         }
         return s;
     }
@@ -386,7 +419,7 @@ public class MainProps {
                 }
             r.close();
         } catch (Exception ex){
-            Log.error("Ошибка обработки описания новой версии",ex);
+            Log.getDefault().error("Ошибка обработки описания новой версии",ex);
         }
     }
 
@@ -398,7 +431,7 @@ NewFile.close();
 }
 catch ( Exception ex )
 {
-Log.error( "Ошибка создания файла: " , ex );
+Log.getDefault().error( "Ошибка создания файла: " , ex );
 }
 }
 

@@ -78,7 +78,7 @@ public class ChatQueue implements Runnable {
      * Добавить сообщение в очередь
      */
     public void addMsg(String m, String user, int room) {
-        Log.debug("CHAT: Add msg "+m);
+        Log.getLogger(srv.getName()).debug("CHAT: Add msg "+m);
         isNewMsg=true;
         mq.add(new MsgElement(m, msgCounter++, user, room));
     }
@@ -87,7 +87,7 @@ public class ChatQueue implements Runnable {
      * Добавить активного юзера
      */
     public void addUser(String uin, String buin, int room) {
-        Log.debug("CHAT: Add user "+uin + ", " + buin);
+        Log.getLogger(srv.getName()).debug("CHAT: Add user "+uin + ", " + buin);
         uq.put(uin,new UinElement(uin,buin,0,room));
     }
     
@@ -113,7 +113,7 @@ public class ChatQueue implements Runnable {
      * Удалить активного юзера
      */
     public void delUser(String uin){
-        Log.debug("CHAT: Delete active user "+uin);
+        Log.getLogger(srv.getName()).debug("CHAT: Delete active user "+uin);
         uq.remove(uin);
     }
     

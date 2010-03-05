@@ -37,6 +37,7 @@ public abstract class DBAdaptor {
     private Connection db;
     private String host, name, user, pass;
     private long lastConnect = 0;
+    protected String serviceName = "";
     
     /** Creates a new instance of DBAdaptor */
     public DBAdaptor() throws Exception {
@@ -69,7 +70,7 @@ public abstract class DBAdaptor {
     
     public boolean openConnection(String host, String name, String user, String pass) {
         	while(!open(host, name, user, pass)){
-//        		Log.info("Подключение к БД...");
+        		//Log.getLogger(serviceName).info("Подключение к БД...");
         	}
         	return true;
     }
@@ -97,7 +98,7 @@ public abstract class DBAdaptor {
                 ex.printStackTrace();
                 f=false;
                 lastConnect = System.currentTimeMillis();
-                Log.talk("Ошибка подключения к базе данных!!!");
+                Log.getLogger(serviceName).talk("Ошибка подключения к базе данных!!!");
             }
         return f;
     }    
@@ -106,7 +107,7 @@ public abstract class DBAdaptor {
     	Statement stmt = null;
         try {
             stmt = getDb().createStatement();
-            Log.debug("EXEC: " + qry);
+            Log.getLogger(serviceName).debug("EXEC: " + qry);
             stmt.execute(qry);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -122,7 +123,7 @@ public abstract class DBAdaptor {
         Statement stmt=null;
         try {
         	stmt = getDb().createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        	Log.debug("EXEC: " + query);
+        	Log.getLogger(serviceName).debug("EXEC: " + query);
         	rst = stmt.executeQuery(query);
             while (!rst.isLast()) {
                 ss = readNext(rst);
@@ -164,7 +165,7 @@ public abstract class DBAdaptor {
         Statement stmt=null;
         try {
         	stmt = getDb().createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        	Log.debug("EXEC: " + q);
+        	Log.getLogger(serviceName).debug("EXEC: " + q);
         	rst = stmt.executeQuery(q);
             s = readNext(rst)[0];
         } catch (Exception ex) {

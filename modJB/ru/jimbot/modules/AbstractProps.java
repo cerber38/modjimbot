@@ -51,4 +51,5 @@ public interface AbstractProps {
 	public boolean isAutoStart();
 	public String[] getAdmins();
     public UserPreference[] OtherUserPreference();
+    public void AddXmlConfig(String ServiceName);
 }

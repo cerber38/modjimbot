@@ -23,7 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Properties;
-
+import ru.jimbot.Manager;
 import ru.jimbot.modules.AbstractProps;
 import ru.jimbot.table.UserPreference;
 import ru.jimbot.util.Log;
@@ -40,7 +40,7 @@ public class AnekProps implements AbstractProps {
     public Properties appProps;
     public Properties langProps;
     public boolean isLoaded = false;
-    
+  
     /** Creates a new instance of AnekProps */
     public AnekProps() {
     }
@@ -53,7 +53,7 @@ public class AnekProps implements AbstractProps {
     		p.PROPS_FILE = "./services/"+name+"/"+name+".xml";
     		p.PROPS_FOLDER = "./services/"+name;
     		p.setDefault();
-    		p.load();
+    		      /*p.load();*/
     		props.put(name, p);
     		return p;
     	}
@@ -219,17 +219,21 @@ public class AnekProps implements AbstractProps {
     }
 
     public final void load() {
-        File file = new File(PROPS_FILE);
+       File file = new File(PROPS_FILE);
+        if(!file.exists()){
+        String[] xml = PROPS_FILE.split("/");
+        Log.getDefault().error(xml[2] + " не создан!");
+        return;
+        }
         setDefault();
         try {
             FileInputStream fi = new FileInputStream(file);
-//            appProps.load(fi);
             appProps.loadFromXML(fi);
             fi.close();
-            Log.info("Load preferences ok");
+            Log.getDefault().info("Load preferences ok");
         } catch (Exception ex) {
             ex.printStackTrace();
-            Log.error("Error opening preferences: ");
+            Log.getDefault().error("Error opening preferences: ");
         }
     }
     
@@ -240,13 +244,12 @@ public class AnekProps implements AbstractProps {
         	if(!dir.exists())
         		dir.mkdirs();
             FileOutputStream fo = new FileOutputStream(file);
-//            appProps.store(fo,"jImBot properties");
             appProps.storeToXML(fo, "jImBot properties");
             fo.close();
-            Log.info("Save preferences ok");
+            Log.getDefault().info("Save preferences ok");
         } catch (Exception ex) {
             ex.printStackTrace();
-            Log.error("Error saving preferences: ");
+            Log.getDefault().error("Error saving preferences: ");
         }
     }
 
@@ -293,4 +296,26 @@ public class AnekProps implements AbstractProps {
 	public Properties getProps() {
 		return appProps;
 	}
+
+
+       /**
+     * Авто создание конфига
+     * @param name
+     */
+
+        public void AddXmlConfig (String name){
+    String Xml = "./services/" + name + "/" + name + ".xml";
+    File NEW = new File(Xml);
+        try {
+            FileOutputStream fo = new FileOutputStream(NEW);
+            appProps.storeToXML(fo, "jImBot properties");
+            fo.close();
+            Log.getLogger(name).info(name + ".xml был создан автоматически!");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Log.getDefault().error("Error saving preferences: ");
+        }
+    }
+
+
 }

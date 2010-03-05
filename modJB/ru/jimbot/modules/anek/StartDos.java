@@ -50,7 +50,7 @@ public class StartDos {
         } catch (Exception e){
             e.printStackTrace();
         }
-        Log.debug(s);
+        Log.getDefault().debug(s);
         return s;        
     }
 }

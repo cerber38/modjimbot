@@ -81,22 +81,21 @@ long StartScriptTime = System.currentTimeMillis();
      * @return
      */
     public String startScript(String name, String in, AbstractServer srv){
-        String s = "";
-//        String sn = srv.getName();
-        try{
-        	Interpreter bsh = new Interpreter();
-            bsh.set("inText", in);
-            bsh.set("proc", null);
-            bsh.set("uin", "");
-            bsh.set("srv", srv);
-            bsh.eval(scripts.getScript("./services/"+sn+SCRIPT_FOLDER + name + ".bsh"));
-            s = bsh.get("out").toString();
-        } catch (Exception ex) {
-//            ex.printStackTrace();
-        	System.err.println("Ошибка скрипта: " + ex.getMessage());
-//            Log.info("Ошибка скрипта: " + ex.getMessage());
-        }
-        return s;
+    String s = "";
+    try{
+    Interpreter bsh = new Interpreter();
+    bsh.set("inText", in);
+    bsh.set("proc", null);
+    bsh.set("uin", "");
+    bsh.set("srv", srv);
+    bsh.eval(scripts.getScript("./services/"+sn+SCRIPT_FOLDER + name + ".bsh"));
+    s = bsh.get("out").toString();
+    } 
+    catch (Exception ex)
+    {
+    Log.getLogger(sn).error("Ошибка скрипта: \"" + name + "\" - " + ex.getMessage());
+    }
+    return s;
     }
 
     /**
@@ -104,20 +103,22 @@ long StartScriptTime = System.currentTimeMillis();
      * @param msg - Текст сообщения
      * @return - Обработанное сообщение
      */
-    public  String startMessagesScript(String msg, AbstractServer srv){
-        String s = msg;
-//        String sn = srv.getName();
-        if(!new File("./services/"+sn+"/scripts/messages.bsh").exists()) return s;
-        try {
-            Interpreter bsh = new Interpreter();
-            bsh.set("msg", msg);
-            bsh.set("srv", srv);
-            bsh.eval(scripts.getScript("./services/"+sn+"/scripts/messages.bsh"));
-            s = bsh.get("msg").toString();
-        } catch (Exception ex) {
-            System.err.println("Ошибка скрипта обработки сообщений: " + ex.getMessage());
-        }
-        return s;
+    public  String startMessagesScript(String msg, AbstractServer srv, String uin){
+    String s = msg;
+    if(!new File("./services/"+sn+"/scripts/messages.bsh").exists()) return s;
+    try {
+    Interpreter bsh = new Interpreter();
+    bsh.set("msg", msg);
+    bsh.set("srv", srv);
+    bsh.set("uin", uin);
+    bsh.eval(scripts.getScript("./services/"+sn+"/scripts/messages.bsh"));
+    s = bsh.get("msg").toString();
+    }
+    catch (Exception ex)
+    {
+    Log.getLogger(sn).error("Ошибка скрипта обработки сообщений: " + ex.getMessage());
+    }
+    return s;
     }
 
     /**
@@ -128,18 +129,18 @@ long StartScriptTime = System.currentTimeMillis();
      * @return
      */
     public String startAdminScript(RobAdmin adm) {
-    	String s = "";
-//        String sn = srv.getName();
-        try{
-        	Interpreter bsh = new Interpreter();
-            bsh.set("adm", adm);
-            bsh.eval(scripts.getScript("./services/" + sn + "/scripts/admin.bsh"));
-//            s = bsh.get("outText").toString();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Log.info("Ошибка скрипта: " + ex.getMessage());
-        }
-        return s;
+    String s = "";
+    try{
+    Interpreter bsh = new Interpreter();
+    bsh.set("adm", adm);
+    bsh.eval(scripts.getScript("./services/" + sn + "/scripts/admin.bsh"));
+    } 
+    catch (Exception ex)
+    {
+    ex.printStackTrace();
+    Log.getLogger(sn).error("Ошибка скрипта админа: " + ex.getMessage());
+    }
+    return s;
     }
 
     /**
@@ -151,22 +152,22 @@ long StartScriptTime = System.currentTimeMillis();
      * @return - текстовый результат работы скрипта
      */
     public String startChatCommandScript(String scriptName, String msg,
-    		String uin, IcqProtocol prot, ChatCommandProc proc){
-//    	String sn = proc.srv.getName();
-    	try{
-    		Interpreter bsh = new Interpreter();
-    		bsh.set("in", "run");
-    		bsh.set("cmd", proc);
-    		bsh.set("uin", uin);
-    		bsh.set("msg", msg);
-    		bsh.set("proc", prot);
-    		bsh.eval(scripts.getScript("./services/"+sn+SCRIPT_FOLDER + "command/" + scriptName + ".bsh"));
-    	} catch (Exception ex) {
-//            ex.printStackTrace();
-    		System.err.println(ex.getMessage());
-            return ex.getMessage();
-        }
-    	return "";
+    String uin, IcqProtocol prot, ChatCommandProc proc){
+    try{
+    Interpreter bsh = new Interpreter();
+    bsh.set("in", "run");
+    bsh.set("cmd", proc);
+    bsh.set("uin", uin);
+    bsh.set("msg", msg);
+    bsh.set("proc", prot);
+    bsh.eval(scripts.getScript("./services/"+sn+SCRIPT_FOLDER + "command/" + scriptName + ".bsh"));
+    }
+    catch (Exception ex)
+    {
+    Log.getLogger(sn).error("Ошибка скрипта: \"" + scriptName + "\" - " + ex.getMessage());
+    return ex.getMessage();
+    }
+    return "";
     }
 
     /**
@@ -176,21 +177,21 @@ long StartScriptTime = System.currentTimeMillis();
      * @return
      */
     public String installChatCommandScript(String name, ChatCommandProc proc){
-    	String t = "";
-//    	String sn = proc.srv.getName();
-    	try{
-    		Interpreter bsh = new Interpreter();
-    		bsh.set("in", "install");
-    		bsh.set("name", name);
-    		bsh.set("cmd", proc);
-    		bsh.eval(scripts.getScript("./services/" + sn + SCRIPT_FOLDER + "command/" + name + ".bsh"));
-    		t = bsh.get("out").toString();
-    	} catch (Exception ex) {
-//            ex.printStackTrace();
-            System.err.println(ex.getMessage());
-            return ex.getMessage();
-        }
-    	return t;
+    String t = "";
+    try{
+    Interpreter bsh = new Interpreter();
+    bsh.set("in", "install");
+    bsh.set("name", name);
+    bsh.set("cmd", proc);
+    bsh.eval(scripts.getScript("./services/" + sn + SCRIPT_FOLDER + "command/" + name + ".bsh"));
+    t = bsh.get("out").toString();
+    } 
+    catch (Exception ex)
+    {
+    Log.getLogger(sn).error("Ошибка при установке скрипта: \"" + name + "\" - " + ex.getMessage());
+    return ex.getMessage();
+    }
+    return t;
     }
 
     /**
@@ -198,97 +199,83 @@ long StartScriptTime = System.currentTimeMillis();
      * @param proc
      */
     public void installAllChatCommandScripts(ChatCommandProc proc){
-//    	String sn = proc.srv.getName();
-    	Log.info("Начинаю установку скриптов для " + sn);
-    	// Формируем список файлов
-    	Vector<String> v = new Vector<String>();
-        File f = new File("./services/" + sn + SCRIPT_FOLDER + "command/");
-        if(!f.exists()) return;
-        if(!f.isDirectory()) return;
-        File[] fs = f.listFiles();
-        if(fs.length>0)
-        	for(int i=0;i<fs.length;i++){
-        		if(fs[i].isFile())
-        			if(getExt(fs[i].getName()).equals("bsh"))
-        				v.add(getName(fs[i].getName()));
-        	}
-    	try {
-    		for(int i=0; i<v.size(); i++){
-    			Log.info("Устанавливаю скрипт: " + v.get(i));
-    			Log.info("Завершено: " + installChatCommandScript(v.get(i),proc));
-    		}
-    	} catch (Exception ex){
-    		ex.printStackTrace();
-    	}
+    Log.getLogger(sn).info("Начинаю установку скриптов для " + sn);
+    // Формируем список файлов
+    Vector<String> v = new Vector<String>();
+    File f = new File("./services/" + sn + SCRIPT_FOLDER + "command/");
+    if(!f.exists()) return;
+    if(!f.isDirectory()) return;
+    File[] fs = f.listFiles();
+    if(fs.length>0)
+    for(int i=0;i<fs.length;i++){
+    if(fs[i].isFile())
+    if(getExt(fs[i].getName()).equals("bsh"))
+    v.add(getName(fs[i].getName()));
+    }
+    try {
+    for(int i=0; i<v.size(); i++){
+    Log.getLogger(sn).info("Устанавливаю скрипт: " + v.get(i));
+    Log.getLogger(sn).info("Завершено: " + installChatCommandScript(v.get(i),proc));
+    }
+    } catch (Exception ex){
+    ex.printStackTrace();
+    }
     }
 
     public String startAnekScript(String name, IcqProtocol proc, AnekCommandProc cproc, String uin, String msg){
-//    	String sn = cproc.srv.getName();
-    	try {
-    		Interpreter bsh = new Interpreter();
-    		bsh.set("proc", proc);
-    		bsh.set("uin", uin);
-    		bsh.set("msg", msg);
-    		bsh.set("cp", cproc);
-    		bsh.eval(scripts.getScript("./services/"+sn+SCRIPT_FOLDER + name + ".bsh"));
-    	} catch (Exception ex) {
-            ex.printStackTrace();
-            return ex.getMessage();
-        }
-        return "";
+    try {
+    Interpreter bsh = new Interpreter();
+    bsh.set("proc", proc);
+    bsh.set("uin", uin);
+    bsh.set("msg", msg);
+    bsh.set("cp", cproc);
+    bsh.eval(scripts.getScript("./services/"+sn+SCRIPT_FOLDER + name + ".bsh"));
+    } 
+    catch (Exception ex)
+    {
+    ex.printStackTrace();
+    return ex.getMessage();
+    }
+    return "";
     }
 
     public String startCommandScript(String name, IcqProtocol proc, AbstractServer srv, String uin, String arg){
-//    	String sn = srv.getName();
-    	try{
-        	Interpreter bsh = new Interpreter();
-            bsh.set("inText", arg);
-            bsh.set("proc", proc);
-            bsh.set("uin", uin);
-            bsh.set("srv", srv);
-//            bsh.source(SCRIPT_FOLDER + name + ".bsh");
-            bsh.eval(scripts.getScript("./services/"+sn+SCRIPT_FOLDER + name + ".bsh"));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return ex.getMessage();
-        }
-        return "";
+    try{
+    Interpreter bsh = new Interpreter();
+    bsh.set("inText", arg);
+    bsh.set("proc", proc);
+    bsh.set("uin", uin);
+    bsh.set("srv", srv);
+    bsh.eval(scripts.getScript("./services/"+sn+SCRIPT_FOLDER + name + ".bsh"));
     }
-    /*
-    public static void startScriptBackground(String name, String in) {
-        tName = name; tIn = in;
-        Runnable update = new Runnable() {
-            public void run(){
-                try{
-                    startScript(tName, tIn, null);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        };
-        th = new Thread(update);
-        th.start();
+    catch (Exception ex)
+    {
+    ex.printStackTrace();
+    return ex.getMessage();
     }
-    */
+    return "";
+    }
 
     /**
      * Возвращает список HTTP скриптов
      */
     public Vector<String> listHTTPScripts(){
-        Vector<String> v = new Vector<String>();
-        try{
-            File f = new File("./scripts/http/");
-            File[] fs = f.listFiles();
-            if(fs.length<0) return v;
-            for(int i=0;i<fs.length;i++){
-                if(fs[i].isFile())
-                    if(getExt(fs[i].getName()).equals("bsh"))
-                        v.add(getName(fs[i].getName()));
-            }
-        } catch (Exception ex){
-            ex.printStackTrace();
-        }
-        return v;
+    Vector<String> v = new Vector<String>();
+    try{
+    File f = new File("./scripts/http/");
+    File[] fs = f.listFiles();
+    if(fs.length<0) return v;
+    for(int i=0;i<fs.length;i++){
+    if(fs[i].isFile())
+    if(getExt(fs[i].getName()).equals("bsh"))
+    v.add(getName(fs[i].getName()));
+    }   
+    }
+    catch (Exception ex)
+    {
+    ex.printStackTrace();
+    }
+    return v;
     }
 
     /**
@@ -297,37 +284,20 @@ long StartScriptTime = System.currentTimeMillis();
      * @param con
      */
     public HttpConnection startHTTPScript(String name, HttpConnection con){
-        HttpConnection c = con;
-        try{
-            Interpreter bsh = new Interpreter();
-            bsh.set("con", con);
-            bsh.eval(scripts.getScript("./scripts/http/" + name + ".bsh"));
-            c = (HttpConnection)bsh.get("con");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Log.http("Ошибка запуска скрипта " + name);
-        }
-        return c;
+    HttpConnection c = con;
+    try{
+    Interpreter bsh = new Interpreter();
+    bsh.set("con", con);
+    bsh.eval(scripts.getScript("./scripts/http/" + name + ".bsh"));
+    c = (HttpConnection)bsh.get("con");
+    } 
+    catch (Exception ex)
+    {
+    ex.printStackTrace();
+    Log.getLogger(sn).http("Ошибка запуска HTTP-скрипта " + name);
     }
-
-public void startTimeScript(IcqProtocol proc, String uin, AbstractServer srv)
-{
-try{
-Interpreter bsh = new Interpreter();
-bsh.set("in", "install");
-bsh.set("proc", proc);
-bsh.set("uin", uin);
-bsh.set("srv", srv);
-String t = bsh.get("time").toString();
-long Time = Integer.parseInt(t);
-if((System.currentTimeMillis()-StartScriptTime)>Time*60000)
-{
-bsh.eval(scripts.getScript("./services/" + sn + "/scripts/TimeSkript.bsh"));
-}
-StartScriptTime = System.currentTimeMillis();
-}catch (Exception ex){ex.printStackTrace();Log.info("Ошибка скрипта: " + ex.getMessage());}
-}
-
+    return c;
+    }
 
     private String getName(String s){
         if(s.indexOf(".")<0)

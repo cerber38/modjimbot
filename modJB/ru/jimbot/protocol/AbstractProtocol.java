@@ -38,6 +38,7 @@ public abstract class AbstractProtocol {
     public String proxyPass = "";
     public String screenName = "";
     public String password = "";
+    public String serviceName = "";
     
 //    public AbstractConnection con;
     public MsgOutQueue mq;

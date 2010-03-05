@@ -36,12 +36,12 @@ public class HTTPScriptRequest extends HttpServlet{
 
     @Override
     public void init() throws ServletException {
-        Log.http("init script servlet");
+        Log.getDefault().http("init script servlet");
     }
     
     @Override
     public void destroy() {
-        Log.http("destroy script servlet");
+        Log.getDefault().http("destroy script servlet");
     }
     
     @Override

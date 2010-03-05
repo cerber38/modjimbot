@@ -71,7 +71,7 @@ public class SystemErrLogger extends OutputStream {
                     return;
                 }
                 String text = newLineMatcher.replaceAll(" ");
-                Log.error(text);
+                Log.getDefault().error(text);
             }
         };
         SwingUtilities.invokeLater(update);

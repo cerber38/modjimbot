@@ -63,7 +63,7 @@ public class ScriptCashElement {
     private String readScript(String fileName){
     	String s="";
     	try {
-    		Log.info("Reading script: "+fileName);
+    		Log.getDefault().info("Reading script: "+fileName);
     		BufferedReader in
     		   = new BufferedReader(new InputStreamReader(
     				   new FileInputStream(fileName),"windows-1251"));

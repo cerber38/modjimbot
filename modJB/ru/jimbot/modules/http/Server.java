@@ -40,7 +40,7 @@ public class Server {
         if (cfgFileName != null) {
             propsFile = new File(cfgFileName);
             if (!propsFile.exists()) {
-                Log.error("Configuration file " + propsFile +
+                Log.getDefault().error("Configuration file " + propsFile +
                                    " doesn't exit");
                 System.exit(1);
             }
@@ -68,7 +68,7 @@ public class Server {
             servletMapping.put(path, args[i + 1]);
         }
         server = new JHttpServer(servletMapping, serverProperties);
-        Log.info("Start http...");
+        Log.getDefault().info("Start http...");
         /*JOptionPane.showMessageDialog(null, "HTTP сервер запущен.", "Сообщение",
                                       JOptionPane.INFORMATION_MESSAGE);*/
     }

@@ -137,14 +137,14 @@ public class MsgInQueue implements Runnable {
     
     public void addMsg(IcqProtocol proc, String sn, String msg, boolean isOffline){
         if(isOffline && ignoreOffline) {
-            Log.info("OFFLINE: " + sn + " - " + msg);
+            Log.getLogger(proc.serviceName).info("OFFLINE: " + sn + " - " + msg);
             return;
         }
         MsgStatCounter.getElement(proc.baseUin).addMsgCount();
         if(!testFlood(sn))
         	q.add(new MsgQueueElement(sn, msg, proc));
         else {
-        	Log.flood("FLOOD from " + sn + ">> " + msg);
+        	Log.getLogger(proc.serviceName).flood("FLOOD from " + sn + ">> " + msg);
         	MsgQueueElement e = new MsgQueueElement(sn,msg,proc);
         	e.type = MsgQueueElement.TYPE_FLOOD_NOTICE;
         	q.add(e);

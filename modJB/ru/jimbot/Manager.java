@@ -27,10 +27,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-
 import ru.jimbot.modules.AbstractServer;
 import ru.jimbot.modules.anek.AnekServer;
 import ru.jimbot.modules.chat.ChatServer;
@@ -181,12 +182,9 @@ public class Manager {
     public void exit() {
     	stopAll();
     	if(MainProps.getBooleanProperty("main.StartHTTP"))
-            Server.stopServer();
+        Server.stopServer();
     	mon.stop();
-    	Log.info("Exit bot " + new Date(System.currentTimeMillis()).toString());
-//    	for(String s : services.keySet()){
-//    		services.get(s).getProps().save();
-//    	}
+    	Log.getDefault().info("Exit bot " + new Date(System.currentTimeMillis()).toString());
     	System.exit(0);
     }
 
@@ -198,14 +196,11 @@ public class Manager {
 	public void addService(String name, String type) {
 		if(type.equals("chat")){
 			services.put(name, new ChatServer(name));
-//			MainProps.addService(name, type);
 		} else if (type.equals("anek")){
 			services.put(name, new AnekServer(name));
-//			MainProps.addService(name, type);
 		} else {
-			Log.error("Неизвестный тип сервиса: "+type);
+			Log.getLogger(name).error("Неизвестный тип сервиса: "+type);
 		}
-//		services.get(name).getProps().load();
 	}
 
 	/**
@@ -218,9 +213,8 @@ public class Manager {
 			    services.get(name).stop();
 			} catch (Exception e) {}
 			services.remove(name);
-//			MainProps.delService(name);
 		} else {
-			Log.error("Отсутствет сервис с именем "+name);
+			Log.getLogger(name).error("Отсутствет сервис с именем "+name);
 		}
 	}
 
@@ -230,10 +224,10 @@ public class Manager {
 	 */
 	public void start(String name){
 		if(services.containsKey(name)){
-			Log.info("Запускаю сервис: " + name);
+			Log.getLogger(name).info("Запускаю сервис: " + name);
 			services.get(name).start();
 		} else {
-			Log.error("Отсутствет сервис с именем "+name);
+			Log.getLogger(name).error("Отсутствет сервис с именем "+name);
 		}
 	}
 
@@ -243,10 +237,10 @@ public class Manager {
 	 */
 	public void stop(String name){
 		if(services.containsKey(name)){
-			Log.info("Останавливаю сервис: " + name);
+			Log.getLogger(name).info("Останавливаю сервис: " + name);
 			services.get(name).stop();
 		}else{
-			Log.error("Отсутствет сервис с именем "+name);
+			Log.getLogger(name).error("Отсутствет сервис с именем "+name);
 		}
 	}
 

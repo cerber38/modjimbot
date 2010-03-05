@@ -94,12 +94,12 @@ public class DBLogArh extends DBAdaptor implements Runnable{
     public int copyRecords(DBChat dbc){
         //Выводим статистику о базах
         Vector v = dbc.getValues("select min(time) from LOG");
-        Log.info("Запуск архивации базы сообщений пользователя");
-        Log.info("Начало базы сообщений: " + ((String[])v.get(0))[0]);
+        Log.getDefault().info("Запуск архивации базы сообщений пользователя");
+        Log.getDefault().info("Начало базы сообщений: " + ((String[])v.get(0))[0]);
         v = dbc.getValues("select count(*) from LOG");
-        Log.info("Всего сообщений в базе: " + ((String[])v.get(0))[0]);
+        Log.getDefault().info("Всего сообщений в базе: " + ((String[])v.get(0))[0]);
         v = this.getValues("select count(*) from LOG");
-        Log.info("Всего сообщений в архиве: " + ((String[])v.get(0))[0]);
+        Log.getDefault().info("Всего сообщений в архиве: " + ((String[])v.get(0))[0]);
         v = dbc.getValues("select min(id) from LOG");
         long id = Long.parseLong(((String[])v.get(0))[0]);
         long last = System.currentTimeMillis() - 1000*3600*24;
@@ -123,16 +123,16 @@ public class DBLogArh extends DBAdaptor implements Runnable{
             pst1.close();
             rs.close();
             pst.close();
-            Log.info("Удаление записей");
+            Log.getDefault().info("Удаление записей");
             pst = dbc.getDb().prepareStatement("delete from LOG t where time<? and id<"+(id+20000));
             pst.setTimestamp(1,new Timestamp(last));
             pst.execute();
             pst.close();
-            Log.info("Архивация завершена, всего записей перенесено: " + i);
+            Log.getDefault().info("Архивация завершена, всего записей перенесено: " + i);
             this.getDb().commit();
         } catch (Exception ex){
             ex.printStackTrace();
-            Log.info("В результате выполнения призошла ошибка: " + ex.getMessage() + "\nПеренесено записей:" + i);
+            Log.getDefault().info("В результате выполнения призошла ошибка: " + ex.getMessage() + "\nПеренесено записей:" + i);
             stop();
         }
         return i;

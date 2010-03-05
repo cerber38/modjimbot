@@ -414,13 +414,13 @@ firstStartMsg=true;
     firstScript(proc);//Запуск скриптов
     state++;
     /*psp.del_logs_time();*/
-    Log.debug("CHAT: parse " + proc.baseUin + ", " + uin + ", " + mmsg); 
+    Log.getLogger(srv.getName()).debug("CHAT: parse " + proc.baseUin + ", " + uin + ", " + mmsg);
     if(psp.getBooleanProperty("chat.writeInMsgs"))
     //Слишком длинные сообщения записывать в БД не нужно для избежания переполнений
     if(mmsg.length()>1000){srv.us.db.log(0,uin,"IN",mmsg.substring(0, 1000),0);} else {srv.us.db.log(0,uin,"IN",mmsg,0);}
     String tmsg = mmsg.trim();
-    if(tmsg.length()==0){Log.error("Пустое сообщение в парсере команд: " + uin + ">" + mmsg);return;}
-    if(tmsg.charAt(0)=='!' || tmsg.charAt(0)=='+'){Log.info("CHAT COM_LOG: " + uin + ">>" + tmsg);}
+    if(tmsg.length()==0){Log.getLogger(srv.getName()).error("Пустое сообщение в парсере команд: " + uin + ">" + mmsg);return;}
+    if(tmsg.charAt(0)=='!' || tmsg.charAt(0)=='+'){Log.getLogger(srv.getName()).info("CHAT COM_LOG: " + uin + ">>" + tmsg);}
     try {
     //banroom
     if (testClosed(uin)==0 & !srv.us.authorityCheck(uin,"room"))freedom(uin);
@@ -430,8 +430,8 @@ firstStartMsg=true;
     
     if(srv.us.testUser(uin))
     {
-    if(isBan(uin)){Log.flood2("CHAT_BAN: " + uin + ">" + mmsg);return;}
-    if(testKick(uin)>0){Log.info("CHAT_KICK: " + uin + ">" + mmsg);return;}
+    if(isBan(uin)){Log.getLogger(srv.getName()).flood2("CHAT_BAN: " + uin + ">" + mmsg);return;}
+    if(testKick(uin)>0){Log.getLogger(srv.getName()).info("CHAT_KICK: " + uin + ">" + mmsg);return;}
     if(srv.us.getUser(uin).state==UserWork.STATE_CHAT)
     goChat(proc, uin, mmsg, parser.parseArgs(mmsg));
     } 
@@ -445,14 +445,14 @@ firstStartMsg=true;
     {
     e.addMsg(tmsg);
     floodNoReg.put(uin, e);
-    Log.flood("FLOOD NO REG " + uin + "> " + tmsg);
+    Log.getLogger(srv.getName()).flood("FLOOD NO REG " + uin + "> " + tmsg);
     return; // Слишком часто
     }
     if(e.isDoubleMsg(tmsg) && e.getCount()>3)
     {
     e.addMsg(tmsg);
     floodNoReg.put(uin, e);
-    Log.flood("FLOOD NO REG " + uin + "> " + tmsg);
+    Log.getLogger(srv.getName()).flood("FLOOD NO REG " + uin + "> " + tmsg);
     return; // Повтор сообщений
     }
     e.addMsg(tmsg);
@@ -498,7 +498,7 @@ firstStartMsg=true;
       return;
       }
       proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.parse.1", new Object[] {psp.getStringProperty("chat.name"),psp.getIntProperty("chat.floodTimeLimitNoReg")}));
-      Log.talk(uin + " Captcha user: " + mmsg);
+      Log.getLogger(srv.getName()).talk(uin + " Captcha user: " + mmsg);
       proc.mq.add(uin, "", 1);      
       srv.us.getUser(uin).state = UserWork.STATE_CAPTCHA;
       return;
@@ -524,7 +524,7 @@ firstStartMsg=true;
             floodMap.put(uin, e);
             }
             testFlood(proc,uin);
-            mmsg = WorkScript.getInstance(srv.getName()).startMessagesScript(mmsg, srv);
+            mmsg = WorkScript.getInstance(srv.getName()).startMessagesScript(mmsg, srv, uin);
             if(mmsg.equals("")) return; // Сообщение было удалено в скрипте
             int tp = 0;
             if(comMap.containsKey(uin))
@@ -788,7 +788,7 @@ firstStartMsg=true;
      }
      s = s.replace('\n',' ');
      s = s.replace('\r',' ');
-     Log.talk("CHAT: " + uin + "<" + srv.us.getUser(uin).id +"> ["+srv.us.getUser(uin).room +"]>>" + s);
+     Log.getLogger(srv.getName()).info("CHAT: " + uin + "<" + srv.us.getUser(uin).id +"> ["+srv.us.getUser(uin).room +"]>>" + s);
      srv.us.db.log(srv.us.getUser(uin).id,uin,"OUT", s, srv.us.getUser(uin).room);
      srv.cq.addMsg(s, uin, srv.us.getUser(uin).room);
      if(psp.getBooleanProperty("adm.useAdmin")) radm.parse(proc,uin,s,srv.us.getUser(uin).room);
@@ -1287,7 +1287,7 @@ firstStartMsg=true;
      return;
      }
      uss.localnick = lnick;
-     Log.talk(uin + " update " + mmsg);
+     Log.getLogger(srv.getName()).talk(uin + " update " + mmsg);
      proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandReg.8"));
      srv.cq.addMsg(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandReg.9", new Object[] {oldNick,lnick}), "", uss.room); //Сообщение для всех
      srv.us.db.log(uss.id,uin,"REG",lnick,uss.room);
@@ -1312,7 +1312,7 @@ firstStartMsg=true;
      catch (Exception ex)
      {
      ex.printStackTrace();
-     Log.talk(uin + " Reg error: " + mmsg);
+     Log.getLogger(srv.getName()).talk(uin + " Reg error: " + mmsg);
      //proc.mq.add(uin,"Ошибка");
      }
 
@@ -1426,13 +1426,13 @@ firstStartMsg=true;
         srv.getIcqProcess(usss.basesn).mq.add(usss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.4", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,uin,uss.localnick,uss.id,txt}));
         }
         }
-    Log.talk("CHAT: " + uss.sn + ">>" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
+    Log.getLogger(srv.getName()).talk("CHAT: " + uss.sn + ">>" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
     srv.us.db.log(uss.id,uin,"LICH",">> " + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}),uss.room);
     srv.getIcqProcess(uss.basesn).mq.add(uss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
     setPM(uss.sn, uin);
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.6"));
     }
-    catch (Exception ex){ex.printStackTrace();Log.talk(uin + " Private msg error: " + tmsg);proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.7"));}
+    catch (Exception ex){ex.printStackTrace();Log.getLogger(srv.getName()).talk(uin + " Private msg error: " + tmsg);proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.7"));}
     }
     
     /**
@@ -1459,7 +1459,7 @@ firstStartMsg=true;
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.3", new Object[] {txt}));
     }
     //TODO: Понять почему иногда возбуждается исключение null.... или переделать всю систему
-        /*if(psp.getBooleanProperty("lichnoe.on.off"))
+        if(psp.getBooleanProperty("lichnoe.on.off"))
         {
         String s = psp.getStringProperty("chat.lichnoe");
         String[] ss = s.split(";");
@@ -1468,14 +1468,14 @@ firstStartMsg=true;
         Users usss = srv.us.getUser(ss[i]);
         srv.getIcqProcess(usss.basesn).mq.add(usss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.4", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,uin,uss.localnick,uss.id,txt}));
         }
-        }*/
-    Log.talk("CHAT: " + uss.sn + ">>" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
+        }
+    Log.getLogger(srv.getName()).talk("CHAT: " + uss.sn + ">>" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
     srv.us.db.log(uss.id,uin,"LICH",">> " + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}),uss.room);
     srv.getIcqProcess(uss.basesn).mq.add(uss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
     setPM(uss.sn, uin);
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.6"));
     }
-    catch (Exception ex){ex.printStackTrace();Log.talk(uin + " Private msg error: " + tmsg);proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.7"));}
+    catch (Exception ex){ex.printStackTrace();Log.getLogger(srv.getName()).talk(uin + " Private msg error: " + tmsg);proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.7"));}
     }
     
     /**
@@ -1493,7 +1493,7 @@ firstStartMsg=true;
     Rooms r = srv.us.getRoom(room);
     r.setTopic(s);
     srv.us.saveRoom(r, "");
-    Log.info("Установлена тема комнаты " + room + ": " + s);
+    Log.getLogger(srv.getName()).info("Установлена тема комнаты " + room + ": " + s);
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandSettheme.0", new Object[] {uss.localnick,s}), "", room);
     }
     
@@ -1613,7 +1613,7 @@ firstStartMsg=true;
     srv.us.db.admmsg(id, id_2, s, t);
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAdm.1"));
     }
-    catch (Exception ex) {ex.printStackTrace();Log.talk("Error save msg: " + ex.getMessage());proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAdm.2"));}
+    catch (Exception ex) {ex.printStackTrace();Log.getLogger(srv.getName()).talk("Error save msg: " + ex.getMessage());proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAdm.2"));}
     }
     
     /**
@@ -1849,7 +1849,7 @@ firstStartMsg=true;
     public void parseInfo(Users u, int type){
     	switch(type) {
     	case 1: // Основная инфа
-    		Log.info("User: " + u.sn + ", " + u.nick);
+    		Log.getLogger(srv.getName()).info("User: " + u.sn + ", " + u.nick);
     		Users uu = srv.us.getUser(u.sn);
     		uu.sn = u.sn;
     		uu.nick = u.nick;
@@ -1874,13 +1874,13 @@ firstStartMsg=true;
         long t = floodMap.get(uin).getDeltaTime();
         if(t>(psp.getIntProperty("chat.autoKickTimeWarn")*60000) &&
                 !warnFlag.contains(uin)){
-            Log.info("Warning to " + uin);
+            Log.getLogger(srv.getName()).info("Warning to " + uin);
 
             srv.getIcqProcess(srv.us.getUser(uin).basesn).mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.testState.0"));
             warnFlag.add(uin);
         }
         if(t>(psp.getIntProperty("chat.autoKickTime")*60000)){
-            Log.talk("Autokick to " + uin);
+            Log.getLogger(srv.getName()).talk("Autokick to " + uin);
             warnFlag.remove(uin);
             kick(srv.getIcqProcess(srv.us.getUser(uin).basesn),uin);
         }
@@ -2024,7 +2024,7 @@ firstStartMsg=true;
     comNew.put(uin, new NewExtend(uin, mmsg, mmsg, v, 2*60000));
     return;
     }
-    Log.info("Add contact " + uin);
+    Log.getLogger(srv.getName()).info("Add contact " + uin);
     if(proc.isNoAuthUin(uin)) proc.mq.add(uin, Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandgoChat.9"), 2);
     proc.addContactList(uin);
     uss.state = UserWork.STATE_CHAT;
@@ -2045,7 +2045,7 @@ firstStartMsg=true;
     if(psp.getBooleanProperty("chat.showChangeUserStatus"))
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandgoChat.10", new Object[] {uss.localnick}), uss.sn, uss.room);
     }
-    Log.talk(uss.localnick + " Вошел в чат");
+    Log.getLogger(srv.getName()).talk(uss.localnick + " Вошел в чат");
     srv.us.db.log(uss.id,uin,"STATE_IN",uss.localnick + " вошел(а) в чат",uss.room);
     srv.us.db.event(uss.id, uin, "STATE_IN", 0, "", uss.localnick + " Вошел в чат");
     srv.cq.addUser(uin,proc.baseUin, uss.room);
@@ -2076,14 +2076,14 @@ firstStartMsg=true;
     {
     if(!psp.getBooleanProperty("chat.NoDelContactList"))
     {
-    Log.info("Delete contact " + uin);
+    Log.getLogger(srv.getName()).info("Delete contact " + uin);
     proc.RemoveContactList(uin);
     }
     } else
     return; // Юзера нет в чате - игнорируем команду
     uss.state = UserWork.STATE_NO_CHAT;
     srv.us.updateUser(uss);
-    Log.talk(uss.localnick + " Ушел(а) из чата");
+    Log.getLogger(srv.getName()).talk(uss.localnick + " Ушел(а) из чата");
     srv.us.db.log(uss.id,uin,"STATE_OUT",uss.localnick + " Ушел(а) из чата",uss.room);
     srv.us.db.event(uss.id, uin, "STATE_OUT", 0, "", uss.localnick + " Ушел(а) из чата");
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandexitChat.0", new Object[] {uss.localnick}), uss.sn, uss.room);
@@ -2158,7 +2158,7 @@ firstStartMsg=true;
     public void tkick(IcqProtocol proc, String uin, int t, int user_id, String r){
         Users uss = srv.us.getUser(uin);
         setKick(uin,t, user_id, r);
-        Log.talk("kick user " + uin + " on " + t + " min.");
+        Log.getLogger(srv.getName()).talk("kick user " + uin + " on " + t + " min.");
         if (srv.us.getUser(uin).state == UserWork.STATE_CHAT)
         if (psp.getBooleanProperty("chat.isShowKickReason")) {
         srv.getIcqProcess(uss.basesn).mq.add(uss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.tkick.0", new Object[] {t,
@@ -2181,7 +2181,7 @@ firstStartMsg=true;
     public void kick(IcqProtocol proc, String uin) {
         Users uss = srv.us.getUser(uin);
         if(uss.state != UserWork.STATE_CHAT) return;
-        Log.talk("Kick user " + uin);
+        Log.getLogger(srv.getName()).talk("Kick user " + uin);
         
         if(srv.cq.testUser(uin)){
         proc.mq.add(uin, Messages.getInstance(srv.getName()).getString("ChatCommandProc.kick.0"));
@@ -2205,13 +2205,13 @@ firstStartMsg=true;
     public void ban(IcqProtocol proc, String uin, String adm_uin, String m) {
         Users uss = srv.us.getUser(uin);
         if(uss.state==UserWork.STATE_CHAT) kick(proc, uin);
-        Log.talk("Ban user " + uin);
+        Log.getLogger(srv.getName()).talk("Ban user " + uin);
         srv.us.db.log(uss.id,uin,"BAN",m,uss.room);
         srv.us.db.event(uss.id, uin, "BAN", srv.us.getUser(adm_uin).id, adm_uin, m);
         uss.state=UserWork.STATE_BANNED;
         srv.us.updateUser(uss);
         // Удалим из КЛ
-        Log.info("Delete contact " + uin);
+        Log.getLogger(srv.getName()).info("Delete contact " + uin);
         proc.RemoveContactList(uin);
         srv.getIcqProcess(uss.basesn).mq.add(uss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.ban.0") +
         (psp.getBooleanProperty("chat.isShowKickReason") ? ("\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.ban.1", new Object[] {m})) : ""));
@@ -2829,7 +2829,7 @@ firstStartMsg=true;
         Rooms r = srv.us.getRoom(room);
         r.setPass(s);
         srv.us.saveRoom(r, s);
-        Log.info("Установлен пароль на комнату " + room + ": " + s);
+        Log.getLogger(srv.getName()).info("Установлен пароль на комнату " + room + ": " + s);
         proc.mq.add(uin,"Пароль "+s+" на комнату успешно установлен.");
         }
 
@@ -2953,7 +2953,7 @@ firstStartMsg=true;
     {
     Users uss = srv.us.getUser(uin);
     srv.cq.addMsg(uss.localnick + "|" + uss.id + "|" + " убрал статус", uss.sn, uss.room);
-    Log.talk(uss.localnick + "|" + uss.id + "|" + " убрал статус");
+    Log.getLogger(srv.getName()).talk(uss.localnick + "|" + uss.id + "|" + " убрал статус");
     proc.mq.add(uin, "Вы убрали статус");
     uss.status  = "";
     srv.us.updateUser(uss);
@@ -2966,7 +2966,7 @@ firstStartMsg=true;
     }
     Users uss = srv.us.getUser(uin);
     srv.cq.addMsg(uss.localnick + "|" + uss.id + "|" + " меняет статус на |" + lstatus + "|", uss.sn, uss.room);
-    Log.talk(uss.localnick + "|" + uss.id + "|" + " меняет статус на |" + lstatus + "|");
+    Log.getLogger(srv.getName()).talk(uss.localnick + "|" + uss.id + "|" + " меняет статус на |" + lstatus + "|");
     uss.status  = lstatus;
     srv.us.updateUser(uss);
     proc.mq.add(uin, "Вы сменили статус на |" + lstatus + "|");
@@ -2974,8 +2974,8 @@ firstStartMsg=true;
     catch (Exception ex)
     {
     ex.printStackTrace();
-    Log.talk("Error save msg: " + ex.getMessage());
-    proc.mq.add(uin, "Ошибка изменения инфы " + ex.getMessage());
+    Log.getLogger(srv.getName()).talk("Error save msg: " + ex.getMessage());
+    proc.mq.add(uin, "Ошибка смены статуса пользователя " + ex.getMessage());
     }
     }
 

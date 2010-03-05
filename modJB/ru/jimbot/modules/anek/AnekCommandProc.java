@@ -129,12 +129,12 @@ public class AnekCommandProc extends AbstractCommandProcessor {
             String s = (String)v.get(0) + "\n\n";
             ow.write(s);
             ow.close();
-            Log.info("Add anek <" + uin + ">: " + (String)v.get(0));
+            Log.getLogger(srv.getName()).info("Add anek <" + uin + ">: " + (String)v.get(0));
             proc.mq.add(uin,"Анекдот сохранен. После рассмотрения администрацией он будет добавлен в базу.");
             state_add++;
         } catch (Exception ex) {
             ex.printStackTrace();
-            Log.info("Error save anek: " + ex.getMessage());
+            Log.getLogger(srv.getName()).info("Error save anek: " + ex.getMessage());
             proc.mq.add(uin,"Ошибка добавления");
         }
     }

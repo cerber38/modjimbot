@@ -33,7 +33,7 @@ import ru.jimbot.util.Log;
  * @author Prolubnikov Dmitry
  */
 public class DBChat extends DBAdaptor{
-    private String serviceName = "";
+    //private String serviceName = "";
     
     /** Creates a new instance of DBChat */
     public DBChat(String name) throws Exception
@@ -141,7 +141,7 @@ public class DBChat extends DBAdaptor{
         Statement stmt=null;
         try{
         	stmt = getDb().createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        	Log.debug("EXEC: " + q);
+        	Log.getLogger(serviceName).debug("EXEC: " + q);
         	rSet = stmt.executeQuery(q);
             rSet.next();
             us.id = rSet.getInt(1);
@@ -188,7 +188,7 @@ public class DBChat extends DBAdaptor{
         Statement stmt=null;
         try{
         	stmt = getDb().createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        	Log.debug("EXEC: " + q);
+        	Log.getLogger(serviceName).debug("EXEC: " + q);
         	rSet = stmt.executeQuery(q);
             while(rSet.next()) {
                 Users us = new Users();
@@ -235,7 +235,7 @@ public class DBChat extends DBAdaptor{
     
     public void insertObject(DBObject o){
         Users us = (Users)o;
-        Log.debug("INSERT user id=" + us.id);
+        Log.getLogger(serviceName).debug("INSERT user id=" + us.id);
         try{
             PreparedStatement pst = getDb().prepareStatement("insert into users values (?," +
                     " ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
@@ -277,7 +277,7 @@ public class DBChat extends DBAdaptor{
 
     public void updateObject(DBObject o){
         Users us = (Users)o;
-        Log.debug("UPDATE user id=" + us.id);
+        Log.getLogger(serviceName).debug("UPDATE user id=" + us.id);
         try{
             PreparedStatement pst = getDb().prepareStatement("update users set sn=?,nick=?," + 
                     "localnick=?,fname=?,lname=?,email=?,city=?,homepage=?,gender=?," +

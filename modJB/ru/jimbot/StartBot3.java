@@ -28,6 +28,8 @@ import java.util.Vector;
 
 //import javax.servlet.http.HttpServletRequest;
 //import javax.servlet.http.HttpServletResponse;
+import ru.jimbot.modules.AbstractProps;
+import ru.jimbot.modules.AbstractServer;
 import ru.jimbot.modules.WorkScript;
 //import ru.jimbot.modules.http.HttpConnection;
 import ru.jimbot.modules.http.Server;
@@ -52,6 +54,7 @@ public static String name = System.getProperty("os.name"); //Название о
 public static String version = System.getProperty("os.version"); //Версия операционной системы
 public static String java = System.getProperty("java.version"); //Версия JRE
 //String newString = new String( advertising.getBytes( "ISO-8859-1" ), "windows-1251"  );
+private AbstractProps props = null;
 
 public StartBot3(){}
 
@@ -79,14 +82,14 @@ stop();
 else
 {
 stop();
-Log.info( Fucking );
+Log.getDefault().info( Fucking );
 Manager.getInstance().exit();
 }
 }
 catch ( Exception ex )
 {
 ex.printStackTrace();
-Log.info( "Errore: " + ex );
+Log.getDefault().info( "Errore: " + ex );
 stop();
 }
 }
@@ -97,11 +100,15 @@ stop();
 		notify();
 	}
 
+    public AbstractProps getProps() {
+    	return props;
+    }
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
+
         // Самосоздание батника для запуска бота :)
 /*File bat = new File("JimBot_Start.bat");
             if( !bat.exists() ){
@@ -112,14 +119,10 @@ stop();
             Log.info( "При создании bat. файла возникла ошибка: " + ex );
             }
             }*/
-            	Log.init("");
+            	//Log.init("");
                 //Log.info( "Операционная система: " + name );
                 //Log.info( "Версия операционной системы: " + version );
-                if( start ){
-                botstart = new StartBot3();
-                botstart.start();
-                start = false;
-                }
+
             	System.setErr(new PrintStream(new SystemErrLogger(), true));
                 MainProps.load();
                 Manager.getInstance();

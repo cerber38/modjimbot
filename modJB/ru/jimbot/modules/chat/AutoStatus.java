@@ -7,10 +7,9 @@ package ru.jimbot.modules.chat;
 
 import com.mysql.jdbc.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Enumeration;
-import java.util.Random;
 import java.util.Vector;
 import ru.jimbot.Manager;
+import ru.jimbot.util.Log;
 
 /**
  * Авто смена x-статуса
@@ -27,60 +26,29 @@ public class AutoStatus implements Runnable {
 private int sleepAmount = 1000;
 private Thread th;
 private long time = System.currentTimeMillis();
-private Random r = new Random();
 private ChatServer srv;
 private int id = 0;
 private int number = 0;
 private String text = "";
-private Vector hist = new Vector();
+private boolean testType = false;
 
 public AutoStatus(ChatServer s) {
         srv = s;
 }
 
-private int getRND(int i)
-{
-return r.nextInt(i);
-}
-
-/**
- * Тест на повтор
- * @param id
- */
-
-private boolean TestRepetition (int id){
-    for(Enumeration e = hist.elements(); e.hasMoreElements();) {
-    if((Integer)e.nextElement() == id ){
-    setXStatus();
-    time = System.currentTimeMillis();
-    return false;
-    }
-    }
-    return true;
-}
-
-private int Random_ID()
-{
-long i = srv.us.db.getLastIndex("xstatus");
-    /*if(getRND((int)i)==0){
-    return 1;
-    }*/
-return getRND((int)i);
-}
 
 private void setXStatus(){
-id = Random_ID();// Случайный ид
-if(TestRepetition(id)){
+Random_ID();// Случайны ид
 number = GetNumber(id);// Номер
 text = GetText(id);// Текст
 // Проверим номер
 if(number < 1 || number > 37){
-hist.add(id);
+Log.getLogger(srv.getName()).error("Не правельный номер статуса в автосмене: " + number);
 return; // Если номер не верный!
 }
 // Проверим текст
 if(text.trim().equals("")){
-hist.add(id);
+Log.getLogger(srv.getName()).error("Не правельный текст статуса в автосмене");
 return; // Если текст не верный!
 }
 ChatProps.getInstance(srv.getName()).setIntProperty( "icq.xstatus", number );
@@ -94,8 +62,8 @@ if(srv.con.uins.proc.get(uins).isOnLine())// Если номер онлайн, �
 srv.con.uins.proc.get(uins).setXStatusNumber(number);// меняем статус.
 }
 }
-hist.add(id);
-}
+Log.getLogger(srv.getName()).talk("Change auto x-status number - " + number + " and text -  " + text);
+setType(id);
 }
 
 public void start()
@@ -129,18 +97,32 @@ th=null;
 }
 
     private void timeEvent() {
-       if((time - System.currentTimeMillis())>ChatProps.getInstance(srv.getName()).getIntProperty( "auto_status.time")*60000){
-        if(getCountStatus() == 0){
+        // Первый запуск? Если да то везде ставим type=0
+        if(!testType){
+            setTypeAll();
+            Log.getLogger(srv.getName()).talk("Change auto x-status dump");
+            testType = true;
+        }
+       if((System.currentTimeMillis() - time)>ChatProps.getInstance(srv.getName()).getIntProperty( "auto_status.time")*60000){
+           if(getCountStatus() == 0){
             time = System.currentTimeMillis();
+            Log.getLogger(srv.getName()).error("Нет статусов в бд для автосмены");
            return; // Если нет статусов в БД
         }
-           if(hist.size() >= getCountStatus()){
-            hist.removeAllElements();
+        // Если задействованы были все статусы
+        if(getCountType() >= getCountStatus()){
+          Log.getLogger(srv.getName()).talk("Change auto x-status dump");
+          setTypeAll();
         }
         setXStatus();
          time = System.currentTimeMillis();
      }
     }
+
+    /**
+     * Получаем максимальный ид
+     * @return
+     */
 
     public int getCountStatus()
     {
@@ -148,6 +130,46 @@ th=null;
     Vector<String[]> v = srv.us.db.getValues(q);
     return Integer.parseInt(v.get(0)[0]);
     }
+
+    /**
+     * Получаем количество статусов которые уже были задействованы (Для исключения повторов)
+     * @return
+     */
+
+    public int getCountType()
+    {
+    String q = "SELECT count(*) FROM `xstatus` WHERE type=1";
+    Vector<String[]> v = srv.us.db.getValues(q);
+    return Integer.parseInt(v.get(0)[0]);
+    }
+
+    /**
+     * Метод устанавливает во всех полях type=0
+     * Вызывается при старте, и когда все статусы были задействованы.
+     * Служит для исключения повторов.
+     */
+
+    public void setTypeAll(){
+    // формируем цикл
+    for(int i = 0; i >= getCountStatus(); i++){
+    srv.us.db.executeQuery("update xstatus set type=0 where id=" + i);
+    }
+    }
+
+    /**
+     * Ставим type=1 если статус был задействован
+     * @param id
+     */
+
+    public void setType( int id ){
+    srv.us.db.executeQuery("update xstatus set type=1 where id=" + id);
+    }
+
+    /**
+     * Получаем текст статуса из БД
+     * @param id
+     * @return
+     */
 
     public String GetText(int id)
     {
@@ -165,6 +187,12 @@ th=null;
     return texts;
     }
 
+     /**
+     * Получаем номер статуса из БД
+     * @param id
+     * @return
+     */
+
     public int GetNumber(int id)
     {
     int numbers = 0;
@@ -180,5 +208,24 @@ th=null;
     } catch (Exception ex) {}
     return numbers;
     }
+
+/**
+ * Получаем рандомный ид, из тех статусов где type=0
+ * @return
+ */
+
+private void Random_ID()
+{
+    try {
+    PreparedStatement pst =  (PreparedStatement) srv.us.db.getDb().prepareStatement("SELECT id FROM xstatus WHERE type=0 ORDER BY RAND( ) LIMIT 0 , 1");
+    ResultSet rs = pst.executeQuery();
+    if(rs.next())
+    {
+    id = rs.getInt(1);
+    }
+    rs.close();
+    pst.close();
+    } catch (Exception ex) {}
+}
 
 }

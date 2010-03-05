@@ -177,7 +177,7 @@ OscarInterface.sendBasicMessage(con, sn, msg);
 }
 catch (ConvertStringException e)
 {
-Log.info("ERROR send message: " + msg);
+Log.getLogger(serviceName).info("ERROR send message: " + msg);
 e.printStackTrace();
 }
 }
@@ -210,12 +210,12 @@ public void onIncomingMessage(IncomingMessageEvent e)
 {
 if(MainProps.isIgnor(e.getSenderID()))
 {
-Log.flood2("IGNORE LIST: " + e.getMessageId() + "->" + screenName + ": " + e.getMessage());
+Log.getLogger(serviceName).flood2("IGNORE LIST: " + e.getMessageId() + "->" + screenName + ": " + e.getMessage());
 return;
 }
 if(e.getSenderID().equals("1"))
 {
-Log.error("Ошибка совместимости клиента ICQ. Будет произведена попытка переподключения...");
+Log.getLogger(serviceName).error("Ошибка совместимости клиента ICQ. Будет произведена попытка переподключения...");
 try{
 con.close();
 }
@@ -229,17 +229,17 @@ protList.getMsg(e.getSenderID(), screenName, e.getMessage(), false);
 
 public void onAuthorizationFailed(LoginErrorEvent arg0)
 {
-Log.error("Authorization Failed! You UIN or Password is not valid");
+Log.getLogger(serviceName).error("Authorization Failed! You UIN or Password is not valid");
 }
 
 public void onIncomingUser(IncomingUserEvent e) {
-Log.debug(e.getIncomingUserId() + " has just signed on.");
+Log.getDefault().debug(e.getIncomingUserId() + " has just signed on.");
 protList.getStatus(e.getIncomingUserId(), 0);
 }
 
 public void onLogout()
 {
-Log.error("Разрыв соединения: " + screenName + " - " + server + ":" + port);
+Log.getLogger(serviceName).error("Разрыв соединения: " + screenName + " - " + server + ":" + port);
 }
 
 public void onOffgoingUser(OffgoingUserEvent e)
@@ -249,7 +249,7 @@ protList.getStatus(e.getOffgoingUserId(), -1);
 
 public void onStatusChange(StatusEvent e)
 {
-Log.debug("StatusEvent: " + e.getStatusMode());
+Log.getLogger(serviceName).debug("StatusEvent: " + e.getStatusMode());
 }
 
 

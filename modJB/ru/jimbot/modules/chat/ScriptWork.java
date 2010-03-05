@@ -319,7 +319,7 @@ public class ScriptWork {
 		installAll(proc, null);
 	}
 	public void installAll(ChatCommandProc proc, IcqProtocol prot) {
-		Log.info(" > ScriptWork(): Install DataBase Scripts.");
+		Log.getLogger(cmd.srv.getName()).info(" > ScriptWork(): Install DataBase Scripts.");
 		String sss = "";
 		String inst = "";
 		try {
@@ -334,8 +334,8 @@ public class ScriptWork {
 				scr.put(script.ScriptID(), script);
 				inst = installScript(script.ScriptID(),proc);
 				if (prot != null) sss += "Устанавливаю скрипт: " + script.ScriptID() + "\nЗавершено: " + inst + "\n";
-				Log.info("   Install script: " + script.ScriptID());
-				Log.info("     Completed: " + inst);
+				Log.getLogger(cmd.srv.getName()).info("   Install script: " + script.ScriptID());
+				Log.getLogger(cmd.srv.getName()).info("     Completed: " + inst);
 			}
 			if (prot != null) {
 				String[] ss = cmd.srv.getProps().getAdmins();
@@ -388,7 +388,7 @@ public class ScriptWork {
 	}
 	public boolean create(Scripts s){
 		last = (int) cmd.srv.us.db.getLastIndex("scripts");
-		Log.info(" > ScriptWork(): Create Script ID = " + last);
+		Log.getLogger(cmd.srv.getName()).info(" > ScriptWork(): Create Script ID = " + last);
 		boolean f = false;
 		try {
 			PreparedStatement pst = cmd.srv.us.db.getDb().prepareStatement("insert into scripts values(?,?,?,?)");
@@ -407,7 +407,7 @@ public class ScriptWork {
 		return f;
 	}
 	public boolean update(Scripts s) {
-		Log.info(" > ScriptWork(): Update Script ID = " + s.ScriptID());
+		Log.getLogger(cmd.srv.getName()).info(" > ScriptWork(): Update Script ID = " + s.ScriptID());
 		boolean f = false;
 		try {
 			PreparedStatement pst = cmd.srv.us.db.getDb().prepareStatement("update scripts set `script`=?, `describe`=?, `enable`=? where `id`=?");
@@ -425,7 +425,7 @@ public class ScriptWork {
 		return f;
 	}
 	public boolean delete(Integer id) {
-		Log.info(" > ScriptWork(): Delete Script ID = " + id);
+		Log.getLogger(cmd.srv.getName()).info(" > ScriptWork(): Delete Script ID = " + id);
 		boolean f = false;
 		try {
 			PreparedStatement pst = cmd.srv.us.db.getDb().prepareStatement("delete from `scripts` where `id` = ? limit 1");
@@ -447,7 +447,7 @@ public class ScriptWork {
 		return ScriptImport("__SCRPATH__", fileName);
 	}
 	public boolean ScriptImport(String path, String fileName){
-		Log.info(" > ScriptWork(): Import Script Name: " + fileName);
+		Log.getLogger(cmd.srv.getName()).info(" > ScriptWork(): Import Script Name: " + fileName);
 		boolean f = false;
 		String s="";
 		try {
@@ -469,7 +469,7 @@ public class ScriptWork {
 		return ScriptExport("__SCRPATH__", id);
 	}
 	public boolean ScriptExport(String path, Integer id){
-		Log.info(" > ScriptWork(): Export Script ID = " + id);
+		Log.getLogger(cmd.srv.getName()).info(" > ScriptWork(): Export Script ID = " + id);
 		boolean f = false;
 		try {
 			ename = nameGenerate();

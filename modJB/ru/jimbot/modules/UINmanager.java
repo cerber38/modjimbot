@@ -34,7 +34,7 @@ public class UINmanager {
     public boolean ignoreOfflineMsg=false;
     
     /** Creates a new instance of UINmanager */
-    public UINmanager(String[] ic, String[] ps, AbstractConnection c, boolean ignore, AbstractProps props) {
+    public UINmanager(String[] ic, String[] ps, AbstractConnection c, boolean ignore, AbstractProps props, String serviceName) {
         ignoreOfflineMsg = ignore;
         con = c;
         for(int i=0;i<ic.length;i++){
@@ -48,6 +48,7 @@ public class UINmanager {
             iprot.port = con.port;
             iprot.proxyHost = con.proxy[0];
             iprot.useProxy = !con.proxy[0].equals("");
+            iprot.serviceName = serviceName;
             try{
                 iprot.proxyPort = Integer.parseInt(con.proxy[1]);
             } catch (Exception ex){
@@ -58,6 +59,7 @@ public class UINmanager {
             //!!! настройки прокси !!!
 //            iprot.con = c;
             proc.add(iprot);
+            //System.out.print(serviceName);
         }
     }
     

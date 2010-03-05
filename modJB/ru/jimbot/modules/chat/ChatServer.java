@@ -61,7 +61,7 @@ public class ChatServer extends AbstractServer{
         }
         con.uins = new UINmanager(icq, pass, con, 
                 ChatProps.getInstance(this.getName()).getBooleanProperty("chat.IgnoreOfflineMsg"), 
-                ChatProps.getInstance(this.getName()));
+                ChatProps.getInstance(this.getName()), this.getName());
         cq = new ChatQueue(this);
         cq.start();
         inq = new MsgInQueue(cmd);

@@ -48,7 +48,7 @@ public class ScriptCash {
 		String s = "";
 		try {
 			if(!new File(fname).exists()){
-				Log.error("Скрипт не найден: " + fname);
+				Log.getDefault().error("Скрипт не найден: " + fname);
 				return "";
 			}
 			if(scr.containsKey(fname)){

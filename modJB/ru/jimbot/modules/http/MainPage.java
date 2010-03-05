@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ru.jimbot.Manager;
+import ru.jimbot.modules.AbstractProps;
 import ru.jimbot.modules.MsgStatCounter;
 import ru.jimbot.modules.chat.ChatCommandProc;
 import ru.jimbot.modules.chat.ChatServer;
@@ -62,12 +63,12 @@ public class MainPage extends HttpServlet {
 			e.printStackTrace();
             throw new ServletException(e.getMessage());
 		}
-        Log.http("init MainPage");
+        Log.getDefault().http("init MainPage");
     }
     
     @Override
     public void destroy() {
-        Log.http("destroy MainPage");
+        Log.getDefault().http("destroy MainPage");
     }
     
     private boolean checkSession(String id){
@@ -416,7 +417,10 @@ public class MainPage extends HttpServlet {
     		printMsg(con,"srvs_create","Необходимо выбрать тип сервиса!");
     		return;
     	}
+        MainProps.AddDirectory(ns);
+        MainProps.AddLogProperties(ns);
     	Manager.getInstance().addService(ns, type);
+        Manager.getInstance().getService(ns).getProps().AddXmlConfig(ns);
     	MainProps.addService(ns, type);
     	MainProps.save();
     	printOkMsg(con,"main_page");
@@ -1013,7 +1017,7 @@ public class MainPage extends HttpServlet {
     void doGetOrPost(HttpServletRequest request, HttpServletResponse response) throws
     IOException, ServletException {
     	response.setContentType("text/html; charset=\"utf-8\"");
-    	Log.http("HTTP LOG: " + request.getRemoteAddr()+"("+request.getRemoteHost()+") "+ 
+    	Log.getDefault().http("HTTP LOG: " + request.getRemoteAddr()+"("+request.getRemoteHost()+") "+
     			request.getQueryString());
     	HttpConnection con = new HttpConnection(request, response);
     	String page = request.getParameter("page");
