@@ -150,10 +150,7 @@ th=null;
      */
 
     public void setTypeAll(){
-    // формируем цикл
-    for(int i = 0; i >= getCountStatus(); i++){
-    srv.us.db.executeQuery("update xstatus set type=0 where id=" + i);
-    }
+    srv.us.db.executeQuery("UPDATE `xstatus` SET `type`=0");
     }
 
     /**
