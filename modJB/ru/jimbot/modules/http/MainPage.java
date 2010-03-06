@@ -228,9 +228,22 @@ public class MainPage extends HttpServlet {
             return;
         }
         Manager.restart();
-        printMsg(con,"main_page", "Перезапуск бота...");
+        printMsgRestart(con,"main_page", "Перезапуск бота...");
     }
-    
+
+
+        public void printMsgRestart(HttpConnection con, String pg, String msg) throws IOException {
+        String ns = con.get("ns");
+        ns = ns==null ? "" : "&ns="+ns;
+        con.print(SrvUtil.HTML_HEAD +
+                "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
+                "<H3><FONT COLOR=\"#004000\">" +
+                msg + " </FONT></H3>");
+    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + userID + "&page=" +
+    			pg + ns +"\">" + "Назад</A><br>");
+    	con.print("</FONT></BODY></HTML>");
+    }
+
     /**
      * Вывод статитики работы сервиса
      * @param con

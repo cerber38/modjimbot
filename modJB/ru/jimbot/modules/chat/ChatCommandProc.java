@@ -77,7 +77,9 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     private HashMap<String, Cmd> commands = new HashMap<String, Cmd>();
     int a = 0;
     long ButilochkaTime = System.currentTimeMillis();
-
+    private ConcurrentHashMap <Integer, WeddingInfo> WeddingInfo;// Расширенная свадьба
+    private ConcurrentHashMap <String,Integer> Wedding_ID;// Хранит ид свадьбы
+    private ConcurrentHashMap <String,Integer> Wedding_STATUS;// Хранит ид пользователей при свадьбе
 
     class ModInfo
     {
@@ -128,6 +130,9 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         clan = new ClanCommand(this);
         abv = new AboutUser(this);
         gift = new Gift(this);
+        WeddingInfo = new ConcurrentHashMap<Integer, WeddingInfo>();
+        Wedding_ID = new ConcurrentHashMap<String, Integer>();
+        Wedding_STATUS = new ConcurrentHashMap<String, Integer>();
         init();
     }
     
@@ -181,6 +186,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         authObj.put("allroom_message", "Сообщение во все комнаты");
         authObj.put("setclan", "Создание/удаление кланов");
         authObj.put("deladmmsg", "Удаление адм сообщений");
+        authObj.put("wedding", "Свадьба/Развод");
     	
        	commands.put("!help", new Cmd("!help","",1));
         commands.put("!справка", new Cmd("!справка", "", 1));
@@ -290,6 +296,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         commands.put("!пригласитьуин", new Cmd("!пригласитьуин", "$c $s", 57));
         commands.put("!везде", new Cmd("!везде", "$s", 58));
         commands.put("!деладм", new Cmd("!деладм", "", 59));
+        commands.put("!свадьба", new Cmd("!свадьба", "$n $n", 60));
     	WorkScript.getInstance(srv.getName()).installAllChatCommandScripts(this);
     }
     
@@ -549,6 +556,22 @@ firstStartMsg=true;
             else
             tp = parser.parseCommand(tmsg);
             /********************************/
+            if (comNew.containsKey("Wedding_"+uin)){
+            if (!comNew.get("Wedding_"+uin).isExpire()){
+            //tp = parser.parseCommand(comNew.get("Wedding_"+uin).getCmd());
+            TestWedding(proc, uin, mmsg, parser.parseArgs(mmsg));
+            //return;
+            }
+            else
+            {
+            tp = parser.parseCommand(tmsg); 
+            comNew.remove("Wedding_"+uin);
+            Wedding_ID.remove("Wedding_"+uin);
+            Wedding_STATUS.remove("Wedding_"+uin);
+            }
+            }else 
+            tp = parser.parseCommand(tmsg);
+            /********************************/
             int tst=0;
             if(tp<0)
                 tst=0;
@@ -758,6 +781,9 @@ firstStartMsg=true;
                 break;
            case 59:
                 commandDelAdmMsg(proc, uin);
+                break;
+           case 60:
+                commandWedding(proc, uin, parser.parseArgs(tmsg), mmsg);
                 break;
                 default:
      //Дополнительные команды из других классов
@@ -1415,22 +1441,25 @@ firstStartMsg=true;
     txt = txt.substring(0,psp.getIntProperty("chat.MaxMsgSize"));
     proc.mq.add(uin, Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.3", new Object[] {txt}));
     }
-    //TODO: Понять почему иногда возбуждается исключение null.... или переделать всю систему
-        if(psp.getBooleanProperty("lichnoe.on.off"))
-        {
-        String s = psp.getStringProperty("chat.lichnoe");
-        String[] ss = s.split(";");
-        for (int i=0;i<ss.length;i++)
-        {
-        Users usss = srv.us.getUser(ss[i]);
-        srv.getIcqProcess(usss.basesn).mq.add(usss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.4", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,uin,uss.localnick,uss.id,txt}));
-        }
-        }
     Log.getLogger(srv.getName()).talk("CHAT: " + uss.sn + ">>" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
     srv.us.db.log(uss.id,uin,"LICH",">> " + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}),uss.room);
     srv.getIcqProcess(uss.basesn).mq.add(uss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
     setPM(uss.sn, uin);
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.6"));
+    /*Оповещение админа*/
+    if(psp.getBooleanProperty("lichnoe.on.off"))
+    {
+    String[] admins = psp.getStringProperty("chat.lichnoe").split(";");
+    for (int i=0 ;i<admins.length; i++)
+    {
+    if(admins[i] == null || admins[i].equals("")){
+    Log.getLogger(srv.getName()).error("В админке не указан(ны) уин(ы) для оповещения!!!");
+    return;
+    }
+    Users usss = srv.us.getUser(admins[i]);
+    srv.getIcqProcess(usss.basesn).mq.add(usss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.4", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,uin,uss.localnick,uss.id,txt}));
+    }
+    }
     }
     catch (Exception ex){ex.printStackTrace();Log.getLogger(srv.getName()).talk(uin + " Private msg error: " + tmsg);proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.7"));}
     }
@@ -1458,22 +1487,25 @@ firstStartMsg=true;
     txt = txt.substring(0,psp.getIntProperty("chat.MaxMsgSize"));
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.3", new Object[] {txt}));
     }
-    //TODO: Понять почему иногда возбуждается исключение null.... или переделать всю систему
-        if(psp.getBooleanProperty("lichnoe.on.off"))
-        {
-        String s = psp.getStringProperty("chat.lichnoe");
-        String[] ss = s.split(";");
-        for (int i=0;i<ss.length;i++)
-        {
-        Users usss = srv.us.getUser(ss[i]);
-        srv.getIcqProcess(usss.basesn).mq.add(usss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.4", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,uin,uss.localnick,uss.id,txt}));
-        }
-        }
     Log.getLogger(srv.getName()).talk("CHAT: " + uss.sn + ">>" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
     srv.us.db.log(uss.id,uin,"LICH",">> " + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}),uss.room);
     srv.getIcqProcess(uss.basesn).mq.add(uss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.5", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,txt}));
     setPM(uss.sn, uin);
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.6"));
+    /*Оповещение админа*/
+    if(psp.getBooleanProperty("lichnoe.on.off"))
+    {
+    String[] admins = psp.getStringProperty("chat.lichnoe").split(";");
+    for (int i=0 ;i<admins.length; i++)
+    {
+    if(admins[i] == null || admins[i].equals("")){
+    Log.getLogger(srv.getName()).error("В админке не указан(ны) уин(ы) для оповещения!!!");
+    return;
+    }
+    Users usss = srv.us.getUser(admins[i]);
+    srv.getIcqProcess(usss.basesn).mq.add(usss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.4", new Object[] {srv.us.getUser(uin).localnick,srv.us.getUser(uin).id,uin,uss.localnick,uss.id,txt}));
+    }
+    }
     }
     catch (Exception ex){ex.printStackTrace();Log.getLogger(srv.getName()).talk(uin + " Private msg error: " + tmsg);proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.7"));}
     }
@@ -3026,7 +3058,6 @@ firstStartMsg=true;
         return;
         }
         srv.cq.addMsg("Была удалена комната " + srv.us.getRoom(room).getName() + "|" + room + "| пользователем " + uss.localnick + "|" + uss.id + "|", uin, uss.room);
-        //srv.cq.addMsg("Была удалена комната " + srv.us.getRoom(room).getName() + "|" + room + "| пользователем " + uss.localnick + "|" + uss.id + "|", uin, 0);
         proc.mq.add(uin, "Комната " + room + " была успешно удалена");
         Rooms r = new Rooms();
         r.setId(room);
@@ -3072,21 +3103,25 @@ firstStartMsg=true;
         proc.mq.add(uin,srv.us.getUser(uin).localnick  + " Необходимо добавить сообщение!\nПример: !позвать <id> давай к нам");
         return;
         }
-            if(psp.getBooleanProperty("Priglashenie.on.off"))
-            {
-            String ss = psp.getStringProperty("chat.Priglashenie");
-            String[] sss = ss.split(";");
-            for (int i1=0;i1<sss.length;i1++)
-            {
-            Users usss = srv.us.getUser(sss[i1]);
-            srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Пользователя " + us.localnick +  "|" + us.id + "|" + " зовет в чат " + uss.localnick+ "|" + uss.localnick + "| "
-            + "\n Сообщение: "+s);
-            }
-            }
         srv.us.db.event(uss.id, uin, "PRIG", us.id, us.sn, "позвал в чат");
         srv.us.db.log(uss.id,uin,"PRIG",">> Вас зовут в чат " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "|",uss.room);
         srv.getIcqProcess(uss.basesn).mq.add(uss.sn,"Пользователь " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "| зовет вас в чат " + " и вам от него сообщение: " + s);
         proc.mq.add(uin,"Вы позвали в чат пользователя " + uss.localnick + " |" + uss.id + "|");
+        /*Оповещение админа*/
+        if(psp.getBooleanProperty("Priglashenie.on.off"))
+        {
+        String[] admins = psp.getStringProperty("chat.Priglashenie").split(";");
+        for (int t=0 ;t<admins.length; t++)
+        {
+        if(admins[t] == null || admins[t].equals("")){
+        Log.getLogger(srv.getName()).error("В админке не указан(ны) уин(ы) для оповещения!!!");
+        return;
+        }
+        Users usss = srv.us.getUser(admins[t]);
+        srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Пользователя " + us.localnick +  "|" + us.id + "|" + " зовет в чат " + uss.localnick+ "|" + uss.localnick + "| "
+        + "\n Сообщение: "+s);
+        }
+        }
         }
         catch (Exception ex)
         {
@@ -3129,20 +3164,24 @@ firstStartMsg=true;
         s = s.substring(0, psp.getIntProperty("chat.MaxMsgSize"));
         proc.mq.add(uin, "Слишком длинное сообщение было обрезано: " + s);
         }
-            if(psp.getBooleanProperty("Priglashenie.on.off"))
-            {
-            String ss = psp.getStringProperty("chat.Priglashenie");
-            String[] sss = ss.split(";");
-            for (int i=0;i<sss.length;i++)
-            {
-            Users usss = srv.us.getUser(sss[i]);
-            srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Отправлено приглашение в чат на уин " + uins+ " от пользователя " + srv.us.getUser(uin).localnick + "|" + srv.us.getUser(uin).id + "| "
-            + "\n Сообщение: "+s);
-            }
-            }
         srv.us.db.event(uss.id, uin, "PRIG", us.id, us.sn, "позвал в чат");
         proc.mq.add(uins,"Пользователь " + srv.us.getUser(uin).localnick + " |" + srv.us.getUser(uin).id + "| приглашает вас в чат " + " и вам от него сообщение: " + s);
         proc.mq.add(uin,"Приглашение на уин: "+uins+"  отправлено");
+        /*Оповещение админа*/
+        if(psp.getBooleanProperty("Priglashenie.on.off"))
+        {
+        String[] admins = psp.getStringProperty("chat.Priglashenie").split(";");
+        for (int t=0 ;t<admins.length; t++)
+        {
+        if(admins[t] == null || admins[t].equals("")){
+        Log.getLogger(srv.getName()).error("В админке не указан(ны) уин(ы) для оповещения!!!");
+        return;
+        }
+        Users usss = srv.us.getUser(admins[t]);
+        srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Пользователя " + us.localnick +  "|" + us.id + "|" + " зовет в чат " + uss.localnick+ "|" + uss.localnick + "| "
+        + "\n Сообщение: "+s);
+        }
+        }
         }
         catch (Exception ex)
         {
@@ -3218,5 +3257,227 @@ firstStartMsg=true;
         srv.us.db.executeQuery( " TRUNCATE `admmsg` " );
         proc.mq.add(uin, "Таблицы \"admmsg\" очищена" );
         }
+
+        /**
+         * Свадьба
+         * @author fraer72
+         * @param proc
+         * @param uin
+         * @param v
+         * @param mmsg
+         */
+
+        public void commandWedding(IcqProtocol proc, String uin, Vector v, String mmsg) {
+        if (!isChat(proc, uin) && !psp.testAdmin(uin))
+        {
+        return;
+        }
+        if (!auth(proc, uin, "wedding"))
+        {
+        return;
+        }
+        int bride = (Integer)v.get(0);
+        int groom  = (Integer)v.get(1);
+        Users u = srv.us.getUser(uin); // Который набрад команду
+        Users us = srv.us.getUser(bride);// Невеста
+        Users uss = srv.us.getUser(groom);// Жених
+        /*Тест невесты*/
+        if(us.id == 0)
+        {
+        proc.mq.add(uin,"Пользователя с id=" + bride + " не существует");
+        return;
+        }
+        if (us.state!=UserWork.STATE_CHAT)
+        {
+        proc.mq.add(uin,"Пользователь " + us.localnick + " не в чате!");
+        return;
+        }
+        /*Тест жениха*/
+        if(uss.id == 0)
+        {
+        proc.mq.add(uin,"Пользователя с id=" + groom + " не существует");
+        return;
+        }
+        if (uss.state!=UserWork.STATE_CHAT)
+        {
+        proc.mq.add(uin,"Пользователь " + uss.localnick + " не в чате!");
+        return;
+        }
+        /*Тест на пол*/
+        if(psp.getBooleanProperty("wedding.floor.on.off"))
+        {
+        /*Невеста*/
+        if(us.homepage.equalsIgnoreCase("")){
+        proc.mq.add(uin,"Невеста ''" + us.localnick + "'' должна указать свой пол!");
+        return;
+        } else if (!us.homepage.equalsIgnoreCase("ж")){
+        proc.mq.add(uin,"Невеста не женского пола. Однополые браки в чате запрещены!");
+        return;
+        }
+        /*Жених*/
+        if(uss.homepage.equalsIgnoreCase("")){
+        proc.mq.add(uin,"Жених ''" + uss.localnick + "'' должен указать свой пол!");
+        return;
+        } else if (!uss.homepage.equalsIgnoreCase("м")){
+        proc.mq.add(uin,"Жених не мужского пола. Однополые браки в чате запрещены!");
+        return;
+        }
+        }
+        // Запоминаем текушую свадьбу для дальнейших действий
+        WeddingInfo sv = new WeddingInfo(u.id, us.id, uss.id, 0 , 0);
+        int Wedding_id = sv.count;
+        sv.Count();
+        WeddingInfo.put(Wedding_id, sv);// Запомним свадьбу
+        Wedding_ID.put("Wedding_"+us.sn, Wedding_id);// Запоминаем ид свадьбы для невесты
+        Wedding_ID.put("Wedding_"+uss.sn, Wedding_id);// Запоминаем ид свадьбы для жениха
+        // Запоминаем статус пользователя в свадьбе
+        Wedding_STATUS.put("Wedding_"+us.sn, 0);
+        Wedding_STATUS.put("Wedding_"+uss.sn, 0);
+        // Вызываем метод для определения согласен пользователь или нет
+        TestWedding(srv.getIcqProcess(us.basesn), us.sn, mmsg, v);// Невесиа
+        TestWedding(srv.getIcqProcess(us.basesn), uss.sn, mmsg, v);// Жених
+        }
+
+        /**
+         * Проверка согласия
+         * @author fraer72
+         * @param proc
+         * @param uin
+         * @param v
+         * @param mmsg
+         * @param - 0 - невеста, 1 - жених
+         */
+
+        private void TestWedding(IcqProtocol proc, String uin, String mmsg, Vector v)
+        {
+        Users uss = srv.us.getUser(uin);
+        String[] message0 = "согласна;согласен".split(";");
+        String[] message1 = "женой;мужем".split(";");
+        String[] message2 = "отказалась;отказался".split(";");
+        String msg = "";
+        int id = 0;
+        boolean Wedding = false;
+        WeddingInfo sv = WeddingInfo.get(Wedding_ID.get("Wedding_"+uin));
+        // Надо понять кто жених кто невеста в этой каше :D
+        if(Wedding_STATUS.get("Wedding_"+uin) == 0){
+        id = sv.groom;// ид жениха, если невеста
+        }else{
+        id = sv.bride;// ид невесты, если жених
+        }
+        Users u = srv.us.getUser(id);
+        String cmd = "Wedding_"+uin;
+        if(comNew.containsKey(cmd))
+        {
+        try
+        {
+        msg = mmsg;
+        msg.toLowerCase();
+        }
+        catch(NumberFormatException e)
+        {
+        proc.mq.add( uin, uss.localnick + " ответ должен быть ''Да'' или ''Нет'' " );
+        return;
+        }
+        if( !TestMsgWedding( msg ) )
+        {
+        proc.mq.add( uin, uss.localnick + " ответ должен быть ''Да'' или ''Нет'' " );
+        return;
+        }
+        Wedding = true;
+        comNew.remove(cmd);
+        }
+        if(!Wedding)
+        {
+        proc.mq.add(uin,uss.localnick + " Ты " + message0[Wedding_STATUS.get("Wedding_"+uin)] + " стать "
+        + message1[Wedding_STATUS.get("Wedding_"+uin)] + " пользователя " + u.localnick + "\n" +
+        " Ответ должен быть ''Да'' или ''Нет''");
+        comNew.put(cmd, new NewExtend(uin, cmd, cmd,v, 60000));
+        return;
+        }
+        System.out.print(msg);
+        if(msg.equals("да"))
+        {
+        System.out.print("test");
+        srv.cq.addMsg("Пользователь " + uss.localnick + " " + message0[Wedding_STATUS.get("Wedding_"+uin)] +
+        " стать " +  message1[Wedding_STATUS.get("Wedding_"+uin)] + " пользователя " + u.localnick,
+        uss.sn, psp.getIntProperty("wedding.room"));
+        sv.answer += 1;
+        sv.CountAnswer();
+        WeddingInfo.put(Wedding_ID.get("Wedding_"+uin), sv);
+        EndWedding(uin, Wedding_ID.get("Wedding_"+uin));
+        }else{
+        srv.cq.addMsg("Пользователь " + uss.localnick + " " + message2[Wedding_STATUS.get("Wedding_"+uin)] +
+        " стать " +  message1[Wedding_STATUS.get("Wedding_"+uin)] + " пользователя " + u.localnick,
+        uss.sn, psp.getIntProperty("wedding.room"));
+        sv.answer -= 1;
+        sv.CountAnswer();
+        WeddingInfo.put(Wedding_ID.get("Wedding_"+uin), sv);
+        EndWedding(uin, Wedding_ID.get("Wedding_"+uin));
+        }
+        }
+        
+        /**
+         * Если все успешно, то метод завершит процес свадьбы
+         * @author fraer72
+         * @param Wedding_id - ид свадьбы
+         */
+
+        private void EndWedding(String uin, int Wedding_id){
+        // Очистим
+        Wedding_ID.remove("Wedding_"+uin);
+        Wedding_STATUS.remove("Wedding_"+uin);
+        WeddingInfo sv = WeddingInfo.get(Wedding_id);
+        if(sv.answer_cnt == 2){
+        if(sv.answer == 2){// Если новобрачные согласны
+        srv.cq.addMsg("Все четко БУХАЕМ", "", psp.getIntProperty("wedding.room"));
+        WeddingInfo.remove(Wedding_id);
+        }else{
+        srv.cq.addMsg("Всеровно бухаем", "", psp.getIntProperty("wedding.room"));
+        WeddingInfo.remove(Wedding_id);
+        }
+        }else{
+        return; // Если свадьба еще идет!
+        }
+        }
+
+        /**
+          * Проверка ответа
+          * @param msg
+          * @return
+          */
+
+        public boolean TestMsgWedding( String msg )
+        {
+        if( msg.equals( "да" ) || msg.equals( "нет" ) )
+        {
+        return true;
+        } else return false;
+        }
+
+        /**
+         * Клас для хранения информаии при свадьбе
+         */
+
+     class WeddingInfo {
+        public int id = 0;
+        public int bride = 0;
+        public int groom = 0;
+        public int count = 0;
+        public int answer = 0;
+        public int answer_cnt = 0;
+
+        WeddingInfo(int id, int groom,  int bride, int answer, int answer_cnt) {
+            this.id = id;
+            this.bride = bride;
+            this.groom = groom;
+            this.answer = answer;
+            this.answer_cnt = answer_cnt;
+            count = 0;
+        }
+
+        public int Count() {return count++;}
+        public int CountAnswer() {return answer_cnt++;}
+    }
+
 
         }

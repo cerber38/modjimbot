@@ -187,6 +187,8 @@ public class ChatProps implements AbstractProps {
         setBooleanProperty("id.on.off", false);
         setIntProperty("auto_status.time", 5 );
         setBooleanProperty("auto_status.on.off", false);
+        setBooleanProperty("wedding.floor.on.off", true);
+        setIntProperty("wedding.room", 7 );
     }
 
     public UserPreference[] getUserPreference(){
@@ -328,6 +330,10 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.CATEGORY_TYPE,"but", "Настройки бутылочки =)" +"","",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"room.igra.bytilochka","Комната игры",getIntProperty("room.igra.bytilochka"),""),
         new UserPreference(UserPreference.INTEGER_TYPE,"time.igra.bytilochkat","Интервал игры",getIntProperty("time.igra.bytilochka")," секунд"),
+        //Настройки свадьбы
+        new UserPreference(UserPreference.CATEGORY_TYPE,"wedding", "Настройки свадьбы" +"","",""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"wedding.floor.on.off","Включить/Выключить проверку пола",getBooleanProperty("wedding.floor.on.off"),""),
+        new UserPreference(UserPreference.INTEGER_TYPE,"wedding.room","Комната",getIntProperty("wedding.room")," секунд"),
         };
         return p;
         }
