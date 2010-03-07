@@ -128,6 +128,7 @@ return f;
     if(i == 8 && cmd.psp.getBooleanProperty("Spisok.Status.on.off")){Status(proc, uin);}
     if(i == 9 && cmd.psp.getBooleanProperty("Spisok.Moder.on.off")){Moder(proc, uin);}
     if(i == 10 && cmd.psp.getBooleanProperty("Spisok.Admin.on.off")){Admin(proc, uin);}
+    if(i == 11 && cmd.psp.getBooleanProperty("Spisok.Modertime.on.off")){ModerTime(proc, uin);}
     }
     }
 
@@ -160,6 +161,8 @@ if(cmd.psp.getBooleanProperty("Spisok.Status.on.off")){Spisok += "\n|8| - Пол
 Spisok += "\nГруппы:";
 if(cmd.psp.getBooleanProperty("Spisok.Moder.on.off")){Spisok += "\n|9| - Группа ''moder'' цена - " + cmd.psp.getIntProperty("ball.grant.8") + " баллов";}
 if(cmd.psp.getBooleanProperty("Spisok.Admin.on.off")){Spisok += "\n|10| - Группа ''admin'', цена - " + cmd.psp.getIntProperty("ball.grant.9") + " баллов";}
+if(cmd.psp.getBooleanProperty("Spisok.Modertime.on.off")){Spisok += "\n|11| - Группа ''modertime'' на " + cmd.psp.getIntProperty("Spisok.Modertime.Day") +
+" день(дней) , цена - " + cmd.psp.getIntProperty("ball.grant.11") + " баллов";}
 Spisok += "\nДля выхода из магазина выберете |0|";
 Spisok += "\nВыберете цифру для покупки";
 proc.mq.add(uin, Spisok);
@@ -320,6 +323,29 @@ return;
 if(cmd.srv.us.grantUser(cmd.srv.us.getUser(uin).id, "status_user"))
 cmd.srv.us.db.event(cmd.srv.us.getUser(uin).id, uin, "SHOP", 0, "", "Купил(а) полномочие ''status_user''");
 cmd.srv.us.getUser(uin).ball=cmd.srv.us.getUser(uin).ball-cmd.psp.getIntProperty("ball.grant.10");
+cmd.srv.us.updateUser(cmd.srv.us.getUser(uin));
+proc.mq.add(uin,"Запрос успешно выполне, у вас осталось " + cmd.srv.us.getUser(uin).ball + " балл(ов)");
+}
+
+public void ModerTime(IcqProtocol proc, String uin)
+{
+if(cmd.srv.us.getUser(uin).ball<cmd.psp.getIntProperty("ball.grant.11"))
+{
+proc.mq.add(uin, "Для получения этого полномочия Вам необходимо набрать " + cmd.psp.getIntProperty("ball.grant.11") + " баллов");
+return;
+}
+int id = cmd.srv.us.getUser(uin).id;
+boolean kk = cmd.srv.us.setUserPropsValue(id, "group", "modertime") &&
+cmd.srv.us.setUserPropsValue(id, "grant", "") &&
+cmd.srv.us.setUserPropsValue(id, "revoke", "");
+cmd.srv.us.clearCashAuth(id);
+cmd.setGrouptime(uin, cmd.psp.getIntProperty("Spisok.Modertime.Day"));
+if(kk)
+proc.mq.add(uin,"Запрос успешно выполне, у вас осталось " + cmd.srv.us.getUser(uin).ball + " балл(ов)");
+else
+proc.mq.add(uin,"Произошла ошибка");
+cmd.srv.us.db.event(cmd.srv.us.getUser(uin).id, uin, "SHOP", 0, "", "Купил(а) группу ''modertime''");
+cmd.srv.us.getUser(uin).ball=cmd.srv.us.getUser(uin).ball-cmd.psp.getIntProperty("ball.grant.11");
 cmd.srv.us.updateUser(cmd.srv.us.getUser(uin));
 proc.mq.add(uin,"Запрос успешно выполне, у вас осталось " + cmd.srv.us.getUser(uin).ball + " балл(ов)");
 }

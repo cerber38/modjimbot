@@ -151,6 +151,7 @@ public class ChatProps implements AbstractProps {
         setIntProperty("ball.grant.8",3000);
         setIntProperty("ball.grant.9",5000);
         setIntProperty("ball.grant.10",50);
+        setIntProperty("ball.grant.11",1000);
         setBooleanProperty("Spisok.Chnick.on.off", true);
         setBooleanProperty("Spisok.Settheme.on.off", true);
         setBooleanProperty("Spisok.Who.on.off", true);
@@ -161,6 +162,8 @@ public class ChatProps implements AbstractProps {
         setBooleanProperty("Spisok.Moder.on.off", true);
         setBooleanProperty("Spisok.Admin.on.off", true);
         setBooleanProperty("Spisok.Status.on.off", true);
+        setBooleanProperty("Spisok.Modertime.on.off", true);
+        setIntProperty("Spisok.Modertime.Day",30);
         setIntProperty("max.chnick",10);
         setBooleanProperty("adm.Informer",false);
         setIntProperty("adm.Informer.time",5);
@@ -318,6 +321,9 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.INTEGER_TYPE,"ball.grant.9","Группа ''admin''",getIntProperty("ball.grant.9")," баллов"),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"Spisok.Status.on.off","Включить/Выключить продажу полномочия ''status_user''",getBooleanProperty("Spisok.Status.on.off"),""),
         new UserPreference(UserPreference.INTEGER_TYPE,"ball.grant.10","Полномочие ''status_user''",getIntProperty("ball.grant.10")," баллов"),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"Spisok.Modertime.on.off","Включить/Выключить продажу группы ''modertime''",getBooleanProperty("Spisok.Modertime.on.off"),""),
+        new UserPreference(UserPreference.INTEGER_TYPE,"ball.grant.11","Группа ''modertime''",getIntProperty("ball.grant.11")," баллов"),
+        new UserPreference(UserPreference.INTEGER_TYPE,"Spisok.Modertime.Day","Количество дней",getIntProperty("Spisok.Modertime.Day"),""),
         //Настройки кланов
         new UserPreference(UserPreference.CATEGORY_TYPE,"clan", "Настройки кланов" +"","",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"Clan.MaxCount","Максимальное количество кланов",getIntProperty("Clan.MaxCount"),""),

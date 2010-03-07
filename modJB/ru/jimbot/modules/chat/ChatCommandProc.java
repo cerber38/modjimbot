@@ -79,7 +79,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     long ButilochkaTime = System.currentTimeMillis();
     private ConcurrentHashMap <Integer, WeddingInfo> WeddingInfo;// Расширенная свадьба
     private ConcurrentHashMap <String,Integer> Wedding_ID;// Хранит ид свадьбы
-    private ConcurrentHashMap <String,Integer> Wedding_STATUS;// Хранит ид пользователей при свадьбе
+    private ConcurrentHashMap <String,Integer> Wedding_STATUS;// Хранит статус пользователей при свадьбе
 
     class ModInfo
     {
@@ -297,6 +297,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         commands.put("!везде", new Cmd("!везде", "$s", 58));
         commands.put("!деладм", new Cmd("!деладм", "", 59));
         commands.put("!свадьба", new Cmd("!свадьба", "$n $n", 60));
+        commands.put("!развод", new Cmd("!развод", "$n $n", 61));
     	WorkScript.getInstance(srv.getName()).installAllChatCommandScripts(this);
     }
     
@@ -558,9 +559,7 @@ firstStartMsg=true;
             /********************************/
             if (comNew.containsKey("Wedding_"+uin)){
             if (!comNew.get("Wedding_"+uin).isExpire()){
-            //tp = parser.parseCommand(comNew.get("Wedding_"+uin).getCmd());
             TestWedding(proc, uin, mmsg, parser.parseArgs(mmsg));
-            //return;
             }
             else
             {
@@ -784,6 +783,9 @@ firstStartMsg=true;
                 break;
            case 60:
                 commandWedding(proc, uin, parser.parseArgs(tmsg), mmsg);
+                break;
+           case 61:
+                commandDivorce(proc, uin, parser.parseArgs(tmsg), mmsg);
                 break;
                 default:
      //Дополнительные команды из других классов
@@ -3281,6 +3283,10 @@ firstStartMsg=true;
         Users u = srv.us.getUser(uin); // Который набрад команду
         Users us = srv.us.getUser(bride);// Невеста
         Users uss = srv.us.getUser(groom);// Жених
+        if(u.room != psp.getIntProperty("wedding.room")){
+        proc.mq.add(uin,"Проводить свадьбы можно тока в " + psp.getIntProperty("wedding.room") + " комнате");
+        return;    
+        }
         /*Тест невесты*/
         if(us.id == 0)
         {
@@ -3292,6 +3298,14 @@ firstStartMsg=true;
         proc.mq.add(uin,"Пользователь " + us.localnick + " не в чате!");
         return;
         }
+        if(us.room != psp.getIntProperty("wedding.room")){
+        proc.mq.add(uin,"Невеста должна присутствовать в данной комнате");
+        return;    
+        }
+        if(us.wedding != 0){
+        proc.mq.add(uin,"Невеста уже состоит в браке");
+        return;      
+        }
         /*Тест жениха*/
         if(uss.id == 0)
         {
@@ -3301,6 +3315,14 @@ firstStartMsg=true;
         if (uss.state!=UserWork.STATE_CHAT)
         {
         proc.mq.add(uin,"Пользователь " + uss.localnick + " не в чате!");
+        return;
+        }
+        if(uss.room != psp.getIntProperty("wedding.room")){
+        proc.mq.add(uin,"Жених должен присутствовать в данной комнате");
+        return;    
+        }
+        if(uss.wedding != 0){
+        proc.mq.add(uin,"Жених уже состоит в браке");
         return;
         }
         /*Тест на пол*/
@@ -3332,7 +3354,7 @@ firstStartMsg=true;
         Wedding_ID.put("Wedding_"+uss.sn, Wedding_id);// Запоминаем ид свадьбы для жениха
         // Запоминаем статус пользователя в свадьбе
         Wedding_STATUS.put("Wedding_"+us.sn, 0);
-        Wedding_STATUS.put("Wedding_"+uss.sn, 0);
+        Wedding_STATUS.put("Wedding_"+uss.sn, 1);
         // Вызываем метод для определения согласен пользователь или нет
         TestWedding(srv.getIcqProcess(us.basesn), us.sn, mmsg, v);// Невесиа
         TestWedding(srv.getIcqProcess(us.basesn), uss.sn, mmsg, v);// Жених
@@ -3353,16 +3375,15 @@ firstStartMsg=true;
         Users uss = srv.us.getUser(uin);
         String[] message0 = "согласна;согласен".split(";");
         String[] message1 = "женой;мужем".split(";");
-        String[] message2 = "отказалась;отказался".split(";");
         String msg = "";
         int id = 0;
         boolean Wedding = false;
         WeddingInfo sv = WeddingInfo.get(Wedding_ID.get("Wedding_"+uin));
         // Надо понять кто жених кто невеста в этой каше :D
         if(Wedding_STATUS.get("Wedding_"+uin) == 0){
-        id = sv.groom;// ид жениха, если невеста
-        }else{
         id = sv.bride;// ид невесты, если жених
+        }else{
+        id = sv.groom;// ид жениха, если невеста
         }
         Users u = srv.us.getUser(id);
         String cmd = "Wedding_"+uin;
@@ -3397,8 +3418,7 @@ firstStartMsg=true;
         System.out.print(msg);
         if(msg.equals("да"))
         {
-        System.out.print("test");
-        srv.cq.addMsg("Пользователь " + uss.localnick + " " + message0[Wedding_STATUS.get("Wedding_"+uin)] +
+        srv.cq.addMsg(uss.localnick + " ты " + message0[Wedding_STATUS.get("Wedding_"+uin)] +
         " стать " +  message1[Wedding_STATUS.get("Wedding_"+uin)] + " пользователя " + u.localnick,
         uss.sn, psp.getIntProperty("wedding.room"));
         sv.answer += 1;
@@ -3406,7 +3426,7 @@ firstStartMsg=true;
         WeddingInfo.put(Wedding_ID.get("Wedding_"+uin), sv);
         EndWedding(uin, Wedding_ID.get("Wedding_"+uin));
         }else{
-        srv.cq.addMsg("Пользователь " + uss.localnick + " " + message2[Wedding_STATUS.get("Wedding_"+uin)] +
+        srv.cq.addMsg(uss.localnick + " ты " + message0[Wedding_STATUS.get("Wedding_"+uin)] +
         " стать " +  message1[Wedding_STATUS.get("Wedding_"+uin)] + " пользователя " + u.localnick,
         uss.sn, psp.getIntProperty("wedding.room"));
         sv.answer -= 1;
@@ -3429,10 +3449,17 @@ firstStartMsg=true;
         WeddingInfo sv = WeddingInfo.get(Wedding_id);
         if(sv.answer_cnt == 2){
         if(sv.answer == 2){// Если новобрачные согласны
-        srv.cq.addMsg("Все четко БУХАЕМ", "", psp.getIntProperty("wedding.room"));
+        Users u = srv.us.getUser(sv.bride);//невеста
+        Users us = srv.us.getUser(sv.groom);//жених
+        srv.cq.addMsg("Пользователи " + u.localnick + " и " +
+        us.localnick + " обвенчались. Бухаем*DRINK*", "", psp.getIntProperty("wedding.room"));
+        u.wedding = sv.groom;
+        us.wedding = sv.bride;
+        srv.us.updateUser(u);
+        srv.us.updateUser(us);
         WeddingInfo.remove(Wedding_id);
         }else{
-        srv.cq.addMsg("Всеровно бухаем", "", psp.getIntProperty("wedding.room"));
+        srv.cq.addMsg("Свадьба не состоялась", "", psp.getIntProperty("wedding.room"));
         WeddingInfo.remove(Wedding_id);
         }
         }else{
@@ -3479,5 +3506,82 @@ firstStartMsg=true;
         public int CountAnswer() {return answer_cnt++;}
     }
 
+     /**
+      * Развод
+      * @author fraer72
+      * @param proc
+      * @param uin
+      * @param v
+      * @param mmsg
+      */
+
+  public void commandDivorce(IcqProtocol proc, String uin, Vector v, String mmsg) {
+        if (!isChat(proc, uin) && !psp.testAdmin(uin))
+        {
+        return;
+        }
+        if (!auth(proc, uin, "wedding"))
+        {
+        return;
+        }
+        int bride = (Integer)v.get(0);
+        int groom  = (Integer)v.get(1);
+        Users u = srv.us.getUser(uin); // Который набрад команду
+        Users us = srv.us.getUser(bride);// Жена
+        Users uss = srv.us.getUser(groom);// Муж
+        if(u.room != psp.getIntProperty("wedding.room")){
+        proc.mq.add(uin,"Проводить развод можно тока в " + psp.getIntProperty("wedding.room") + " комнате");
+        return;
+        }
+        /*Тест жены*/
+        if(us.id == 0)
+        {
+        proc.mq.add(uin,"Пользователя с id=" + bride + " не существует");
+        return;
+        }
+        if (us.state!=UserWork.STATE_CHAT)
+        {
+        proc.mq.add(uin,"Пользователь " + us.localnick + " не в чате!");
+        return;
+        }
+        if(us.room != psp.getIntProperty("wedding.room")){
+        proc.mq.add(uin,"Жена должна присутствовать в данной комнате");
+        return;
+        }
+        if(us.wedding == 0){
+        proc.mq.add(uin,"Жена не находится в браке");
+        return;
+        }
+        /*Тест мужа*/
+        if(uss.id == 0)
+        {
+        proc.mq.add(uin,"Пользователя с id=" + groom + " не существует");
+        return;
+        }
+        if (uss.state!=UserWork.STATE_CHAT)
+        {
+        proc.mq.add(uin,"Пользователь " + uss.localnick + " не в чате!");
+        return;
+        }
+        if(uss.room != psp.getIntProperty("wedding.room")){
+        proc.mq.add(uin,"Муж должен присутствовать в данной комнате");
+        return;
+        }
+        if(uss.wedding == 0){
+        proc.mq.add(uin,"Муж не находится в браке");
+        return;
+        }
+        if(us.wedding != uss.id & uss.wedding != us.id){
+        proc.mq.add(uin,"Данные пользователи не находятся в браке друг с другом.");
+        return;
+        }
+        us.wedding = 0;
+        uss.wedding = 0;
+        srv.us.updateUser(us);
+        srv.us.updateUser(uss);
+        srv.cq.addMsg("Пользователи " + us.localnick + " и " +
+        uss.localnick + " развелись!", "", psp.getIntProperty("wedding.room"));
+        proc.mq.add(uin,"Успешно выполнено!");
+  }
 
         }

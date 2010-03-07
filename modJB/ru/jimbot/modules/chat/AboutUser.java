@@ -120,6 +120,7 @@ else
 List += "В клане не состаит" + '\n';
 }
 List += "Правельных ответов в викторине - " + u.answer + '\n';
+List += (u.wedding == 0 ? "" : ("В браке с |" + cmd.srv.us.getUser(u.wedding).id + "|" + cmd.srv.us.getUser(u.wedding).localnick + '\n'));
 List += "------\n";
 List += cmd.gift.commandListGiftUser_5(id);
 List += cmd.frends.Random_Frends(id);

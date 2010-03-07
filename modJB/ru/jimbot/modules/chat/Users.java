@@ -57,7 +57,7 @@ public class Users extends DBObject {
     public int answer = 0;
     public int clansman = 0;
     public String clangroup = "";
-    public String wedding = "";
+    public int wedding = 0;
 
    
     /** Creates a new instance of Users */
@@ -110,7 +110,7 @@ public class Users extends DBObject {
             Types.INTEGER,Types.INTEGER,Types.INTEGER,Types.VARCHAR,Types.TIMESTAMP,
             Types.INTEGER, Types.TIMESTAMP, Types.TIMESTAMP, Types.TIMESTAMP, 
             Types.TIMESTAMP,Types.INTEGER,Types.INTEGER,Types.VARCHAR,Types.INTEGER,
-            Types.VARCHAR,Types.VARCHAR};
+            Types.VARCHAR,Types.INTEGER};
         tableName="users";        
     }
    
