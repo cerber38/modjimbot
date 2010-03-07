@@ -1,24 +1,15 @@
 <?php
-/*
-   CREATE TABLE `xstatus` (
-  `id` int(11) NOT NULL,
-  `number` int(11) NOT NULL,
-  `text` text(300) default NULL,
-  `type` int(11) NOT NULL,
-  PRIMARY KEY  (`id`)
-  );
-*/
 
-$host = "localhost:3306"; // Хост БД
-$username = "test";// Имя пользователя
-$password = "test";// Пароль пользователя
-$name = "test";// Имя БД
+$host = "localhost:3306";
+$username = "test";
+$password = "test";
+$name = "test";
 
 // Конект с бд
 $connect = mysql_connect($host, $username, $password )or 
-exit( "Не удалось соединиться с сервером. ".mysql_error() );
+exit( "It was not possible to incorporate to server. ".mysql_error() );
 $db = mysql_select_db( $name, $connect )or
-exit( "Не удалось выбрать БД. ".mysql_error() );
+exit( "It was not possible to select a DB. ".mysql_error() );
   $file = file("./status.txt");
   $count = count($file);
 
@@ -31,7 +22,7 @@ exit( "Не удалось выбрать БД. ".mysql_error() );
   '0');");
   if(!$qwerty) echo"ERROR ".mysql_error();
   }
-  print "Статусы добавлены<br>";
+  print "Statuses are added<br>";
 // Отключение от бд
 mysql_close( $connect );  		
 ?>
