@@ -139,7 +139,7 @@ public class ChatProps implements AbstractProps {
         setStringProperty("chat.name","Чат");
         setStringProperty("chat.lichnoe","111111;222222");
         setBooleanProperty("lichnoe.on.off", false);
-        setIntProperty("vic.room",555);
+        setStringProperty("vic.room","555;888");
         setBooleanProperty("vic.on.off", false);
         setIntProperty("ball.grant.1",1000);
         setIntProperty("ball.grant.2",1000);
@@ -289,7 +289,7 @@ public class ChatProps implements AbstractProps {
         //Викторина
         new UserPreference(UserPreference.CATEGORY_TYPE,"victorina", "Игра викторина","",""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"vic.on.off","Включить/выключить викторина",getBooleanProperty("vic.on.off"),""),
-        new UserPreference(UserPreference.INTEGER_TYPE,"vic.room", "Комната где будет проходить викторина", Integer.valueOf(getIntProperty("vic.room")),""),
+        new UserPreference(UserPreference.STRING_TYPE,"vic.room", "Комнаты где будет проходить викторина", getStringProperty("vic.room"),""),
         //данные
         new UserPreference(UserPreference.CATEGORY_TYPE,"AboutUser", "Настройки личной информации","",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"about.user.long","Максимальная длина имени и города.",getIntProperty("about.user.long"),""),

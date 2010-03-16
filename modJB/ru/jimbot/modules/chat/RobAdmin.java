@@ -60,6 +60,7 @@ public class RobAdmin implements Runnable {
     private Random r = new Random();
     int a = 0;
     long times = System.currentTimeMillis();
+    long TimesDelLog = System.currentTimeMillis();
 
    
     /** Creates a new instance of RobAdmin */
@@ -285,6 +286,7 @@ public class RobAdmin implements Runnable {
         while (th == me) {
             parse();
             timeEvent();
+            /*DelLog();*/
             try {
                 th.sleep(sleepAmount);
             } catch (InterruptedException e) { break; }             
@@ -292,9 +294,17 @@ public class RobAdmin implements Runnable {
         th=null;
     }
 
+
     ///////////////////////
     //ДОПОЛНИТЕЛЬНЫЕ КОМАНДЫ
     ////////////////////////
+
+    private void DelLog(){
+    if((System.currentTimeMillis()-TimesDelLog)> 5*60000){
+        // Тут удаление
+    TimesDelLog = System.currentTimeMillis();
+    }
+    }
 
    public String getBanroom_say()
    {
