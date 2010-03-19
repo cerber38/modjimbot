@@ -46,6 +46,7 @@ QuizInfo = new ConcurrentHashMap<Integer, QuizInfo>();
         public String word;/*Ответ*/
         public char[] mix;/*Масив звездочек и букв*/
         public int starsCount;/*Количество оставшихся звездочек*/
+        public boolean start = true;/*Новый вопрос?*/
 
         QuizInfo(int id, int room, int AG, long time) {
             this.id = id;
@@ -79,25 +80,28 @@ Arrays.fill(quiz.mix, '*');
 public void Vopros( int id, int room )
 {
 QuizInfo quiz = QuizInfo.get(id);
-Hint(GetAnswer(quiz.AG), id);
+if(quiz.start)Hint(GetAnswer(quiz.AG), id);
 String s = GetQuestion(quiz.AG);
 // Проверяем сколько звезд осталось
 if(hasStars(id))
 {
 replaceOne(id);// Откроем еще одну
 String help = String.valueOf(getMix(id));
-String g_1 = "Вопрос № - (" + id + "): " + s + "\n" +
+String g_1 = "Вопрос № - (" + quiz.AG + "): " + s + "\n" +
 "Подсказка: ''" + help + "''";
 srv.cq.addMsg(g_1, "", quiz.room);
 quiz.time = System.currentTimeMillis();
+quiz.start = false;
 QuizInfo.put(id, quiz);
+Log.getLogger(srv.getName()).talk("Вопрос № - (" + quiz.AG + "): " + s);
 }else{
     // если ответ не дан
-String g_2 = "На вопрос № - (" + id + "): " + s + "\n" +
+String g_2 = "На вопрос № - (" + quiz.AG + "): " + s + "\n" +
         "Ответ не дан.";
 srv.cq.addMsg(g_2, "", quiz.room);
 quiz.AG = Random_ID();
 quiz.time = System.currentTimeMillis();
+quiz.start = true;
 QuizInfo.put(id, quiz);
 }
 }
@@ -133,11 +137,12 @@ srv.us.getUser(uin).answer += 1;//дадим 1 правельный ответ :
 srv.us.updateUser(srv.us.getUser(uin));
 srv.cq.addMsg("Пользователь |" + srv.us.getUser(uin).id  +
 "|" + srv.us.getUser(uin).localnick +
-" ответил верно ''" + GetAnswer(id) + "''" +
+" ответил верно ''" + GetAnswer(quiz.AG) + "''" +
 "\nОтветил верно на "+ srv.us.getUser(uin).answer + " вопрос(ов)" +
 "", "", room);
 quiz.AG = Random_ID();
 quiz.time = System.currentTimeMillis();
+quiz.start = true;
 QuizInfo.put(id, quiz);
 Vopros(id, room);
 }
@@ -159,11 +164,11 @@ QuizInfo.put(i, quiz);
  */
 private void Quiz()
 {
-    if(TestCountChat()){         // TODO: будет ли грузить данная проверка в потоке? и
+    //if(TestCountChat()){         // TODO: будет ли грузить данная проверка в потоке? и
                                  // понять, будет ли работать викторина после нее? т.е. если return, а
                                  // текущее время не сохраненно
-    return;// если в чате не кого нету
-    }
+    //return;// если в чате не кого нету
+    //}
 if(QuizStart){
     String s = psp.getStringProperty("vic.room");
         if(s.equals("")){
