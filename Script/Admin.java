@@ -1,4 +1,4 @@
-п»їimport java.util.Vector;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
@@ -16,96 +16,96 @@ import ru.jimbot.modules.chat.Users;
 import java.sql.*;
 
     // RobAdmin adm;
-    adm.NICK = "РђРґРјРёРЅ:D";
-    adm.ALT_NICK="Р°РґРјРёРЅ;admin";
+    adm.NICK = "Админ:D";
+    adm.ALT_NICK="админ;admin";
 
 
     
-     // РўРµСЃС‚ РЅР° РїСЂРёРІРµС‚СЃС‚РІРёРµ
+     // Тест на приветствие
     public boolean testHi(String s)
 	{
-    String t = "РїСЂРёРІ;РїСЂРµРІ;Р·РґРѕСЂРѕРІ;Р·РґСЂР°СЃ;Р·РґСЂР°РІ;С…Р°Р№;С…РѕР№;С…РµР»Р»;РґРѕР±СЂ;РґР°СЂРѕ;СЃР°Р»СЏРј";
+    String t = "прив;прев;здоров;здрас;здрав;хай;хой;хелл;добр;даро;салям";
     return adm.test(s,t.split(";"));
     }
     public String getHi(String name)
 	{
-    String[] s = {"РџСЂРёРІРµС‚","РҐР°Р№","РџСЂРёРІРµС‚СЃС‚РІСѓСЋ","Р—РґСЂР°РІСЃС‚РІСѓР№","Р—РґРѕСЂРѕРІ","РђР°Р°... Р­С‚Рѕ СЃРЅРѕРІР° С‚С‹, РїСЂРёРІРµС‚"};
+    String[] s = {"Привет","Хай","Приветствую","Здравствуй","Здоров","Ааа... Это снова ты, привет"};
     return name + " " + s[adm.getRND(s.length)];
     }
 
-    // РўРµСЃС‚ РЅР° РїСЂРѕС‰Р°РЅРёРµ
+    // Тест на прощание
     public boolean testBYE(String s)
 	{
-    String t = "РїРѕРєР°;РїРѕРєРµРґР°;СЃС‡Р°СЃС‚Р»РёРІРѕ;СѓРґР°С‡Рё;РґРѕ СЃРІРёРґР°РЅРёСЏ;РіСѓРґ Р±Р°Р№";
+    String t = "пока;покеда;счастливо;удачи;до свидания;гуд бай";
     return adm.test(s,t.split(";"));
     }
     public String getBYE(String name)
 	{
-    String[] s = {"РїРѕРєР°","РїРѕРєРµРґР°","СЃС‡Р°СЃС‚Р»РёРІРѕ","СѓРґР°С‡Рё","РґРѕ СЃРІРёРґР°РЅРёСЏ","РіСѓРґ Р±Р°Р№","Р°СЂРёРІРµРґРµСЂС‡Рё","РёРґРё СѓР¶Рµ","РІР°Р»Рё СѓР¶Рµ"};
+    String[] s = {"пока","покеда","счастливо","удачи","до свидания","гуд бай","ариведерчи","иди уже","вали уже"};
     return name + " " + s[adm.getRND(s.length)];
     }
 
 
-    // РўРµСЃС‚ РЅР° РІРѕРїСЂРѕСЃ (1)
+    // Тест на вопрос (1)
     public boolean testQuestion1(String s)
 	{
-    String t = "С‡С‘ РґРµР»Р°РµС€СЊ;С‡С‚Рѕ РґРµР»Р°РµС€СЊ;С‡Рµ РґРµР»Р°РµС€СЊ;С‡РµРј РјР°РµС€СЊСЃСЏ;С‡РµРј Р·Р°РЅРёРјР°РµС€СЊСЃСЏ;С‡Рµ С‚РІРѕСЂРёС€СЊ;С‡С‚Рѕ С‚РІРѕСЂРёС€СЊ;С‡РµРј Р·Р°РЅСЏС‚Р°";
+    String t = "чё делаешь;что делаешь;че делаешь;чем маешься;чем занимаешься;че творишь;что творишь;чем занята";
     return adm.test(s,t.split(";"));
     }
     public String getQuestion1(String name){
-    String[] s = {"Р”Р° РІРѕС‚ РІ С‡Р°С‚Рµ СЂР°Р±РѕС‚Р°СЋ...","Р®Р·РµСЂРѕРІ РІСЃСЏРєРёС… РєРёРєР°СЋ!","РџРѕРєР° РЅРёС‡РµРј РЅРµ Р·Р°РЅСЏС‚Р°.:)","РҐРѕС‚РµР»Р° РїРѕРєСѓС€Р°С‚СЊ СЃС…РѕРґРёС‚СЊ...","РђРґРјРёРЅСѓ РїРѕРјРѕРіР°СЋ","РўРµР±СЏ РµР±РµС‚???"};
+    String[] s = {"Да вот в чате работаю...","Юзеров всяких кикаю!","Пока ничем не занята.:)","Хотела покушать сходить...","Админу помогаю","Тебя ебет???"};
     return name + " " + s[adm.getRND(s.length)];
     }
 
-    // РўРµСЃС‚ РЅР° РІРѕРїСЂРѕСЃ (2)
+    // Тест на вопрос (2)
     public boolean testQuestion2(String s)
 	{
-    String t = "РєР°Рє РґРµР»Р°;РєР°Рє РѕРЅР°;РєР°Рє РѕРЅРѕ;РєР°Рє Р¶РёР·РЅСЊ;РєР°Рє Р¶РёР·РЅСЊ РјРѕР»РѕРґР°СЏ;РєР°Рє РїРѕР¶РёРІР°РµС€СЊ;РєР°Рє Р¶РёС‚СѓС…Р°;РєР°Рє С‚С‹";
+    String t = "как дела;как она;как оно;как жизнь;как жизнь молодая;как поживаешь;как житуха;как ты";
     return adm.test(s,t.split(";"));
     }
     public String getQuestion2(String name)
 	{
-    String[] s = {"РџРѕРєР° РЅРµ СЂРѕРґРёР»Р°!","РќРµРїР»РѕС…Рѕ...","Р—Р°РјРµС‡Р°С‚РµР»СЊРЅРѕ:)","РќРѕСЂРјР°Р»СЊРЅРѕ!","Р›СѓС‡С€Рµ РІСЃРµС…, Р° С‚Рё???"};
+    String[] s = {"Пока не родила!","Неплохо...","Замечательно:)","Нормально!","Лучше всех, а ти???"};
     return name + " " + s[adm.getRND(s.length)];
     }
 
-    // РўРµСЃС‚ РЅР° РІРѕРїСЂРѕСЃ (3)
+    // Тест на вопрос (3)
     public boolean testQuestion3(String s)
 	{
-    String t = "РїРѕС‡РµРјСѓ";
+    String t = "почему";
     return adm.test(s,t.split(";"));
     }
     public String getQuestion3(String name)
 	{
-    String[] s = {"РџРѕС‚РѕРјСѓ С‡С‚Рѕ, РіР»Р°РґРёРѕР»СѓСЃ!","РџРѕС‚РѕРјСѓ!","Р’СЃС‘ С‚РµР±Рµ СЂР°СЃСЃРєР°Р¶Рё, РґР° РїРѕРєР°Р¶Рё, РґР° РґР°Р№ РїРѕРїСЂРѕР±РѕРІР°С‚СЊ!"};
+    String[] s = {"Потому что, гладиолус!","Потому!","Всё тебе расскажи, да покажи, да дай попробовать!"};
     return name + " " + s[adm.getRND(s.length)];
     }
 
-    // РўРµСЃС‚ РЅР° РІРѕРїСЂРѕСЃ (4)
+    // Тест на вопрос (4)
     public boolean testQuestion4(String s)
     {
-    String t = "?;РєРѕРіРґР°;Р·Р°С‡РµРј;РіРґРµ;РєСѓРґР°;РєРѕРіРѕ;РєРѕРјСѓ;РєС‚Рѕ;С‡РµРј";
+    String t = "?;когда;зачем;где;куда;кого;кому;кто;чем";
     return adm.test(s,t.split(";"));
     }
     public String getQuestion4(String name)
     {
-    String[] s = {"Р›РёС€РЅРёС… РІРѕРїСЂРѕСЃРѕРІ РЅРµ Р·Р°РґР°РІР°Р№!","РњРЅРѕРіРѕ Р±СѓРґРµС€СЊ Р·РЅР°С‚СЊ, РїР»РѕС…Рѕ Р±СѓРґРµС€СЊ СЃРїР°С‚СЊ","РЇ РІРѕР·РґРµСЂР¶СѓСЃСЊ РѕС‚ РѕС‚РІРµС‚Р°"};
+    String[] s = {"Лишних вопросов не задавай!","Много будешь знать, плохо будешь спать","Я воздержусь от ответа"};
     return name + " " + s[adm.getRND(s.length)];
     }
 
-    // РўРµСЃС‚ РЅР° РѕСЃРєРѕСЂР±Р»РµРЅРёРµ Р°РґРјРёРЅР°
+    // Тест на оскорбление админа
     public boolean testSKD(String s)
     {
-    String t = "С‚СѓРї;Р»РѕС…;С‡РјРѕ;РїРёРґ;С€Р°Р»Р°РІ;С€Р»СЋС…;РїСЂРѕСЃС‚РёС‚СѓС‚;СЃСѓРєР°;РјСЂР°Р·;РіСЂСѓР±РёСЏРЅ;С‚РІР°СЂ;РїРёР·;РіР°РІРЅ;РіРѕРІРЅ;РѕР»РµРЅ;РґСѓСЂР°;СѓСЂРѕРґ;С‡РµСЂС‚;РѕРІС†Р°;С€Р»СЋС€РєР°;РѕРІРµС‡РєР°;СЃРІРёРЅ;РєРѕР·Р°;РєР°Р·Р°";
+    String t = "туп;лох;чмо;пид;шалав;шлюх;проститут;сука;мраз;грубиян;твар;пиз;гавн;говн;олен;дура;урод;черт;овца;шлюшка;овечка;свин;коза;каза";
     return adm.test(s,t.split(";"));
     }
     public String getSKD(String name)
     {
-    String[] s = {"РЎР°Рј С‚Р°РєРѕР№!","Р С‚С‹ РЅРµ Р»СѓС‡С€Рµ","РўС‹ С‡Рµ Р°С…СѓРµР»!","Р—Р°С‚РєРЅРёСЃСЊ СЃСѓРєР°!!! РЎРµР№С‡Р°СЃ РїРѕР»РµС‚РёС€СЊ!","Р§С‚Рѕ Р±РѕР»СЊС€Рµ СЃРєР°Р·Р°С‚СЊ РЅРµС‡РµРіРѕ?! РЁР»СЋС€РєР°","Рђ Р·Р° С‰РµРєСѓ РІРѕР·РјС‘С€СЊ???"};
+    String[] s = {"Сам такой!","И ты не лучше","Ты че ахуел!","Заткнись сука!!! Сейчас полетишь!","Что больше сказать нечего?! Шлюшка","А за щеку возмёшь???"};
     return name + " " + s[adm.getRND(s.length)];
     }
 	
-    /*РРќР¤РћР РњРђРўРћР */
+    /*ИНФОРМАТОР*/
     public int n_inf()
     {
     long i = adm.srv.us.db.getLastIndex("inforob");
@@ -135,7 +135,7 @@ import java.sql.*;
     Object times = Manager.getInstance().getData("times");
     if (times == null || times < System.currentTimeMillis())
     {
-    Manager.getInstance().setData("times", System.currentTimeMillis() + adm.srv.getProps().getIntProperty("adm.Informer.time") *60000);// РРЅС‚РµСЂРІР°Р» РІС‹РІРѕРґР° РёРЅС„РѕСЂРјР°С†РёРё
+    Manager.getInstance().setData("times", System.currentTimeMillis() + adm.srv.getProps().getIntProperty("adm.Informer.time") *60000);// Интервал вывода информации
     Set rid = new HashSet();
     Enumeration e = adm.srv.cq.uq.keys();
     while(e.hasMoreElements())
@@ -147,7 +147,7 @@ import java.sql.*;
     }
     for (int i:rid)
     {
-    adm.say(GetInfo(n_inf()), i); // РћРїРѕРІРµС‰РµРЅРёРµ Р±СѓРґРµС‚ РІРѕ РІСЃРµ РєРѕРјРЅР°С‚С‹
+    adm.say(GetInfo(n_inf()), i); // Оповещение будет во все комнаты
     }
     }
     }	
@@ -180,9 +180,9 @@ import java.sql.*;
 
     if(!adm.srv.getProps().getBooleanProperty("adm.useSayAdmin"))
     return;  
-    if(ms.room==555){return;} 	
+    if(((ChatCommandProc)adm.srv.cmd).Quiz.TestRoom(ms.room)){return;} 	
 	
-	// РўРµСЃС‚ РЅР° РїСЂРёРІРµС‚СЃС‚РІРёРµ
+	// Тест на приветствие
     if(adm.testName(ms.msg) && testHi(ms.msg))
 	{
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
@@ -190,7 +190,7 @@ import java.sql.*;
     return;
     }
 	
-    // РўРµСЃС‚ РЅР° РїСЂРѕС‰Р°РЅРёРµ
+    // Тест на прощание
     if(adm.testName(ms.msg) && testBYE(ms.msg))
 	{
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
@@ -198,7 +198,7 @@ import java.sql.*;
     return;
     }
     
-	// РўРµСЃС‚ РЅР° РѕСЃРєРѕСЂР±Р»РµРЅРёРµ Р°РґРјРёРЅР°
+	// Тест на оскорбление админа
     if(adm.testName(ms.msg) && testSKD(ms.msg))
 	{
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
@@ -206,7 +206,7 @@ import java.sql.*;
     return;
     }
 	
-	// РўРµСЃС‚ РЅР° РІРѕРїСЂРѕСЃ (1)
+	// Тест на вопрос (1)
 	if(adm.testName(ms.msg) && testQuestion1(ms.msg))
 	{
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
@@ -214,7 +214,7 @@ import java.sql.*;
     return;
     }
 	
-	// РўРµСЃС‚ РЅР° РІРѕРїСЂРѕСЃ (2)
+	// Тест на вопрос (2)
     if(adm.testName(ms.msg) && testQuestion2(ms.msg))
 	{
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
@@ -222,7 +222,7 @@ import java.sql.*;
     return;
     }
 
-	// РўРµСЃС‚ РЅР° РІРѕРїСЂРѕСЃ (3)
+	// Тест на вопрос (3)
     if(adm.testName(ms.msg) && testQuestion3(ms.msg))
 	{
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
@@ -230,7 +230,7 @@ import java.sql.*;
     return;
     }
     
-	// РўРµСЃС‚ РЅР° РІРѕРїСЂРѕСЃ (4)
+	// Тест на вопрос (4)
     if(adm.testName(ms.msg) && testQuestion4(ms.msg))
 	{
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
@@ -238,7 +238,7 @@ import java.sql.*;
     return;
     }
 	
-	// РўРµСЃС‚ РЅР° СЃС‚Р°С‚
+	// Тест на стат
     if(adm.testName(ms.msg) && adm.testStat(ms.msg))
 	{
     if(!adm.srv.us.authorityCheck(ms.uin, "adminstat")) return;
@@ -246,7 +246,7 @@ import java.sql.*;
     return;
     }
     
-    // РўРµСЃС‚ РЅР° РѕР±СЂР°С‰РµРЅРёРµ Рє Р°РґРјРёРЅСѓ    
+    // Тест на обращение к админу    
     if(adm.testName(ms.msg)){
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
     if(adm.testFlood(ms.uin))
@@ -254,7 +254,7 @@ import java.sql.*;
     adm.lastCount++;
     if(adm.lastCount == (adm.srv.getProps().getIntProperty("adm.maxSayAdminCount")-1))
 	{
-    adm.say("Р”РѕСЃС‚Р°Р»Рё... С‰Р° Р·Р°РєСЂРѕСЋ!", ms.room);
+    adm.say("Достали... ща закрою!", ms.room);
     } 
 	else if(adm.lastCount >= adm.srv.getProps().getIntProperty("adm.maxSayAdminCount"))
 	{
