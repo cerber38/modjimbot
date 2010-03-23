@@ -23,17 +23,22 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.MissingResourceException;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
+import ru.jimbot.modules.chat.ChatCommandProc;
+import ru.jimbot.modules.chat.ChatProps;
+import ru.jimbot.modules.chat.ChatServer;
+import ru.jimbot.modules.chat.Users;
 
 /**
  * Класс управления локализованными текстовыми ресурсами
  * 
  * @author Prolubnikov Dmitriy
- *
+ * @author fraer72
  */
 public class Messages {
 private String Messages_FOLDER = "/msg/";
@@ -77,9 +82,82 @@ private static Messages mainInst = new Messages("");
     }
 
 
+        public synchronized String getString_Room(String key, int room, Users uss) {
+        try {
+     //System.out.print("Messages >>> " + getNewBundle().getString(key));
+            ChatServer srv = ( ChatServer ) Manager.getInstance().getService( ServiceName );
+            String msg = getNewBundle().getString(key);
+            msg = msg.replace("%NICK%", uss.localnick);// Ник пользователя который набрал команду
+            msg = msg.replace("%ID%", Integer.toString(uss.id));// Ид пользователя который набрал команду
+            msg = msg.replace("%ROOM_ID%", Integer.toString(room));// Ид комнаты куда переходим
+            msg = msg.replace("%ROOM_NAME%", srv.us.getRoom(room).getName());// Название комнаты куда переходим
+            msg = msg.replace("%ROOM_TOPIC%", (srv.us.getRoom(room).getTopic().equals("") ? "" : ("\nТема: " + srv.us.getRoom(room).getTopic())));// Тема комнаты куда переходим
+            msg = msg.replace("%ROOM_USERS%", Integer.toString(((ChatCommandProc)srv.cmd).AllUsersRoom(room)));// Количество пользователей в комнате куда переходим
+            return msg;
+        } catch (MissingResourceException e) {
+            return '!' + key + '!';
+        }
+    }
+
+        public synchronized String getString_goChat(String key, int room, Users uss) {
+        try {
+     //System.out.print("Messages >>> " + getNewBundle().getString(key));
+            ChatServer srv = ( ChatServer ) Manager.getInstance().getService( ServiceName );
+            String msg = getNewBundle().getString(key);
+            msg = msg.replace("%NICK%", uss.localnick);// Ник пользователя который набрал команду
+            msg = msg.replace("%ID%", Integer.toString(uss.id));// Ид пользователя который набрал команду
+            msg = msg.replace("%NEW_CHAT_UIN%", uss.basesn);// Уин на который перевели
+            msg = msg.replace("%BALL%", Integer.toString(uss.ball));// Баллы пользователя который набрал команду
+            msg = msg.replace("%DATA%", (uss.data==0 ? "Не указанна" : (("|" + new Date(uss.data)).toString() + "|")));// Дата регистрации
+            msg = msg.replace("%GROUP%", uss.group);// Группа пользователя
+            msg = msg.replace("%NAME%", uss.lname);// Имя пользователя
+            msg = msg.replace("%SEX%", uss.homepage);// Пол пользователя
+            msg = msg.replace("%AGE%", Integer.toString(uss.age));// Возраст пользователя
+            msg = msg.replace("%CITY%", uss.city );// Город пользователя
+            msg = msg.replace("%CLAN%", test_clan(uss) );// Клан пользователя
+            msg = msg.replace("%WEDDING%", (uss.wedding == 0 ? "" : ("В браке с |" + srv.us.getUser(uss.wedding).id + "|" + srv.us.getUser(uss.wedding).localnick)) );// Брак пользователя
+            msg = msg.replace("%ROOM_ID%", Integer.toString(room));// Ид комнаты в которую вошли
+            msg = msg.replace("%ROOM_NAME%", srv.us.getRoom(room).getName());// Название комнаты в которую вошли
+            msg = msg.replace("%ROOM_TOPIC%", (srv.us.getRoom(room).getTopic().equals("") ? "" : ("\nТема: " + srv.us.getRoom(room).getTopic())));// Тема комнаты в которую вошли
+            msg = msg.replace("%ROOM_USERS%", Integer.toString(((ChatCommandProc)srv.cmd).AllUsersRoom(room)));// Количество пользователей в комнате в которую вошли
+            msg = msg.replace("%CHAT_NAME%", ChatProps.getInstance(ServiceName).getStringProperty("chat.name"));// Название чата
+            msg = msg.replace("%ROOM_PRISON_ID%", Integer.toString(ChatProps.getInstance(ServiceName).getIntProperty("room.tyrma")));// Ид комнаты тюрьмы
+            msg = msg.replace("%ROOM_PRISON_NAME%", srv.us.getRoom(ChatProps.getInstance(ServiceName).getIntProperty("room.tyrma")).getName());// Название комнаты тюрьмы
+            return msg;
+        } catch (MissingResourceException e) {
+            return '!' + key + '!';
+        }
+    }
+
+        private String test_clan(Users uss){
+        String clan = "";
+        ChatServer srv = ( ChatServer ) Manager.getInstance().getService( ServiceName );
+        if( uss.clansman != 0 )
+        {
+        clan += (  uss.id != srv.us.getClan( uss.clansman ).getLeader() ? "Состаит в клане - ''" + srv.us.getClan( uss.clansman ).getName() + "''" : ( "Лидер клана - ''" + srv.us.getClan( uss.clansman ).getName() + "''" ) );
+        }
+        else
+        {
+        clan += "В клане не состаит";
+        }
+        return clan;
+        }
+
+         public synchronized String getString_exitChat(String key, Users uss) {
+        try {
+     //System.out.print("Messages >>> " + getNewBundle().getString(key));
+            String msg = getNewBundle().getString(key);
+            msg = msg.replace("%NICK%", uss.localnick);// Ник пользователя который набрал команду
+            msg = msg.replace("%ID%", Integer.toString(uss.id));// Ид пользователя который набрал команду
+            return msg;
+        } catch (MissingResourceException e) {
+            return '!' + key + '!';
+        }
+         }
 
     public synchronized String getString(String key) {
         try {
+     //System.out.print("Messages >>> " + getNewBundle().getString(key));
             return getNewBundle().getString(key);
         } catch (MissingResourceException e) {
             return '!' + key + '!';
@@ -88,6 +166,7 @@ private static Messages mainInst = new Messages("");
     
     public synchronized String getString(String key, Object[] arg) {
         try {
+     //System.out.print("Messages >>> " + java.text.MessageFormat.format(getNewBundle().getString(key), arg));
             return java.text.MessageFormat.format(getNewBundle().getString(key), arg);
         } catch (MissingResourceException e) {
             return '!' + key + '!';

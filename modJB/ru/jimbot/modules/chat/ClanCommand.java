@@ -323,7 +323,7 @@ return;
 // Пользователь существует?
 if( u.id == 0 )
 {
-proc.mq.add( uin, uss.localnick + " такого пользователя несуществует" );
+proc.mq.add( uin, uss.localnick + " такого пользователя не существует" );
 return;
 }
 // Пользователь в чате?
@@ -346,7 +346,7 @@ cmd.srv.getIcqProcess(u.basesn).mq.add(u.sn, u.localnick + " Вас пригла
 "рассмотрения вступления в этот клан наберите !рассмотреть" );
 }
 } else {
-proc.mq.add( uin, uss.localnick + " пользователь " + u.localnick + " уже состаит в клане ''" + cmd.srv.us.getClan( u.clansman ).getName() + "''" );
+proc.mq.add( uin, uss.localnick + " пользователь " + u.localnick + " уже состоит в клане ''" + cmd.srv.us.getClan( u.clansman ).getName() + "''" );
 }
 ////
 }
@@ -383,7 +383,7 @@ uss.ball -= cmd.psp.getIntProperty( "Clan.Ball_3" );
 cmd.srv.us.updateUser( uss );
 proc.mq.add( uin, uss.localnick + " рейтинг клана повышен на " + cmd.psp.getIntProperty( "Clan.Ball_2" ) + " у вас осталось " + uss.ball + " баллов");
 }else{
-proc.mq.add( uin, uss.localnick + " у вас недостаточно " + (uss.ball - cmd.psp.getIntProperty( "Clan.Ball_3" )) + " баллов" );
+proc.mq.add( uin, uss.localnick + " у вас не достаточно " + (uss.ball - cmd.psp.getIntProperty( "Clan.Ball_3" )) + " баллов" );
 }
 }
 
@@ -415,7 +415,7 @@ return;
 }
 if( u.id == 0 )
 {
-proc.mq.add( uin, uss.localnick + " такого пользователя несуществует" );
+proc.mq.add( uin, uss.localnick + " такого пользователя не существует" );
 return;
 }
 if( u.clansman == uss.clansman )
@@ -434,7 +434,7 @@ proc.mq.add( uin, uss.localnick + " успешно изгнан из клан" )
 }
 else
 {
-proc.mq.add( uin, uss.localnick + " вы не можите изгнать пользователя " + u.localnick + ", он сотаит в вашем клане ''" + cmd.srv.us.getClan( u.clansman ).getName() + "''" );
+proc.mq.add( uin, uss.localnick + " вы не можите изгнать пользователя " + u.localnick + ", он сотоит в вашем клане ''" + cmd.srv.us.getClan( u.clansman ).getName() + "''" );
 }
 }
 catch ( Exception ex )
@@ -927,7 +927,7 @@ cmd.srv.getIcqProcess( u.basesn ).mq.add( u.sn, "В клане ''" + cmd.srv.us.
 }
 proc.mq.add( uin, "Успешно выполненно" );
 }else{
-proc.mq.add( uin, "Пользователь состаит не в вашем клане" );
+proc.mq.add( uin, "Пользователь состоит не в вашем клане" );
 return;
 }
 }
@@ -979,7 +979,7 @@ u.clangroup = "member";
 cmd.srv.us.updateUser( u );
 proc.mq.add( uin, "Успешно выполненно" );
 }else{
-proc.mq.add( uin, "Пользователь состаит не в вашем клане" );
+proc.mq.add( uin, "Пользователь состоит не в вашем клане" );
 return;
 }
 }

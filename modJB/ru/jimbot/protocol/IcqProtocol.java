@@ -227,9 +227,9 @@ protList.getMsg(e.getSenderID(), screenName, e.getMessage(), false);
 }
 
 
-public void onAuthorizationFailed(LoginErrorEvent arg0)
+public void onAuthorizationFailed(LoginErrorEvent e)
 {
-Log.getLogger(serviceName).error("Authorization Failed! You UIN or Password is not valid");
+Log.getLogger(serviceName).error("Авторизация с сервером ICQ не удалась. Причина: " +  e.getErrorMessage());
 }
 
 public void onIncomingUser(IncomingUserEvent e) {
@@ -340,7 +340,7 @@ proc.mq.add(uin, s);
  */
 
 public void setXStatus( int n, String text ){
-if ( n >= 0 && n <= 34 )
+if ( n >= 0 && n <= 37 )
 {
 xStatusId = n;
 props.setIntProperty( "icq.xstatus", xStatusId );

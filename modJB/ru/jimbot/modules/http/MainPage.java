@@ -157,8 +157,8 @@ public class MainPage extends HttpServlet {
     	}
     	dt = System.currentTimeMillis();
     	con.print(SrvUtil.HTML_HEAD + "<TITLE>"+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY);
-        con.print("<b><FONT COLOR=\"#006400\">" + MainProps.VERSION + "</FONT></b>");
-        con.print("<H2>Панель управления ботом</H2>");
+        con.print("<p align=\"center\"><b><FONT COLOR=\"#006400\">" + MainProps.VERSION + "</FONT></b></p>");
+        con.print("<hr><H2>Панель управления ботом</H2>");
         /*if(MainProps.getStringProperty("http.user").equals("admin") &&
         MainProps.getStringProperty("http.pass").equals("admin"))
         con.print("<H3><FONT COLOR=\"#FF0000\">В целях безопасности как можно скорее измените " +
@@ -172,7 +172,7 @@ public class MainPage extends HttpServlet {
     	con.print("<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=main_props\">" +
     			"Основные настройки</A><br>");
     	con.print("<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=srvs_manager\">" +
-    			"Управление сервисами</A><br>");
+    			"Управление сервисами</A><br><br>");
     	String s = "<TABLE>";
     	for(String n:Manager.getInstance().getServiceNames()){
     		s += "<TR><TH ALIGN=LEFT>"+n+"</TD>";
@@ -200,10 +200,11 @@ public class MainPage extends HttpServlet {
     	}
     	s += "</TABLE>";
     	con.print(s);
-        /*con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=help\">" + "Помощь</A>");*/
+        con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=Tags\">" + "Tags</A>");
     	con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=stop_bot\">" + "Отключить бота</A>");
     	con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=restart_bot\">" + "Перезапустить бота</A>");
-    	con.print("</FONT></BODY></HTML>");
+        con.print("<hr><br><br>");
+        con.print("</FONT></BODY></HTML>");
     }
     
     /**
@@ -763,28 +764,47 @@ public class MainPage extends HttpServlet {
     	printOkMsg(con,"main_page");
     }
 
-    /*public void help(HttpConnection con) throws IOException {
+    public void Tags(HttpConnection con) throws IOException {
     String uid = con.get("uid");
     if(!checkSession(uid)) {
     SrvUtil.error(con,"Ошибка авторизации!");
     return;
     }
     con.print(SrvUtil.HTML_HEAD + "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
-    "<H2>Панель управления ботом</H2>" +
-    "<H3>Помощь по обозначениям:</H3>");
-    con.print("<P>#NIK# - ник пользователя</P>");
-    con.print("<P>#ID# - ид пользователя</P>");
-    con.print("<P>#UIN# - уин пользователя</P>");
-    con.print("<P>#GROUP# - группа пользователя</P>");
-    con.print("<P>#ROOM# - название комнаты в которой сидит пользователь, используется при входе</P>");
-    con.print("<P>#ROOMID# - ид комнаты в которой сидит пользователь, используется при входе</P>");
-    con.print("<P>#BALLID# - количество баллов пользователя, используется при входе</P>");
-    con.print("<P>#ROOM_IN# - название комнаты в которую перешел пользователь</P>");
-    con.print("<P>#ROOM_IN_ID# - ид комнаты в которую перешел пользователь</P>");
-    con.print("<P>#TOPIC# - тема комнаты, используется при входе в чат</P>");
+    "<H3>Tags</H3>");
+    con.print("<b>room:</b>");
+    con.print("<P>%NICK% - ник пользователя.</P>");
+    con.print("<P>%ID% - id пользователя.</P>");
+    con.print("<P>%ROOM_ID% - id комнаты куда пользователь переходит.</P>");
+    con.print("<P>%ROOM_NAME% - название комнаты куда пользователь переходит.</P>");
+    con.print("<P>%ROOM_TOPIC% - тема комнаты куда пользователь переходит.</P>");
+    con.print("<P>%ROOM_USERS% - количество пользователей в комнате куда пользователь переходит.</P>");
+    con.print("<b>goChat:</b>");
+    con.print("<P>%NICK% - ник пользователя.</P>");
+    con.print("<P>%ID% - id пользователя.</P>");
+    con.print("<P>%ROOM_ID% - id комнаты при входе.</P>");
+    con.print("<P>%ROOM_NAME% - название комнаты при входе.</P>");
+    con.print("<P>%ROOM_TOPIC% - тема комнаты при входе.</P>");
+    con.print("<P>%ROOM_USERS% - количество пользователей в комнате при входе.</P>");
+    con.print("<P>%ROOM_PRISON_ID% - id комнаты \"Тюрьмы\" в чате.</P>");
+    con.print("<P>%ROOM_PRISON_NAME% - название комнаты \"Тюрьмы\" в чате.</P>");
+    con.print("<P>%CHAT_NAME% - название чата.</P>");
+    con.print("<P>%NEW_CHAT_UIN% - уин чата т.е. самый свободный при переводе.</P>");
+    con.print("<P>%BALL% - рейтинг пользователя.</P>");
+    con.print("<P>%DATA% - дата регистрации пользователя.</P>");
+    con.print("<P>%GROUP% - группа пользователя.</P>");
+    con.print("<P>%NAME% - имя пользователя.</P>");
+    con.print("<P>%SEX% - пол пользователя.</P>");
+    con.print("<P>%AGE% - возраст пользователя.</P>");
+    con.print("<P>%CITY% - город пользователя.</P>");
+    con.print("<P>%CLAN% - вернет либо \"Лидер клана |clan_name|\", либо \"Состоит в клане |clan_name| \", либо \"В клане не состоит\".</P>");
+    con.print("<P>%WEDDING% - вернет \"В браке с |nick|\", если пользователь в браке</P>");
+    con.print("<b>exitChat:</b>");
+    con.print("<P>%NICK% - ник пользователя.</P>");
+    con.print("<P>%ID% - id пользователя.</P>");
     con.print("<FORM><P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
     con.print("</FONT></BODY></HTML>");
-    }*/
+    }
     
     /**
      * Страница настроек групп пользователей

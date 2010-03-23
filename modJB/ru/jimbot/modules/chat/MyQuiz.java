@@ -6,10 +6,14 @@
 package ru.jimbot.modules.chat;
 
 import com.mysql.jdbc.PreparedStatement;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Random;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import ru.jimbot.util.Log;
 
@@ -29,6 +33,7 @@ static {
 R = new Random(System.nanoTime());
 }
 private boolean QuizStart = true;
+private boolean autofilling = true;
 
 
 public MyQuiz(ChatServer s)
@@ -93,7 +98,6 @@ srv.cq.addMsg(g_1, "", quiz.room);
 quiz.time = System.currentTimeMillis();
 quiz.start = false;
 QuizInfo.put(id, quiz);
-Log.getLogger(srv.getName()).talk("Вопрос № - (" + quiz.AG + "): " + s);
 }else{
     // если ответ не дан
 String g_2 = "На вопрос № - (" + quiz.AG + "): " + s + "\n" +
@@ -132,7 +136,7 @@ public void Otvet(String uin, int room)
 {
 int id = GetQuizId(room);// id викторины
 QuizInfo quiz = QuizInfo.get(id);
-srv.us.getUser(uin).ball += 1;//дадим бал к репе :)
+srv.us.getUser(uin).ball += psp.getIntProperty("vic.ball");//дадим бал к репе :)
 srv.us.getUser(uin).answer += 1;//дадим 1 правельный ответ :)
 srv.us.updateUser(srv.us.getUser(uin));
 srv.cq.addMsg("Пользователь |" + srv.us.getUser(uin).id  +
@@ -164,11 +168,16 @@ QuizInfo.put(i, quiz);
  */
 private void Quiz()
 {
-    //if(TestCountChat()){         // TODO: будет ли грузить данная проверка в потоке? и
-                                 // понять, будет ли работать викторина после нее? т.е. если return, а
-                                 // текущее время не сохраненно
-    //return;// если в чате не кого нету
-    //}
+ if(getCountStatus() == 0){
+     if(autofilling){
+     Log.getLogger(srv.getName()).talk("Нет вопросов в БД для викторины!");
+     autofilling = false;
+     }
+     return;// если нет вопросов в БД
+ }
+  if(TestCountChat()){
+    return;// если в чате не кого нету
+    }
 if(QuizStart){
     String s = psp.getStringProperty("vic.room");
         if(s.equals("")){
@@ -239,6 +248,13 @@ private boolean TestCountChat(){
  * @param room - комната
  */
 public void parse(String uin, String mmsg, int room) {
+ if(getCountStatus() == 0){
+     return;// если нет вопросов
+ }   
+     String s = psp.getStringProperty("vic.room");
+        if(s.equals("")){
+            return ;// если не указанно не одной комнаты
+        }
 if(TestOtvet(room, mmsg) && TestRoom(room)) Otvet(uin,room);
 }
 
@@ -408,5 +424,19 @@ public boolean hasStars(int id)
 QuizInfo quiz = QuizInfo.get(id);
 return quiz.starsCount != 1 && quiz.starsCount != 0;
 }
+
+/**
+ * Получаем максимальный ид
+ * @return
+ */
+
+public int getCountStatus()
+{
+String q = "SELECT count(*) FROM `victorina` WHERE id";
+Vector<String[]> v = srv.us.db.getValues(q);
+return Integer.parseInt(v.get(0)[0]);
+}
+
+
 
 }

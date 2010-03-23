@@ -141,6 +141,7 @@ public class ChatProps implements AbstractProps {
         setBooleanProperty("lichnoe.on.off", false);
         setStringProperty("vic.room","555;888");
         setBooleanProperty("vic.on.off", false);
+        setIntProperty("vic.ball", 1);
         setIntProperty("ball.grant.1",1000);
         setIntProperty("ball.grant.2",1000);
         setIntProperty("ball.grant.3",1000);
@@ -192,6 +193,8 @@ public class ChatProps implements AbstractProps {
         setBooleanProperty("auto_status.on.off", false);
         setBooleanProperty("wedding.floor.on.off", true);
         setIntProperty("wedding.room", 7 );
+        setBooleanProperty("Questionnaire.on.off", true);
+        setBooleanProperty("ball.on.off", true);
     }
 
     public UserPreference[] getUserPreference(){
@@ -272,6 +275,8 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.BOOLEAN_TYPE,"id.on.off","Включить/Выключить id рядом с ником в сообщении",getBooleanProperty("id.on.off"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"auto_status.on.off","Включить/Выключить авто смену x-status`ов",getBooleanProperty("auto_status.on.off"),""),
         new UserPreference(UserPreference.INTEGER_TYPE,"auto_status.time","Интервал смены x-status`ов",getIntProperty("auto_status.time"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"Questionnaire.on.off","Включить/Выключить заполнение анкеты после регистрации",getBooleanProperty("Questionnaire.on.off"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"ball.on.off","Включить/Выключить возможность передачи баллов между пользователями",getBooleanProperty("ball.on.off"),""),
         //банрум
         new UserPreference(UserPreference.CATEGORY_TYPE,"banroom", "Настройки закрытия в комнате", "",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"room.tyrma","Комната Тюрьма в чате",getIntProperty("room.tyrma"),""),
@@ -290,6 +295,7 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.CATEGORY_TYPE,"victorina", "Игра викторина","",""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"vic.on.off","Включить/выключить викторина",getBooleanProperty("vic.on.off"),""),
         new UserPreference(UserPreference.STRING_TYPE,"vic.room", "Комнаты где будет проходить викторина", getStringProperty("vic.room"),""),
+        new UserPreference(UserPreference.INTEGER_TYPE,"vic.ball","Количество баллов за правельный ответ",getIntProperty("vic.ball"),""),
         //данные
         new UserPreference(UserPreference.CATEGORY_TYPE,"AboutUser", "Настройки личной информации","",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"about.user.long","Максимальная длина имени и города.",getIntProperty("about.user.long"),""),

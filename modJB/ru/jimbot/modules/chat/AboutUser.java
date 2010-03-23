@@ -113,11 +113,11 @@ List += "Возраст - " + u.age + '\n';
 List += "Город - " + u.city + '\n';
 if( u.clansman != 0 )
 {
-List += (  u.id != cmd.srv.us.getClan( u.clansman ).getLeader() ? "Состаит в клане - ''" + cmd.srv.us.getClan( u.clansman ).getName() + "''" : ( "Лидер клана - ''" + cmd.srv.us.getClan( u.clansman ).getName() + "''" ) ) + '\n';
+List += (  u.id != cmd.srv.us.getClan( u.clansman ).getLeader() ? "Состоит в клане - ''" + cmd.srv.us.getClan( u.clansman ).getName() + "''" : ( "Лидер клана - ''" + cmd.srv.us.getClan( u.clansman ).getName() + "''" ) ) + '\n';
 }
 else
 {
-List += "В клане не состаит" + '\n';
+List += "В клане не состоит" + '\n';
 }
 List += "Правельных ответов в викторине - " + u.answer + '\n';
 List += (u.wedding == 0 ? "" : ("В браке с |" + cmd.srv.us.getUser(u.wedding).id + "|" + cmd.srv.us.getUser(u.wedding).localnick + '\n'));
