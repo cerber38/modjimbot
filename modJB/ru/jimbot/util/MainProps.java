@@ -42,7 +42,7 @@ import ru.jimbot.table.UserPreference;
  * @author Prolubnikov Dmitry
  */
 public class MainProps {
-    public static final String VERSION = "jImBot v.0.4.0 pre 4 (06/07/2009) mod by fraer72 (test_4) (23/3/2010)";
+    public static final String VERSION = "jImBot v.0.4.0 pre 4 (06/07/2009) mod by fraer72 (test_6) (24/3/2010)";
     public static final int VER_INT = 18;
 //    public static final String VER_DESC ="test version";
     private static int ver_no = 0;

@@ -404,10 +404,12 @@ firstStartMsg=true;
      * Основная процедура парсера команд
      */
     public void parse(IcqProtocol proc, String uin, String mmsg) {
+    if(psp.getBooleanProperty("vic.on.off")){
     if(Quiz == null)
     {
     Quiz = new MyQuiz(srv);
     Quiz.start();
+    }
     }
     if(voting == null)
     {
@@ -612,6 +614,20 @@ firstStartMsg=true;
             comNew.remove(uin + "Questionnaire");
             Questionnaire.remove(uin);
             Questionnaire_CMD.remove(uin);
+            }
+            }else
+            tp = parser.parseCommand(tmsg);
+            /********************************/
+            if (comNew.containsKey("goChat_"+uin)){
+            if (!comNew.get("goChat_"+uin).isExpire()){
+            tp = parser.parseCommand(comNew.get("goChat_"+uin).getCmd());
+            }
+            else
+            {
+            tp = parser.parseCommand(tmsg);
+            comNew.remove("goChat_"+uin);
+            Wedding_ID.remove("goChat_"+uin);
+            Wedding_STATUS.remove("goChat_"+uin);
             }
             }else
             tp = parser.parseCommand(tmsg);
@@ -874,10 +890,8 @@ firstStartMsg=true;
      } 
      else
      {
-     if(srv.us.getUser(uin).state==UserWork.STATE_NO_CHAT){
-     if (!comNew.containsKey(uin + "Questionnaire")){
-     goChat(proc, uin, mmsg, parser.parseArgs(mmsg));
-     }
+     if(srv.us.getUser(uin).state==UserWork.STATE_NO_CHAT & !comNew.containsKey(uin + "Questionnaire")){
+     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.parse.5", new Object[] {psp.getStringProperty("chat.name")}));
      return;
      }
      if(srv.us.getUser(uin).localnick==null || srv.us.getUser(uin).localnick.equals("") || srv.us.getUser(uin).state == UserWork.STATE_NO_REG) {
@@ -1402,9 +1416,9 @@ firstStartMsg=true;
      }
 
      //вызовем goChat
-     if(!psp.getBooleanProperty("Questionnaire.on.off")){
+     /*if(!psp.getBooleanProperty("Questionnaire.on.off")){
      goChat(proc, uin, mmsg, v);
-     }
+     }*/
      //return;
 
      /*
@@ -2037,7 +2051,7 @@ firstStartMsg=true;
     boolean f = false;
     int room = 0;
     boolean room_in_chat = false;
-    if(uss.localnick==null || uss.localnick.equals("") || uss.state==UserWork.STATE_CAPTCHA)
+    if(uss.localnick==null || uss.localnick.equals("") || uss.state==UserWork.STATE_CAPTCHA || uss.state==UserWork.STATE_NO_REG)
     {
     proc.mq.add(uin, Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.0", room, uss));
     return;
@@ -2046,7 +2060,7 @@ firstStartMsg=true;
     String pass = "";
     if (uss.state==UserWork.STATE_NO_CHAT)
     {
-    if(comNew.containsKey(uin))
+    if(comNew.containsKey("goChat_"+uin))
     {
     try
     {
@@ -2089,7 +2103,7 @@ firstStartMsg=true;
     return;
     }
     room_in_chat = true;
-    comNew.remove(uin);
+    comNew.remove("goChat_"+uin);
     }
     //TODO список комнат перед входом в чат
     Set<Integer> rid = srv.us.getRooms();
@@ -2114,7 +2128,7 @@ firstStartMsg=true;
     list += "[" + i + "] - " + srv.us.getRoom(i).getName() + " «" + cnt + "чел.»\n";
     }
     proc.mq.add(uin, list + "\n----\n" + Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.8", room, uss));
-    comNew.put(uin, new NewExtend(uin, mmsg, mmsg, v, 2*60000));
+    comNew.put("goChat_"+uin, new NewExtend(uin, mmsg, mmsg, v, 2*60000));
     return;
     }
     Log.getLogger(srv.getName()).info("Add contact " + uin);
@@ -2179,8 +2193,8 @@ firstStartMsg=true;
     Log.getLogger(srv.getName()).talk(uss.localnick + " Ушел(а) из чата");
     srv.us.db.log(uss.id,uin,"STATE_OUT",uss.localnick + " Ушел(а) из чата",uss.room);
     srv.us.db.event(uss.id, uin, "STATE_OUT", 0, "", uss.localnick + " Ушел(а) из чата");
-    srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_exitChat("ChatCommandProc.commandgoChat.0", uss), uss.sn, uss.room);
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_exitChat("ChatCommandProc.commandgoChat.1", uss));
+    srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_exitChat("ChatCommandProc.commandexitChat.0", uss), uss.sn, uss.room);
+    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_exitChat("ChatCommandProc.commandexitChat.1", uss));
     srv.cq.delUser(uin);
     }
     

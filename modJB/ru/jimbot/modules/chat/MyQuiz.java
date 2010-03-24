@@ -121,6 +121,7 @@ public boolean TestOtvet(int room, String msg)
 {
 int id = GetQuizId(room);// id викторины
 QuizInfo quiz = QuizInfo.get(id);
+//System.out.print("room - " + room + " users" + msg + " answer" + GetAnswer(quiz.AG));
 String[] mmsg = msg.split(" ");
 String answer = mmsg[0].toLowerCase();
 return answer.trim().equals(GetAnswer(quiz.AG).toLowerCase());
@@ -168,14 +169,15 @@ QuizInfo.put(i, quiz);
  */
 private void Quiz()
 {
- if(getCountStatus() == 0){
-     if(autofilling){
-     Log.getLogger(srv.getName()).talk("Нет вопросов в БД для викторины!");
-     autofilling = false;
-     }
-     return;// если нет вопросов в БД
- }
-  if(TestCountChat()){
+    if(getCountQuestion() == 0){
+    if(autofilling){
+    Log.getLogger(srv.getName()).talk("Нет вопросов в БД для викторины!");
+    autofilling = false;
+    }
+    return;// если нет вопросов в БД
+    }
+    if(!TestCountChat()){
+        //System.out.print("errore - no users or chat");
     return;// если в чате не кого нету
     }
 if(QuizStart){
@@ -192,7 +194,7 @@ if(QuizStart){
 // тест времени 
 for(int id = 0;id < count; id++){
     QuizInfo quiz = QuizInfo.get(id);
-    if((System.currentTimeMillis() - quiz.time)>90000){
+    if((System.currentTimeMillis() - quiz.time)>psp.getIntProperty("vic.time")){
         quiz.time = System.currentTimeMillis();// пишем новое время
      Vopros(quiz.id, quiz.room); // вопрос
     }
@@ -235,7 +237,8 @@ private boolean TestCountChat(){
     cnt++;
     }
     }
-   if((cnt-1) == 0){
+    //System.out.print(cnt);
+   if((cnt) == 0){
        return false;
    }
     return true;
@@ -248,13 +251,10 @@ private boolean TestCountChat(){
  * @param room - комната
  */
 public void parse(String uin, String mmsg, int room) {
- if(getCountStatus() == 0){
-     return;// если нет вопросов
- }   
-     String s = psp.getStringProperty("vic.room");
-        if(s.equals("")){
-            return ;// если не указанно не одной комнаты
-        }
+    if(getCountQuestion() == 0){
+    return;// если нет вопросов
+    }
+    //System.out.print(room + " " + mmsg);
 if(TestOtvet(room, mmsg) && TestRoom(room)) Otvet(uin,room);
 }
 
@@ -430,7 +430,7 @@ return quiz.starsCount != 1 && quiz.starsCount != 0;
  * @return
  */
 
-public int getCountStatus()
+public int getCountQuestion()
 {
 String q = "SELECT count(*) FROM `victorina` WHERE id";
 Vector<String[]> v = srv.us.db.getValues(q);
