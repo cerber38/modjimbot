@@ -148,8 +148,19 @@ public class Manager {
     /**
      * Проверка подключения к БД. Повоторят попытку подключиться если база недоступна.
      */
+    
+    /*public boolean gettestBD(String name){
+    return services.get(name).testBd;
+    }
+    
+    public void settestBD(String name, boolean test){
+    services.put(name, services.get(name).testBd);
+    }*/
+
     public void testDB(){
     	for(String s : services.keySet()){
+            //if(services.get(s).testBd)
+                //return;
     		if(services.get(s).isRun){
     			try {
     				if(services.get(s).getDB().isClosed()){

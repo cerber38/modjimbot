@@ -34,6 +34,7 @@ public class AbstractServer {
     private AbstractProps props = null;
     // Для хранения промежуточных результатов между запусками скриптов бота
     public Vector res = new Vector();
+    public boolean testBd = true;
     /** Creates a new instance of Service */
     public AbstractServer() {
     }

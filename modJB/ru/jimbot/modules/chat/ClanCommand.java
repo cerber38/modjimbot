@@ -413,6 +413,11 @@ if( uss.id != cmd.srv.us.getClan( uss.clansman ).getLeader() )
 proc.mq.add( uin, uss.localnick + " вы не лидер своего клана" );
 return;
 }
+if( u.id == cmd.srv.us.getClan( uss.clansman ).getLeader() )
+{
+proc.mq.add( uin, uss.localnick + " вы лидер своего клана как вы можите кинуть его:D" );
+return;
+}
 if( u.id == 0 )
 {
 proc.mq.add( uin, uss.localnick + " такого пользователя не существует" );
@@ -527,7 +532,7 @@ ClanMap.remove( uin );
 }
 if( !I )
 {
-proc.mq.add( uin, uss.localnick + " приглошение в клан ''" + cmd.srv.us.getClan( TestInvitation( uin ) ).getName() + "''\n" +
+cmd.srv.getIcqProcess(uss.basesn).mq.add(uss.sn, uss.localnick + " приглошение в клан ''" + cmd.srv.us.getClan( TestInvitation( uin ) ).getName() + "''\n" +
 "''Да'' - для вступления, ''Нет'' - отказаться." );
 ClanMap.put( uin, new ClanMap( uin, mmsg, mmsg, v, 5*60000 ) );
 return;
@@ -551,7 +556,7 @@ return;
 proc.mq.add( uin, uss.localnick + " вы отказались от вступления в клан ''" + cmd.srv.us.getClan( TestInvitation( uin ) ).getName() + "''" );
 if( u.state == UserWork.STATE_CHAT )
 {
-proc.mq.add( u.sn, "Пользователь " + uss.localnick + " отказался от вступления в ваш клан");
+cmd.srv.getIcqProcess(u.basesn).mq.add(u.sn, "Пользователь " + uss.localnick + " отказался от вступления в ваш клан");
 }
 c.remove( uin );
 return;

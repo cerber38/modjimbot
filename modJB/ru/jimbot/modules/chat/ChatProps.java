@@ -196,6 +196,11 @@ public class ChatProps implements AbstractProps {
         setIntProperty("wedding.room", 7 );
         setBooleanProperty("Questionnaire.on.off", true);
         setBooleanProperty("ball.on.off", true);
+        setBooleanProperty("voting.on.off", true);
+        setIntProperty("voting.time", 1 );
+        setIntProperty("voting.kick.time", 30 );
+        setIntProperty("voting.count", 2 );
+        setBooleanProperty("inchat.on.off", true);
     }
 
     public UserPreference[] getUserPreference(){
@@ -278,6 +283,7 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.INTEGER_TYPE,"auto_status.time","Интервал смены x-status`ов",getIntProperty("auto_status.time"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"Questionnaire.on.off","Включить/Выключить заполнение анкеты после регистрации",getBooleanProperty("Questionnaire.on.off"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"ball.on.off","Включить/Выключить возможность передачи баллов между пользователями",getBooleanProperty("ball.on.off"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"inchat.on.off","Включить/Выключить интерактивный вход в чат",getBooleanProperty("inchat.on.off"),""),
         //банрум
         new UserPreference(UserPreference.CATEGORY_TYPE,"banroom", "Настройки закрытия в комнате", "",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"room.tyrma","Комната Тюрьма в чате",getIntProperty("room.tyrma"),""),
@@ -348,6 +354,12 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.CATEGORY_TYPE,"wedding", "Настройки свадьбы" +"","",""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"wedding.floor.on.off","Включить/Выключить проверку пола",getBooleanProperty("wedding.floor.on.off"),""),
         new UserPreference(UserPreference.INTEGER_TYPE,"wedding.room","Комната",getIntProperty("wedding.room")," секунд"),
+        //Настройки голосования
+        new UserPreference(UserPreference.CATEGORY_TYPE,"voting", "Настройки голосования" +"","",""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"voting.on.off","Включить/Выключить голосование в чате",getBooleanProperty("voting.on.off"),""),
+        new UserPreference(UserPreference.INTEGER_TYPE,"voting.time","Время голосования",getIntProperty("voting.time")," минут"),
+        new UserPreference(UserPreference.INTEGER_TYPE,"voting.kick.time","Время кик при окончании голосования",getIntProperty("voting.kick.time")," минут"),
+        new UserPreference(UserPreference.INTEGER_TYPE,"voting.count","Количество голосований для пользователя в сутки ",getIntProperty("voting.count"),""),
         };
         return p;
         }

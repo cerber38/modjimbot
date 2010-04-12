@@ -26,6 +26,8 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Vector;
 
+import ru.jimbot.Manager;
+import ru.jimbot.modules.chat.ChatServer;
 import ru.jimbot.util.Log;
 
 /**
@@ -98,6 +100,12 @@ public abstract class DBAdaptor {
                 ex.printStackTrace();
                 f=false;
                 lastConnect = System.currentTimeMillis();
+                //Log.getLogger(serviceName).talk("Ошибка подключения к базе данных!!!" +
+                //" Сервис \"" + serviceName + "\" будет остановлен");
+                //ChatServer srv = ( ChatServer ) Manager.getInstance().getService( serviceName );
+                //srv.stop();
+                //Manager.getInstance().getService(serviceName).stop();// Остановис данный сервис
+                //shutdown();// Закрываем соединение с БД
                 Log.getLogger(serviceName).talk("Ошибка подключения к базе данных!!!");
             }
         return f;

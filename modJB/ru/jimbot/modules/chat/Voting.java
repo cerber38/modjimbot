@@ -19,8 +19,8 @@ private HashMap<String, VotingMap> VotingMap;
 private ConcurrentHashMap <String, Integer> Repetition;// Масив для хранения информации
 private ConcurrentHashMap <String, String> Msg;// Масив для хранения сообщений пользователя
 private CommandParser parser;
-private ChatCommandProc cmd;
-private long TIME_CMD = 1*60000;// Время временной команды
+public ChatServer srv;
+private long TIME_CMD = 0;// Время временной команды
 public long Vtime = System.currentTimeMillis();//Время
 private Thread x;// поток
 private int sleepAmount = 1000;
@@ -31,16 +31,19 @@ public int ALL_Voice = 0;// Общее количество возможных �
 public int ID_Voice = 0;// Ид пользователя против которого идет голосование
 public int ROOM_Voice = 0;// Комната для голосования
 public int moder = 0;// Пользователь который начал голосование
-public final String R = "По результатам голосования ты велетел(а) из чата на 30 мин. :)";//Причина
+public String R = "";//Причина
 
-public Voting(ChatCommandProc c)
+public Voting(ChatServer s)
 {
 parser = new CommandParser(commands);
-cmd = c;
+srv = s;
+TIME_CMD = ChatProps.getInstance(srv.getName()).getIntProperty("voting.time")*60000;
+R = "По результатам голосования ты велетел(а) из чата на " + ChatProps.getInstance(srv.getName()).getIntProperty("voting.kick.time") + " мин. :)";
 Repetition  = new ConcurrentHashMap ();
 Msg = new ConcurrentHashMap ();
 VotingMap = new HashMap<String, VotingMap>();
 init();
+start();
 }
 
 private void init()
@@ -89,7 +92,9 @@ boolean f = true;
 switch (tst)
 {
 case 1:
+if(ChatProps.getInstance(srv.getName()).getBooleanProperty("voting.on.off")){
 Voting(proc, uin, parser.parseArgs(tmsg), mmsg);
+} else proc.mq.add(uin, "Эта команда закрыта администрацией чата");
 break;
 default:
 f = false;
@@ -99,26 +104,26 @@ return f;
 
     public void Voting(IcqProtocol proc, String uin, Vector v, String mmsg)
     {
-    if(!cmd.isChat(proc,uin)) return;
-    if(!cmd.auth(proc,uin, "voting")) return;
+    if(!((ChatCommandProc)srv.cmd).isChat(proc,uin)) return;
+    if(!((ChatCommandProc)srv.cmd).auth(proc,uin, "voting")) return;
     if(StartVoting){return;}// Если голосование уже идет.
     Vtime = System.currentTimeMillis();// Запустим таймер
     int id = (Integer)v.get(0);
-    Users uss = cmd.srv.us.getUser(uin);// Пользователь
+    Users uss = srv.us.getUser(uin);// Пользователь
     moder = uss.id;
     ROOM_Voice = uss.room;// Запомним комнату где идет голосование
     ID_Voice = id;// Пользователь против которого голосуем
-    Users u = cmd.srv.us.getUser(ID_Voice);
+    Users u = srv.us.getUser(ID_Voice);
     StartVoting = true;// Включим голосование
     //Если простой пользователь уже использовал 2 голосования
-    if ((!cmd.psp.testAdmin(uss.sn)) && (!cmd.srv.us.getUserGroup(uss.id).equals("moder")) && (!cmd.srv.us.getUserGroup(uss.id).equals("admin")) && (cmd.srv.us.getCountgolosovanChange(uss.id) >= 2))
+    if ((!ChatProps.getInstance(srv.getName()).testAdmin(uss.sn)) && (!srv.us.getUserGroup(uss.id).equals("moder")) && (!srv.us.getUserGroup(uss.id).equals("admin")) && (srv.us.getCountgolosovanChange(uss.id) >= ChatProps.getInstance(srv.getName()).getIntProperty("voting.count")))
     {
-    proc.mq.add(uin,uss.localnick + ", голосование не создано.\nВы можете только 2 раза в сутки создавать голосование за КИК.\nВы исчерпали свой лимит. :-P");
+    proc.mq.add(uin,uss.localnick + ", голосование не создано.\nВы можете только " + ChatProps.getInstance(srv.getName()).getIntProperty("voting.count") + " раза в сутки создавать голосование за КИК.\nВы исчерпали свой лимит. :-P");
     StartVoting = false;
     return;
     }
     // Если пользователь системный админ или имеет полномочие anti_kik?
-    if ((cmd.psp.testAdmin(u.sn)) || (cmd.qauth(proc, u.sn, "anti_kik")))
+    if ((ChatProps.getInstance(srv.getName()).testAdmin(u.sn)) || (((ChatCommandProc)srv.cmd).qauth(proc, u.sn, "anti_kik")))
     {
     proc.mq.add(uin,uss.localnick + " вы не можете создать голосование против этого пользователя, он владеет иммунитетом");
     StartVoting = false;
@@ -152,34 +157,34 @@ return f;
     StartVoting = false;
     return;
     }
-    cmd.srv.us.db.event(uss.id, uin, "GOLOSOVAN", u.id, u.sn, "голосовал за кик");
-    Enumeration <String> e = cmd.srv.cq.uq.keys();
+    srv.us.db.event(uss.id, uin, "GOLOSOVAN", u.id, u.sn, "голосовал за кик");
+    Enumeration <String> e = srv.cq.uq.keys();
     while (e.hasMoreElements())
     {
     String i = e.nextElement();
-    Users us = cmd.srv.us.getUser(i);
+    Users us = srv.us.getUser(i);
     Repetition.put(us.sn, 2);
     Msg.put(us.sn, mmsg);
     if((us.state == UserWork.STATE_CHAT) && (us.room == ROOM_Voice));
     {
     if((us.id != u.id) && (us.room == ROOM_Voice))
     {
-    cmd.srv.getIcqProcess(us.basesn).mq.add(us.sn,"Пользователем " + uss.localnick + "|" + uss.id + "| начато голосование за КИК пользователя - " + u.localnick + "|" + u.id + "|n"+
-    "Выпнуть его из чата на 30 минут, отправьте ''да'' или ''нет'' ? (без ковычек)n" +
-    "Отправьте ''0'' (цифру ноль), что бы воздержатся от ответа.nЧисло голосующих ~ " + VotingUsersRoom() + " чел.\nВремя на голосование - 2 мин.");
+    srv.getIcqProcess(us.basesn).mq.add(us.sn,"Пользователем " + uss.localnick + "|" + uss.id + "| начато голосование за КИК пользователя - " + u.localnick + "|" + u.id + "|\n"+
+    "Выпнуть его из чата на " + ChatProps.getInstance(srv.getName()).getIntProperty("voting.kick.time") + " минут, отправьте ''да'' или ''нет'' ? (без ковычек)\n" +
+    "Отправьте ''0'' (цифру ноль), что бы воздержатся от ответа.\nЧисло голосующих ~ " + VotingUsersRoom() + " чел.\nВремя на голосование - " + ChatProps.getInstance(srv.getName()).getIntProperty("voting.time") + " мин.");
     VotingMap.put(us.sn, new VotingMap(us.sn,  Msg.get(us.sn), Msg.get(us.sn), parser.parseArgs(mmsg), TIME_CMD));
-    VoicesOfUsers(cmd.srv.getIcqProcess(us.basesn), us.sn, parser.parseArgs(mmsg), Msg.get(us.sn));
+    VoicesOfUsers(srv.getIcqProcess(us.basesn), us.sn, parser.parseArgs(mmsg), Msg.get(us.sn));
     }
     }
     }
-    cmd.srv.getIcqProcess(u.basesn).mq.add(u.sn,"Пользователь " + uss.localnick + "|" + uss.id + "| запустил против тебя голосование.\nЕсли большинство проголосует ЗА, тебя выкинет из чата на 30 минут.");
+    srv.getIcqProcess(u.basesn).mq.add(u.sn,"Пользователь " + uss.localnick + "|" + uss.id + "| запустил против тебя голосование.\nЕсли большинство проголосует ЗА, тебя выкинет из чата на " + ChatProps.getInstance(srv.getName()).getIntProperty("voting.kick.time") + " минут.");
     VotingMap.remove(u.sn);
     Repetition.remove(u.sn);
     }
 
 
     private void VoicesOfUsers(IcqProtocol proc, String uin, Vector v, String mmsg) {
-    Users uss = cmd.srv.us.getUser(uin);
+    Users uss = srv.us.getUser(uin);
     Msg.put(uin, mmsg);
     String voice  = "";
     if (uss.state == UserWork.STATE_CHAT)
@@ -229,19 +234,12 @@ return f;
 
     public boolean VotingTime()// Время голосования. По умолчанию 2 минуты.
     {
-    return (System.currentTimeMillis()-Vtime)>120000;
+    return (System.currentTimeMillis()-Vtime) > 60000 * ChatProps.getInstance(srv.getName()).getIntProperty("voting.time");
     }
 
     public boolean Test(String uin)
     {
-    if(Repetition.get(uin) == 1)
-    {
-    return true;// истина
-    }
-    else
-    {
-    return false;// лож
-    }
+    return (Repetition.get(uin) == 1);
     }
 
 
@@ -249,11 +247,11 @@ return f;
     public int VotingUsersRoom()
     {
     int c = 0;
-    Enumeration <String> e2 = cmd.srv.cq.uq.keys();
+    Enumeration <String> e2 = srv.cq.uq.keys();
     while(e2.hasMoreElements())
     {
     String i2 = e2.nextElement();
-    Users us = cmd.srv.us.getUser(i2);
+    Users us = srv.us.getUser(i2);
     if(us.state==UserWork.STATE_CHAT)
     {
     if(us.room == ROOM_Voice)
@@ -267,14 +265,7 @@ return f;
 
     public boolean TestVoting(String voice)
     {
-    if(voice.equals("да") || voice.equals("нет") || voice.equals("0"))//проверим
-    {
-    return true;//если голос указан верно
-    }
-    else
-    {
-    return false;//если голос указан неверно
-    }
+    return (voice.equals("да") || voice.equals("нет") || voice.equals("0"));//проверим
     }
 
     /*
@@ -283,15 +274,15 @@ return f;
 
     public void EndVoting()
     {
-    Users u = cmd.srv.us.getUser(ID_Voice);
+    Users u = srv.us.getUser(ID_Voice);
     //Если все возможные голаса данны
     if(ALL_Voice == VotingUsersRoom())
     {
     if(YES > NO){
-    cmd.srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
-    YES + "|" + NO + "\n" +u .localnick + " вылетел из чата на 30 минут", "", ROOM_Voice);
+    srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
+    YES + "|" + NO + "\n" +u .localnick + " вылетел из чата на " + ChatProps.getInstance(srv.getName()).getIntProperty("voting.kick.time") + " минут", "", ROOM_Voice);
     //Дадим кик
-    cmd.tkick(cmd.srv.getIcqProcess(u.basesn), u.sn, 30, moder, R);
+    ((ChatCommandProc)srv.cmd).tkick(srv.getIcqProcess(u.basesn), u.sn, ChatProps.getInstance(srv.getName()).getIntProperty("voting.kick.time"), moder, R);
     //
     YES = 0;
     NO = 0;
@@ -300,8 +291,8 @@ return f;
     }
     else
     {
-    cmd.srv.getIcqProcess(u.basesn).mq.add(u.sn,u.localnick + " вам повезло, вы остаетесь в чате.");
-    cmd.srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
+    srv.getIcqProcess(u.basesn).mq.add(u.sn,u.localnick + " вам повезло, вы остаетесь в чате.");
+    srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
     YES + "|" + NO + "\n" +u .localnick + " остается в чате", "", ROOM_Voice);
     //
     YES = 0;
@@ -318,12 +309,12 @@ return f;
 
     public void EndVotingTime()
     {
-    Users u = cmd.srv.us.getUser(ID_Voice);
+    Users u = srv.us.getUser(ID_Voice);
     if(YES > NO){
-    cmd.srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
-    YES + "|" + NO + "\n" +u .localnick + " вылетел из чата на 30 минут", "", ROOM_Voice);
+    srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
+    YES + "|" + NO + "\n" +u .localnick + " вылетел из чата на " + ChatProps.getInstance(srv.getName()).getIntProperty("voting.kick.time") + " минут", "", ROOM_Voice);
     //Дадим кик
-    cmd.tkick(cmd.srv.getIcqProcess(u.basesn), u.sn, 30, moder, R);
+    ((ChatCommandProc)srv.cmd).tkick(srv.getIcqProcess(u.basesn), u.sn, ChatProps.getInstance(srv.getName()).getIntProperty("voting.kick.time"), moder, R);
     //
     YES = 0;
     NO = 0;
@@ -332,8 +323,8 @@ return f;
     }
     else
     {
-    cmd.srv.getIcqProcess(u.basesn).mq.add(u.sn,u.localnick + " вам повезло, вы остаетесь в чате.");
-    cmd.srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
+    srv.getIcqProcess(u.basesn).mq.add(u.sn,u.localnick + " вам повезло, вы остаетесь в чате.");
+    srv.cq.addMsg("Результаты голосования:\nЗА|ПРОТИВ\n" +
     YES + "|" + NO + "\n" + u .localnick + " остается в чате", "", ROOM_Voice);
     //
     YES = 0;

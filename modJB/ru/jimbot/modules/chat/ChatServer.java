@@ -18,6 +18,7 @@
 
 package ru.jimbot.modules.chat;
 
+import ru.jimbot.Manager;
 import ru.jimbot.db.DBAdaptor;
 import ru.jimbot.modules.AbstractProps;
 import ru.jimbot.modules.AbstractServer;
@@ -68,6 +69,9 @@ public class ChatServer extends AbstractServer{
     }
     
     public void start() {
+        /*boolean testBD = Manager.getInstance().getService(getName()).testBd;
+        if(testBD == false)
+        return;*/
         us = new UserWork(getName());
     	WorkScript.getInstance(getName()).startScript("start", "", this);
         if(!con.server.equals("")) {
