@@ -42,7 +42,7 @@ public class Users extends DBObject {
     public int birthmonth= 0;
     public int birthday= 0;
     public int age= 0;
-    public int country= 0;
+    public int country = 0;
     public int language= 0;
     public int state = 0;
     public String basesn="";
@@ -50,7 +50,7 @@ public class Users extends DBObject {
     public int room = 0;
     public long lastKick = System.currentTimeMillis();
     public String group = "";
-    public long lastMod = System.currentTimeMillis();
+    public long grouptime = System.currentTimeMillis();
     public long data = System.currentTimeMillis();
     public long lastclosed = System.currentTimeMillis();
     public int ball = 0;
@@ -102,7 +102,7 @@ public class Users extends DBObject {
         fields = new String[] {"id","sn","nick","localnick","fname","lname",
             "email","city","homepage","gender","birthyear","birthmonth","birthday",
             "age","country","language","state","basesn","createtime", "room", 
-            "lastkick", "lastMod", "data", "lastclosed","ball", "answer","status","" +
+            "lastkick", "grouptime", "data", "lastclosed","ball", "answer","status","" +
             "clansman","clangroup","wedding"};
         types = new int[] {Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
             Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,

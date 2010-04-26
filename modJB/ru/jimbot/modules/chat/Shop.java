@@ -21,7 +21,7 @@ import ru.jimbot.protocol.IcqProtocol;
 
 public class Shop {
 private HashMap<String, Cmd> commands = new HashMap<String, Cmd>();
-private HashMap<String, ShopExtend> ComShop;
+public HashMap<String, ShopExtend> ComShop;
 private CommandParser parser;
 private ChatCommandProc cmd;
 
@@ -335,7 +335,7 @@ proc.mq.add(uin, "Для получения этого полномочия Ва
 return;
 }
 int id = cmd.srv.us.getUser(uin).id;
-boolean kk = cmd.srv.us.setUserPropsValue(id, "group", "modertime") &&
+boolean kk = cmd.srv.us.setUserPropsValue(id, "group", "moder") &&
 cmd.srv.us.setUserPropsValue(id, "grant", "") &&
 cmd.srv.us.setUserPropsValue(id, "revoke", "");
 cmd.srv.us.clearCashAuth(id);
@@ -344,7 +344,7 @@ if(kk)
 proc.mq.add(uin,"Запрос успешно выполне, у вас осталось " + cmd.srv.us.getUser(uin).ball + " балл(ов)");
 else
 proc.mq.add(uin,"Произошла ошибка");
-cmd.srv.us.db.event(cmd.srv.us.getUser(uin).id, uin, "SHOP", 0, "", "Купил(а) группу ''modertime''");
+cmd.srv.us.db.event(cmd.srv.us.getUser(uin).id, uin, "SHOP", 0, "", "Купил(а) группу ''moder'' на время");
 cmd.srv.us.getUser(uin).ball=cmd.srv.us.getUser(uin).ball-cmd.psp.getIntProperty("ball.grant.11");
 cmd.srv.us.updateUser(cmd.srv.us.getUser(uin));
 proc.mq.add(uin,"Запрос успешно выполне, у вас осталось " + cmd.srv.us.getUser(uin).ball + " балл(ов)");

@@ -93,6 +93,10 @@ private static Messages mainInst = new Messages("");
             msg = msg.replace("%ROOM_NAME%", srv.us.getRoom(room).getName());// Название комнаты куда переходим
             msg = msg.replace("%ROOM_TOPIC%", (srv.us.getRoom(room).getTopic().equals("") ? "" : ("\nТема: " + srv.us.getRoom(room).getTopic())));// Тема комнаты куда переходим
             msg = msg.replace("%ROOM_USERS%", Integer.toString(((ChatCommandProc)srv.cmd).AllUsersRoom(room)));// Количество пользователей в комнате куда переходим
+            String[] time = ChatProps.getInstance(ServiceName).getStringProperty("vic.game.time").split(";");
+            msg = msg.replace("%VIC_GAME_TIME_0%", time[0]);
+            msg = msg.replace("%VIC_GAME_TIME_1%", time[1]);
+            msg = msg.replace("%VIC_USERS_COUNT%", Integer.toString(ChatProps.getInstance(ServiceName).getIntProperty("vic.users.cnt")));
             return msg;
         } catch (MissingResourceException e) {
             return '!' + key + '!';
@@ -123,6 +127,10 @@ private static Messages mainInst = new Messages("");
             msg = msg.replace("%CHAT_NAME%", ChatProps.getInstance(ServiceName).getStringProperty("chat.name"));// Название чата
             msg = msg.replace("%ROOM_PRISON_ID%", Integer.toString(ChatProps.getInstance(ServiceName).getIntProperty("room.tyrma")));// Ид комнаты тюрьмы
             msg = msg.replace("%ROOM_PRISON_NAME%", srv.us.getRoom(ChatProps.getInstance(ServiceName).getIntProperty("room.tyrma")).getName());// Название комнаты тюрьмы
+            String[] time = ChatProps.getInstance(ServiceName).getStringProperty("vic.game.time").split(";");
+            msg = msg.replace("%VIC_GAME_TIME_0%", time[0]);
+            msg = msg.replace("%VIC_GAME_TIME_1%", time[1]);
+            msg = msg.replace("%VIC_USERS_COUNT%", Integer.toString(ChatProps.getInstance(ServiceName).getIntProperty("vic.users.cnt")));
             return msg;
         } catch (MissingResourceException e) {
             return '!' + key + '!';

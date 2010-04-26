@@ -328,14 +328,16 @@ public class RobAdmin implements Runnable {
 	{
     Users u = srv.us.getUser(uin);
     int K = srv.getProps().getIntProperty("room.tyrma");
-	// Время
-	int time = (int) (5+(Math.random()*55));
-    long t = System.currentTimeMillis()+(time*60000);
-	u.lastclosed = t;
    	// Сменим ник
+    if(((ChatCommandProc)srv.cmd).testClosed(u.sn) == 0){
 	String nick = u.localnick + "(Зек)";
     u.localnick = nick;
     srv.us.db.event(u.id, uin, "REG", 0, "", nick);
+    }
+    // Время
+	int time = (int) (5+(Math.random()*55));
+    long t = System.currentTimeMillis()+(time*60000);
+	u.lastclosed = t;
     // Оповести чат
 	say(u.localnick + getBanroom_say() + "|" + srv.us.getRoom(K).getName() +
 	"|, на " + time + " минут, " + getBanroom_say1(), u.room);

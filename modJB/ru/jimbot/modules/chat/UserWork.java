@@ -21,6 +21,7 @@ package ru.jimbot.modules.chat;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -596,7 +597,12 @@ public class UserWork {
     }
     
 
-    
+        public void deleteUser(String uin){
+        Users u = getUserFromDB(uin);
+        uu.remove(u.id);
+        uc.remove(u.sn);
+    }
+
 
     
     /**
@@ -829,12 +835,36 @@ public class UserWork {
     }    
 
      /**
-     * Перечень активных времяных модераторов
+     * Пользователи с временной группой
      * @return
      */
-    public Vector<Users> getModList()
+    public String getGroupList()
     {
-    	return db.getObjectVector("select * from users where lastMod>now()");
+        String List = "Список пользователей в временной группе:\n";
+        int i = 0;
+        try
+        {
+        PreparedStatement pst = db.getDb().prepareStatement("select id from users where country=1");
+        ResultSet rs = pst.executeQuery();
+        while( rs.next() )
+        {
+        Users u = getUser( rs.getInt( 1 ) );
+        i++;
+        long d = (u.grouptime-System.currentTimeMillis())/(1000*3600*24);
+        long h = (u.grouptime-System.currentTimeMillis())/(1000*3600);
+        if(d != 0)
+        List += i + ") - |" + u.id + "|" + u.localnick + " - |Назначена группа \"" + u.group + "\"  , осталось " + d + " день(суток)|\n";
+        else
+        List += i + ") - |" + u.id + "|" + u.localnick + " - |Назначена группа \"" + u.group + "\"  , осталось " + h + " час(часов)|\n";
+        }
+        rs.close();
+        pst.close();
+        }
+        catch (Exception ex)
+        {
+        ex.printStackTrace();
+        }
+    return List;
     }
 
      /**

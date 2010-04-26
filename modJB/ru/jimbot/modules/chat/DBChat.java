@@ -165,7 +165,7 @@ public class DBChat extends DBAdaptor{
             us.createtime = rSet.getTimestamp(19).getTime();
             us.room = rSet.getInt(20);
             if(rSet.getLong(21)==0)us.lastKick = System.currentTimeMillis(); else us.lastKick = rSet.getTimestamp(21).getTime();
-            if(rSet.getLong(22)==0)us.lastMod = System.currentTimeMillis(); else us.lastMod = rSet.getTimestamp(22).getTime();
+            if(rSet.getLong(22)==0)us.grouptime = System.currentTimeMillis(); else us.grouptime = rSet.getTimestamp(22).getTime();
             if(rSet.getLong(23)==0)us.data = System.currentTimeMillis(); else us.data = rSet.getTimestamp(23).getTime();
             if(rSet.getLong(24)==0)us.lastclosed = System.currentTimeMillis(); else us.lastclosed = rSet.getTimestamp(24).getTime();
             us.ball = rSet.getInt(25);
@@ -214,7 +214,7 @@ public class DBChat extends DBAdaptor{
                 us.createtime = rSet.getTimestamp(19).getTime();
                 us.room = rSet.getInt(20);
                 if(rSet.getLong(21)==0)us.lastKick = System.currentTimeMillis(); else us.lastKick = rSet.getTimestamp(21).getTime();
-                if(rSet.getLong(22)==0)us.lastMod = System.currentTimeMillis(); else us.lastMod = rSet.getTimestamp(22).getTime();
+                if(rSet.getLong(22)==0)us.grouptime = System.currentTimeMillis(); else us.grouptime = rSet.getTimestamp(22).getTime();
                 if(rSet.getLong(23)==0)us.data = System.currentTimeMillis(); else us.data = rSet.getTimestamp(23).getTime();
                 if(rSet.getLong(24)==0)us.lastclosed = System.currentTimeMillis(); else us.lastclosed = rSet.getTimestamp(24).getTime();
                 us.ball = rSet.getInt(25);
@@ -262,7 +262,7 @@ public class DBChat extends DBAdaptor{
             pst.setTimestamp(19,new Timestamp(us.createtime));
             pst.setInt(20,us.room);
             pst.setTimestamp(21,new Timestamp(us.lastKick));
-            pst.setTimestamp(22,new Timestamp(us.lastMod));
+            pst.setTimestamp(22,new Timestamp(us.grouptime));
             pst.setTimestamp(23,new Timestamp(us.data));
             pst.setTimestamp(24,new Timestamp(us.lastclosed));
             pst.setInt(25,us.ball);
@@ -285,7 +285,7 @@ public class DBChat extends DBAdaptor{
             PreparedStatement pst = getDb().prepareStatement("update users set sn=?,nick=?," + 
                     "localnick=?,fname=?,lname=?,email=?,city=?,homepage=?,gender=?," +
                     "birthyear=?,birthmonth=?,birthday=?,age=?,country=?,language=?," +
-                    "state=?,basesn=?,createtime=?,room=?, lastkick=?, lastMod=?, data=?," +
+                    "state=?,basesn=?,createtime=?,room=?, lastkick=?, grouptime=?, data=?," +
                     "lastclosed=?, ball=?, answer=?, status=?, clansman=?, clangroup=?, wedding=? where id=" + us.id);
             pst.setString(1,us.sn);
             pst.setString(2,us.nick);
@@ -307,7 +307,7 @@ public class DBChat extends DBAdaptor{
             pst.setTimestamp(18,new Timestamp(us.createtime));
             pst.setInt(19,us.room);
             pst.setTimestamp(20,new Timestamp(us.lastKick));
-            pst.setTimestamp(21,new Timestamp(us.lastMod));
+            pst.setTimestamp(21,new Timestamp(us.grouptime));
             pst.setTimestamp(22,new Timestamp(us.data));
             pst.setTimestamp(23,new Timestamp(us.lastclosed));
             pst.setInt(24,us.ball);

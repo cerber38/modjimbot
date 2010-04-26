@@ -97,6 +97,7 @@ s += "!изинфо <text> - Изменить инфо клана.\n";
 return s;
 }
 
+
 public boolean commandClan( IcqProtocol proc, String uin, String mmsg ) {
 String tmsg = mmsg.trim();
 int tp = 0;

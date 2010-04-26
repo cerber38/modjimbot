@@ -23,7 +23,7 @@ import ru.jimbot.protocol.IcqProtocol;
 
 public class Gift {
 private HashMap<String, Cmd> commands = new HashMap<String, Cmd>();
-private HashMap<String, GiftMap> GiftMap;
+public HashMap<String, GiftMap> GiftMap;
 private CommandParser parser;
 private ChatCommandProc cmd;
 

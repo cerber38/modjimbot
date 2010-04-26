@@ -6,13 +6,13 @@
 package ru.jimbot.modules.chat;
 
 import com.mysql.jdbc.PreparedStatement;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.sql.ResultSet;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import ru.jimbot.util.Log;
@@ -25,7 +25,7 @@ public class MyQuiz implements Runnable {
 private ChatServer srv;
 private ChatProps psp;
 private int sleepAmount = 1000;
-private Thread th;
+public Thread th;
 private int count = 0;// Количество викторин :D т.е. максимальное количество комнат где задействована викторина
 private static Random R;
 private ConcurrentHashMap <Integer, QuizInfo> QuizInfo;// для хранения данных по комнатам
@@ -34,7 +34,9 @@ R = new Random(System.nanoTime());
 }
 private boolean QuizStart = true;
 private boolean autofilling = true;
+private boolean translated = true;
 
+private long throwOut = 5000;
 
 public MyQuiz(ChatServer s)
 {
@@ -121,7 +123,6 @@ public boolean TestOtvet(int room, String msg)
 {
 int id = GetQuizId(room);// id викторины
 QuizInfo quiz = QuizInfo.get(id);
-//System.out.print("room - " + room + " users" + msg + " answer" + GetAnswer(quiz.AG));
 String[] mmsg = msg.split(" ");
 String answer = mmsg[0].toLowerCase();
 return answer.trim().equals(GetAnswer(quiz.AG).toLowerCase());
@@ -169,6 +170,13 @@ QuizInfo.put(i, quiz);
  */
 private void Quiz()
 {
+    // Тест времени
+   if(psp.getBooleanProperty("vic.on.off") & psp.getBooleanProperty("vic.time_game.on.off") & !testHours()){
+   if(psp.getBooleanProperty("vic.throwout.on.off")){
+   ThrowOut();
+   }
+   return;
+   }
     if(getCountQuestion() == 0){
     if(autofilling){
     Log.getLogger(srv.getName()).talk("Нет вопросов в БД для викторины!");
@@ -177,7 +185,6 @@ private void Quiz()
     return;// если нет вопросов в БД
     }
     if(!TestCountChat()){
-        //System.out.print("errore - no users or chat");
     return;// если в чате не кого нету
     }
 if(QuizStart){
@@ -237,12 +244,36 @@ private boolean TestCountChat(){
     cnt++;
     }
     }
-    //System.out.print(cnt);
    if((cnt) == 0){
        return false;
    }
     return true;
 }
+    /**
+     * Проверяет сколько человек в определенной комнате
+     * @param room
+     * @return
+     */
+
+
+    public int AllUsersRoom(int room)
+    {
+    int c = 0;
+    Enumeration<String> e2 = srv.cq.uq.keys();
+    while(e2.hasMoreElements())
+    {
+    String i2 = e2.nextElement();
+    Users us = srv.us.getUser(i2);
+    if(us.state==UserWork.STATE_CHAT)
+    {
+    if(us.room == room)
+    {
+    c++;
+    }
+    }
+    }
+    return (c);
+    }
 
 /**
  * Парсер викторины
@@ -254,10 +285,87 @@ public void parse(String uin, String mmsg, int room) {
     if(getCountQuestion() == 0){
     return;// если нет вопросов
     }
-    //System.out.print(room + " " + mmsg);
+   // Тест времени
+   if(psp.getBooleanProperty("vic.on.off") & psp.getBooleanProperty("vic.time_game.on.off") & !testHours()){
+   return;// если игра не идет
+   }
 if(TestOtvet(room, mmsg) && TestRoom(room)) Otvet(uin,room);
 }
 
+/**
+ * Метод переведет пользователь в другие комнаты
+ */
+
+public void ThrowOut(){
+Set<Integer> users = new HashSet();
+String[] rooms = psp.getStringProperty("vic.room").split(";");
+for(int i = 0;i < rooms.length; i++){
+    if(AllUsersRoom(Integer.parseInt(rooms[i])) != 0){
+    Enumeration<String> e = srv.cq.uq.keys();
+    while(e.hasMoreElements())
+    {
+    String a = e.nextElement();
+    Users us = srv.us.getUser(a);
+    if(us.state==UserWork.STATE_CHAT & us.room == Integer.parseInt(rooms[i]) & !psp.testAdmin(us.sn))
+    {
+    users.add(us.id);
+    }
+    }
+    }
+}
+    // Переводим
+    for (int id : users)
+    {
+    Users u = srv.us.getUser(id);
+    u.room = psp.getIntProperty("vic.throwout.room");
+    srv.us.updateUser(u);
+    srv.cq.changeUserRoom(u.sn,psp.getIntProperty("vic.throwout.room"));
+    }
+}
+    /**
+     * Проверка времени игры
+     * @return
+     */
+
+    public boolean testHours(){
+    Date date = new Date(System.currentTimeMillis());
+    String [] test = psp.getStringProperty("vic.game.time").split(";");
+    boolean a = true;
+    int current_hour = date.getHours();// Текущий час
+    int hour_beginning = Integer.parseInt(test[0]);// Час начала игры
+    int hour_final = Integer.parseInt(test[1]);// Час конца игры
+
+    if(hour_beginning > hour_final){
+
+    if(current_hour > hour_beginning){
+    a = false;
+    }
+
+    if(current_hour < hour_beginning & current_hour >= hour_final ){
+    a = false;
+    }
+
+    if(current_hour > hour_final & current_hour < hour_beginning){
+    a = false;
+    }
+
+    }else{
+
+    if(current_hour < hour_beginning){
+    a = false;
+    }
+
+    if(current_hour >= hour_final){
+    a = false;
+    }
+
+    }
+
+    if(a)
+        return true;
+    else
+        return false;
+    }
 
 public void start() 
 {
@@ -362,10 +470,10 @@ private int Random_ID()
  */
 
     public boolean TestRoom(int room) {
+        try{
     String s = psp.getStringProperty("vic.room");
         if(s.equals("")) return false;
         String[] rooms = s.split(";");
-        try{
             for(int i=0;i<rooms.length;i++){
                 if(Integer.parseInt(rooms[i]) == room) return true;
             }

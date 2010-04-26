@@ -26,6 +26,7 @@ import ru.jimbot.modules.MsgInQueue;
 import ru.jimbot.modules.UINmanager;
 import ru.jimbot.modules.WorkScript;
 import ru.jimbot.protocol.IcqProtocol;
+import ru.jimbot.util.Log;
 import ru.jimbot.util.MainProps;
 
 
@@ -82,6 +83,10 @@ public class ChatServer extends AbstractServer{
          }
         inq.start();
         isRun = true;
+        if(ChatProps.getInstance(this.getName()).getBooleanProperty("vic.on.off")){
+        Log.getLogger(getName()).talk("I start quiz for service - \"" + this.getName() + "\"");
+        ((ChatCommandProc)this.cmd).Quiz.start();
+        }
     }
     
     public void stop() {
@@ -89,6 +94,8 @@ public class ChatServer extends AbstractServer{
         closeDB();
         if(!con.server.equals("")) con.uins.stop();
         isRun = false;
+        if(((ChatCommandProc)this.cmd).Quiz.th.isAlive())
+        ((ChatCommandProc)this.cmd).Quiz.stop();
     }
     
     public void closeDB(){

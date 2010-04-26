@@ -779,6 +779,9 @@ public class MainPage extends HttpServlet {
     con.print("<P>%ROOM_NAME% - название комнаты куда пользователь переходит.</P>");
     con.print("<P>%ROOM_TOPIC% - тема комнаты куда пользователь переходит.</P>");
     con.print("<P>%ROOM_USERS% - количество пользователей в комнате куда пользователь переходит.</P>");
+    con.print("<P>%VIC_GAME_TIME_0% - время начала игры в викторине.</P>");
+    con.print("<P>%VIC_GAME_TIME_1% - время конца игры в викторине.</P>");
+    con.print("<P>%VIC_USERS_COUNT% - максимальное количество пользователей которое может играть в викторину.</P>");
     con.print("<b>goChat:</b>");
     con.print("<P>%NICK% - ник пользователя.</P>");
     con.print("<P>%ID% - id пользователя.</P>");
@@ -799,6 +802,9 @@ public class MainPage extends HttpServlet {
     con.print("<P>%CITY% - город пользователя.</P>");
     con.print("<P>%CLAN% - вернет либо \"Лидер клана |clan_name|\", либо \"Состоит в клане |clan_name| \", либо \"В клане не состоит\".</P>");
     con.print("<P>%WEDDING% - вернет \"В браке с |nick|\", если пользователь в браке</P>");
+    con.print("<P>%VIC_GAME_TIME_0% - время начала игры в викторине.</P>");
+    con.print("<P>%VIC_GAME_TIME_1% - время конца игры в викторине.</P>");
+    con.print("<P>%VIC_USERS_COUNT% - максимальное количество пользователей которое может играть в викторину.</P>");
     con.print("<b>exitChat:</b>");
     con.print("<P>%NICK% - ник пользователя.</P>");
     con.print("<P>%ID% - id пользователя.</P>");
