@@ -131,6 +131,10 @@ private static Messages mainInst = new Messages("");
             msg = msg.replace("%VIC_GAME_TIME_0%", time[0]);
             msg = msg.replace("%VIC_GAME_TIME_1%", time[1]);
             msg = msg.replace("%VIC_USERS_COUNT%", Integer.toString(ChatProps.getInstance(ServiceName).getIntProperty("vic.users.cnt")));
+            msg = msg.replace("%CAR%", uss.car);
+            msg = msg.replace("%HOME%", uss.home);
+            msg = msg.replace("%CLOTHING%", uss.clothing);
+            msg = msg.replace("%ANIMAL%", uss.animal);
             return msg;
         } catch (MissingResourceException e) {
             return '!' + key + '!';
@@ -199,5 +203,7 @@ private static Messages mainInst = new Messages("");
             return null;
         }
     }
+
+
 
 }

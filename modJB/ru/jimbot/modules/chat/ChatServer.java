@@ -94,8 +94,9 @@ public class ChatServer extends AbstractServer{
         closeDB();
         if(!con.server.equals("")) con.uins.stop();
         isRun = false;
-        if(((ChatCommandProc)this.cmd).Quiz.th.isAlive())
-        ((ChatCommandProc)this.cmd).Quiz.stop();
+        //if(!((ChatCommandProc)this.cmd).Quiz.testStartQuiz  &
+                //((ChatCommandProc)this.cmd).Quiz.th.isAlive())
+        //((ChatCommandProc)this.cmd).Quiz.stop();
     }
     
     public void closeDB(){

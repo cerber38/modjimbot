@@ -35,6 +35,7 @@ R = new Random(System.nanoTime());
 private boolean QuizStart = true;
 private boolean autofilling = true;
 private boolean translated = true;
+public boolean testStartQuiz = false;
 
 private long throwOut = 5000;
 
@@ -177,12 +178,13 @@ private void Quiz()
    }
    return;
    }
+   if(autofilling){
     if(getCountQuestion() == 0){
-    if(autofilling){
-    Log.getLogger(srv.getName()).talk("Нет вопросов в БД для викторины!");
+    Log.getLogger(srv.getName()).talk("Нет вопросов в БД для викторины! Викторина будет полностью остановлена!");
     autofilling = false;
-    }
+    stop();
     return;// если нет вопросов в БД
+    }
     }
     if(!TestCountChat()){
     return;// если в чате не кого нету
@@ -195,6 +197,7 @@ if(QuizStart){
         } else {
         // если все нормально
     QuizStart = false;
+    autofilling = false;
     QuizStart();
     }
 }
@@ -372,12 +375,14 @@ public void start()
 th = new Thread(this);
 th.setPriority(Thread.NORM_PRIORITY);
 th.start();
+testStartQuiz = true;
 }
 
 public synchronized void stop()
 {
 th = null;
 notify();
+testStartQuiz = false;
 }
 
 public void run()
@@ -545,6 +550,37 @@ Vector<String[]> v = srv.us.db.getValues(q);
 return Integer.parseInt(v.get(0)[0]);
 }
 
+/**
+ * Метод нужен что бы узнать ответ в определенной викторине из других классов или скриптов
+ * @param room
+ * @return
+ */
+
+public String Answer(int room){
+int id = GetQuizId(room);// id викторины
+QuizInfo quiz = QuizInfo.get(id);
+return GetAnswer(quiz.AG);
+}
+
+/**
+ * Добавить викторину на ходу
+ * @param room
+ */
+
+public void AddQuiz(int room){
+String rooms = psp.getStringProperty("vic.room");
+if(rooms.equals("")){
+    psp.setStringProperty("vic.room", Integer.toString(room));
+    psp.save();
+}else{
+    psp.setStringProperty("vic.room", ";" + Integer.toString(room));
+    psp.save();
+}
+QuizInfo quiz = new QuizInfo(count, room, Random_ID(), System.currentTimeMillis());
+QuizInfo.put(count, quiz);
+count++;
+}
 
 
 }
+

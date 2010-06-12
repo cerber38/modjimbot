@@ -62,6 +62,11 @@ public class RobAdmin implements Runnable {
     long times = System.currentTimeMillis();
     long TimesDelLog = System.currentTimeMillis();
 
+    public ConcurrentHashMap <String,Integer> level;
+    public ConcurrentHashMap <String,Integer> level_0;
+    public ConcurrentHashMap <String,Integer> level_1;
+    public ConcurrentHashMap <String,Integer> level_2;
+    public ConcurrentHashMap <String,Integer> level_3;
    
     /** Creates a new instance of RobAdmin */
     public RobAdmin(ChatServer s) {
@@ -69,6 +74,11 @@ public class RobAdmin implements Runnable {
         mq = new ConcurrentLinkedQueue();
         uins = new ConcurrentHashMap();
         uins.put("0",0);
+        level = new ConcurrentHashMap();
+        level_0 = new ConcurrentHashMap();
+        level_1 = new ConcurrentHashMap();
+        level_2 = new ConcurrentHashMap();
+        level_3 = new ConcurrentHashMap();
         test1 = new ConcurrentHashMap();
         test2 = new ConcurrentHashMap();
     }

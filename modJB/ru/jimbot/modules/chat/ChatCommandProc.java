@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import ru.jimbot.Manager;
@@ -53,6 +54,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     public AboutUser abv;
     public ClanCommand clan;
     public Shop shop;
+    public Shop2 shop2;
     public Gift gift;
     public ChatServer srv;
     public Voting voting;
@@ -129,6 +131,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         warnFlag = new HashSet<String>();
         statMod = new ConcurrentHashMap<String, ModInfo>();
         shop = new Shop(this);
+        shop2 = new Shop2(this);
         frends = new frends(this);
         clan = new ClanCommand(this);
         abv = new AboutUser(this);
@@ -149,7 +152,6 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     private void init(){
     	authObj.put("pmsg","Отправка приватных сообщений");
     	authObj.put("reg","Смена ника");
-    	authObj.put("invite","Создание приглашения");
     	authObj.put("kickone","Кик одного пользователя");
     	authObj.put("kickall","Кик всех пользователей");
     	authObj.put("ban","Забанить пользователя");
@@ -177,15 +179,14 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         authObj.put("fraza","Возможность добовлять фразы в игру бутылочка");
         authObj.put("adm","Смотреть список админов в online");
         authObj.put("chnick","Команда изменения ника другого пользователя");
-        authObj.put("invise", "Возможность прятаться");
         authObj.put("setpass", "Установить пароль в комнате");
         authObj.put("admlist", "Смотреть список адм сообщений");
         authObj.put("robmsg", "Возможность добовлять фразы для админ-бота");
         authObj.put("group_time", "Назначать временную группу");
         authObj.put("xst","Изминить х-статус чата");
-        authObj.put("restart","Перезагрузка бота");
+        //authObj.put("restart","Перезагрузка бота");
         authObj.put("shophist","Смотреть историю покупок в магазине");
-        authObj.put("gift","Добавлять/удалять подарки в ларьке");
+        authObj.put("gift","Добавлять/удалять подарки/товар в ларьке/магазине");
         authObj.put("status_user", "Установка статусов");
         authObj.put("ubanhist", "История разбанов");
         authObj.put("shophist", "Список пакупок в магазине");
@@ -197,6 +198,9 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         authObj.put("chstatus", "Смена статуса другому пользователю");
         authObj.put("voting", "Возможность открывать голосование");
         authObj.put("chid", "Менять id другому пользователю");
+        authObj.put("invise","Возможность прятаться");
+        authObj.put("invisible","невидимый");
+        authObj.put("listinvise","Возможность смотреть список скрытых пользователей");
     	
        	commands.put("!help", new Cmd("!help","",1));
         commands.put("!справка", new Cmd("!справка", "", 1));
@@ -298,7 +302,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         commands.put("!адмлист", new Cmd("!адмлист", "$c", 49));
         commands.put("!робмсг", new Cmd("!робмсг", "$s", 50));
         commands.put("!хстатус", new Cmd("!хстатус", "$n $s", 51));
-        commands.put("!перезагрузить", new Cmd("!перезагрузить", "", 52));
+        //commands.put("!перезагрузить", new Cmd("!перезагрузить", "", 52));
         commands.put("!статус", new Cmd("!статус", "$s", 53));
         commands.put("!разбанлист", new Cmd("!разбанлист", "", 54));
         commands.put("!удалить", new Cmd("!удалить", "$n", 55));
@@ -312,6 +316,9 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         commands.put("!chstatus", new Cmd("!chstatus","$n $s",63));
         commands.put("!cмстатус", new Cmd("!смстатус","$n $s",63));
         commands.put("!измид", new Cmd("!измид","$n $n",64));
+        commands.put("!спрятаться", new Cmd("!спрятаться","",65));
+        commands.put("!показаться", new Cmd("!показаться","",66));
+        commands.put("!скрылись", new Cmd("!скрылись","",67));
     	WorkScript.getInstance(srv.getName()).installAllChatCommandScripts(this);
     }
     
@@ -858,11 +865,21 @@ firstStartMsg=true;
            case 64:
                 commandchid(proc, uin, parser.parseArgs(tmsg), mmsg);
                 break;
+           case 65:
+                commandOnInvise(proc, uin);
+                break;
+           case 66:
+                commandOffInvise(proc, uin);
+                break;
+           case 67:
+                commandListInvise(proc, uin);
+                break;
                 default:
      //Дополнительные команды из других классов
      if(scr.commandExec(proc, uin, mmsg)) return;
      if(voting.commandVoting(proc, uin, mmsg)) return;
      if(shop.commandShop(proc, uin, mmsg)) return;
+     if(shop2.commandShop2(proc, uin, mmsg)) return;
      if(frends.commandFrends(proc, uin, mmsg)) return;
      if(abv.commandAboutUser(proc, uin, mmsg)) return;
      if(gift.commandShop(proc, uin, mmsg)) return;
@@ -1090,7 +1107,7 @@ firstStartMsg=true;
     try{
     L += Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.1") + uss.localnick;
     L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.2", new Object[] {(uss.data==0 ? "Не указанна" : (("|" + new Date(uss.data)).toString() + "|"))});
-    L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.3", new Object[] {uss.sn});
+    L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.3", new Object[] {psp.testLatentUin(uss.sn)});
     L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.4", new Object[] {uss.id});
     L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.5", new Object[] {uss.group});
     L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.6", new Object[] {uss.ball});
@@ -1472,7 +1489,7 @@ firstStartMsg=true;
     while(e.hasMoreElements()){
     String i = e.nextElement();
     Users us = srv.us.getUser(i);
-    if(us.state==UserWork.STATE_CHAT)
+    if(us.state==UserWork.STATE_CHAT && !srv.us.authorityCheck(us.id,"invisible"))
     {
     if(us.room==room)
     {
@@ -1504,7 +1521,7 @@ firstStartMsg=true;
     {
     String i = e.nextElement();
     Users us = srv.us.getUser(i);
-    if(us.state==UserWork.STATE_CHAT)
+    if(us.state==UserWork.STATE_CHAT && !srv.us.authorityCheck(us.id,"invisible"))
     {
     cnt++;
     s += us.id + " - " + us.localnick + " ["+ us.room + "] " + "[" + us.ball + "]" + (us.status.equals("") ? "" : ("[" + us.status + "]")) + '\n';
@@ -1512,7 +1529,8 @@ firstStartMsg=true;
     }
     s += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAA.2", new Object[] {cnt});
     s += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAA.3", new Object[] {"«" + srv.us.statUsersCount()+ "»"});
-    proc.mq.add(uin, s);
+    //proc.mq.add(uin, s);
+    cutsend(proc, uin, s);
     }
     
     /**
@@ -1531,7 +1549,7 @@ firstStartMsg=true;
     if(txt.equals("")) {proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.0"));return;}
     Users uss = srv.us.getUser(no);
     if(uss == null){proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.1"));return;}
-    if(!srv.cq.testUser(uss.sn)){proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.2"));return;}
+    if(!srv.cq.testUser(uss.sn) || srv.us.authorityCheck(uss.id,"invisible")){proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.2"));return;}
     if(txt.length()>psp.getIntProperty("chat.MaxMsgSize"))
     {
     txt = txt.substring(0,psp.getIntProperty("chat.MaxMsgSize"));
@@ -1577,7 +1595,7 @@ firstStartMsg=true;
     if(fsn.equals("")) {proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandPP.0"));return;}
     Users uss = srv.us.getUser(fsn);
     if(uss == null){proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.1"));return;}
-    if(!srv.cq.testUser(uss.sn)){proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.2"));return;}
+    if(!srv.cq.testUser(uss.sn) || srv.us.authorityCheck(uss.id,"invisible")){proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.2"));return;}
     if(txt.length()>psp.getIntProperty("chat.MaxMsgSize"))
     {
     txt = txt.substring(0,psp.getIntProperty("chat.MaxMsgSize"));
@@ -1694,11 +1712,15 @@ firstStartMsg=true;
    }
    if (qauth(proc, uin, "anyroom") || srv.us.checkRoom(i))
    {
+   if (!srv.us.authorityCheck(uss.id,"invisible")){
    srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_Room("ChatCommandProc.commandRoom.5", i, uss), uin, uss.room);
+   }
    uss.room = i;
    srv.us.updateUser(uss);
    srv.cq.changeUserRoom(uin, i);
+   if (!srv.us.authorityCheck(uss.id,"invisible")){
    srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_Room("ChatCommandProc.commandRoom.6", i, uss), uin, uss.room);
+   }
    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_Room("ChatCommandProc.commandRoom.7", i, uss));
    } 
    else
@@ -2179,8 +2201,12 @@ firstStartMsg=true;
     uss.basesn = proc.baseUin;
     uss.room=room;
     srv.us.updateUser(uss);
+    if (!srv.us.authorityCheck(uss.id,"invisible")){
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.10", room, uss), uss.sn, uss.room);
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.11", room, uss));
+    } else {
+    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.16", room, uss));    
+    }
     f = true;
     }
     if (uss.state==UserWork.STATE_OFFLINE)
@@ -2189,9 +2215,13 @@ firstStartMsg=true;
     uss.room = room;
     uss.basesn = proc.baseUin;
     srv.us.updateUser(uss);
+    if (!srv.us.authorityCheck(uss.id,"invisible")){
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.11", room, uss));
     if(psp.getBooleanProperty("chat.showChangeUserStatus"))
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.10", room, uss), uss.sn, uss.room);
+    } else {
+    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.16", room, uss));    
+    }
     }
     Log.getLogger(srv.getName()).talk(uss.localnick + " Вошел в чат");
     srv.us.db.log(uss.id,uin,"STATE_IN",uss.localnick + " вошел(а) в чат",uss.room);
@@ -2255,17 +2285,25 @@ firstStartMsg=true;
     uss.state = UserWork.STATE_CHAT;
     uss.basesn = proc.baseUin;
     srv.us.updateUser(uss);
+    if (!srv.us.authorityCheck(uss.id,"invisible")){
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.10", uss.room, uss), uss.sn, uss.room);
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.11", uss.room, uss));
+    } else {
+    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.16", uss.room, uss));
+    }
     f = true;
     }
     if (uss.state==UserWork.STATE_OFFLINE) {
     uss.state = UserWork.STATE_CHAT;
     uss.basesn = proc.baseUin;
     srv.us.updateUser(uss);
+    if (!srv.us.authorityCheck(uss.id,"invisible")){
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.11", uss.room, uss));
     if(psp.getBooleanProperty("chat.showChangeUserStatus"))
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.10", uss.room, uss), uss.sn, uss.room);
+    } else {
+    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.16", uss.room, uss));    
+    }
     }
     Log.getLogger(srv.getName()).talk(uss.localnick + " Вошел в чат");
     srv.us.db.log(uss.id,uin,"STATE_IN",uss.localnick + " вошел(а) в чат",uss.room);
@@ -2292,7 +2330,7 @@ firstStartMsg=true;
     public void exitChat(IcqProtocol proc, String uin)
     {
     Users uss = srv.us.getUser(uin);
-    if (uss.state==UserWork.STATE_CHAT || uss.state==UserWork.STATE_OFFLINE && !srv.us.authorityCheck(uss.id, "invisible"))
+    if (uss.state==UserWork.STATE_CHAT || uss.state==UserWork.STATE_OFFLINE)
     {
     if(!psp.getBooleanProperty("chat.NoDelContactList"))
     {
@@ -2306,8 +2344,10 @@ firstStartMsg=true;
     Log.getLogger(srv.getName()).talk(uss.localnick + " Ушел(а) из чата");
     srv.us.db.log(uss.id,uin,"STATE_OUT",uss.localnick + " Ушел(а) из чата",uss.room);
     srv.us.db.event(uss.id, uin, "STATE_OUT", 0, "", uss.localnick + " Ушел(а) из чата");
+    if (!srv.us.authorityCheck(uss.id,"invisible")){
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_exitChat("ChatCommandProc.commandexitChat.0", uss), uss.sn, uss.room);
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_exitChat("ChatCommandProc.commandexitChat.1", uss));
+    }
     srv.cq.delUser(uin);
     }
     
@@ -2429,6 +2469,10 @@ firstStartMsg=true;
         srv.us.db.log(uss.id,uin,"BAN",m,uss.room);
         srv.us.db.event(uss.id, uin, "BAN", srv.us.getUser(adm_uin).id, adm_uin, m);
         uss.state=UserWork.STATE_BANNED;
+        Users wedding = srv.us.getUser(uss.wedding);
+        wedding.wedding = 0;
+        uss.wedding = 0;
+        srv.us.updateUser(wedding);
         srv.us.updateUser(uss);
         // Удалим из КЛ
         Log.getLogger(srv.getName()).info("Delete contact " + uin);
@@ -3359,7 +3403,7 @@ firstStartMsg=true;
         return;
         }
         Users usss = srv.us.getUser(admins[t]);
-        srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Пользователя " + us.localnick +  "|" + us.id + "|" + " зовет в чат " + uss.localnick+ "|" + uss.localnick + "| "
+        srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Пользователя " + us.localnick +  "|" + us.id + "|" + " отправил приглашение на уин " + uins+ "| "
         + "\n Сообщение: "+s);
         }
         }
@@ -3575,12 +3619,12 @@ firstStartMsg=true;
         }
         catch(NumberFormatException e)
         {
-        srv.getIcqProcess(uss.basesn).mq.add(uss.sn, uss.localnick + " ответ должен быть ''Да'' или ''Нет'' " );
+        srv.getIcqProcess(uss.basesn).mq.add(uss.sn, uss.localnick + " ответ должен быть ''да'' или ''нет'' " );
         return;
         }
         if( !TestMsgWedding( msg ) )
         {
-        srv.getIcqProcess(uss.basesn).mq.add(uss.sn, uss.localnick + " ответ должен быть ''Да'' или ''Нет'' " );
+        srv.getIcqProcess(uss.basesn).mq.add(uss.sn, uss.localnick + " ответ должен быть ''да'' или ''нет'' " );
         return;
         }
         Wedding = true;
@@ -4074,5 +4118,74 @@ firstStartMsg=true;
        }
            }
 
+       /**
+        * @author mmaximm
+        * Спрятатся
+        * @param proc
+        * @param uin
+        */
+
+       public void commandOnInvise(IcqProtocol proc, String uin){
+       if(!isChat(proc,uin) && !psp.testAdmin(uin)) return;
+       if(!auth(proc,uin, "invise")) return;
+       try{
+       Users u = srv.us.getUser(uin);
+       srv.us.grantUser(u.id, "invisible");
+       proc.mq.add(uin,"Вы спрятались");
+       }
+       catch (Exception ex)
+       {
+       ex.printStackTrace();
+       proc.mq.add(uin,"Ошибка " + ex.getMessage());
+       }
+       }
+
+       /**
+        * @author mmaximm
+        * Показаться
+        * @param proc
+        * @param uin
+        */
+
+       public void commandOffInvise(IcqProtocol proc, String uin){
+       if(!isChat(proc,uin) && !psp.testAdmin(uin)) return;
+       if(!auth(proc,uin, "invise")) return;
+       try{
+       Users u = srv.us.getUser(uin);
+       srv.us.revokeUser(u.id, "invisible");
+       proc.mq.add(uin,"Вы показались");
+       }
+       catch (Exception ex)
+       {
+       ex.printStackTrace();
+       proc.mq.add(uin,"Ошибка " + ex.getMessage());
+       }
+       }
+       
+       /**
+        * @author Юрий
+        * Список скрытых пользователей
+        * @param proc
+        * @param uin
+        */
+
+       public void commandListInvise(IcqProtocol proc, String uin) {
+       if (!isChat(proc, uin) && !psp.testAdmin(uin)) return;
+       if (!auth(proc, uin, "listinvise")) return;
+       try {
+       String lst = "";
+       Enumeration<String> e = srv.cq.uq.keys();
+       while (e.hasMoreElements()) {
+       String i = e.nextElement();
+       Users us = srv.us.getUser(i);
+       if ((srv.us.authorityCheck(us.id, "invisible")) && (us.state == UserWork.STATE_CHAT)) lst = lst + us.id + " ~ " + us.localnick + " ~ |" + us.room + "|" + "\n";
+       }
+       proc.mq.add(uin, "Скрываются:\nИд~Ник~Комната\n" + lst);
+       } catch (Exception ex) {
+       ex.printStackTrace();
+       ex.getMessage().toString();
+       proc.mq.add(uin, "Ошибка " + ex.getMessage());
+       }
+       }
 
   }

@@ -1320,6 +1320,8 @@ public class UserWork {
       while(rs.next()){
       s += rs.getString(1) + " - " + rs.getString(2) + "\n";
       }
+      rs.close();
+      pst.close();
       }catch(Exception ex){
       ex.printStackTrace();
       }
@@ -1344,6 +1346,8 @@ public class UserWork {
       while(rs.next()){
       s += rs.getString(1) + " - " + rs.getString(2) + "\n";
       }
+      rs.close();
+      pst.close();
       }catch(Exception ex){
       ex.printStackTrace();
       }

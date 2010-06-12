@@ -174,6 +174,10 @@ public class DBChat extends DBAdaptor{
             us.clansman = rSet.getInt(28);
             us.clangroup =  rSet.getString(29);
             us.wedding =  rSet.getInt(30);
+            us.car =  rSet.getString(31);
+            us.home =  rSet.getString(32);
+            us.clothing =  rSet.getString(33);
+            us.animal =  rSet.getString(34);
             } catch (Exception ex){
             ex.printStackTrace();
             } finally {
@@ -223,6 +227,10 @@ public class DBChat extends DBAdaptor{
                 us.clansman = rSet.getInt(28);
                 us.clangroup =  rSet.getString(29);
                 us.wedding =  rSet.getInt(30);
+                us.car =  rSet.getString(31);
+                us.home =  rSet.getString(32);
+                us.clothing =  rSet.getString(33);
+                us.animal =  rSet.getString(34);
                 v.addElement(us);
             }
         } catch (Exception ex){
@@ -240,7 +248,7 @@ public class DBChat extends DBAdaptor{
         Log.getLogger(serviceName).debug("INSERT user id=" + us.id);
         try{
             PreparedStatement pst = getDb().prepareStatement("insert into users values (?," +
-                    " ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                    " ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             pst.setInt(1,us.id);
             pst.setString(2,us.sn);
             pst.setString(3,us.nick);
@@ -271,6 +279,10 @@ public class DBChat extends DBAdaptor{
             pst.setInt(28,us.clansman);
             pst.setString(29,us.clangroup);
             pst.setInt(30,us.wedding);
+            pst.setString(31,us.car);
+            pst.setString(32,us.home);
+            pst.setString(33,us.clothing);
+            pst.setString(34,us.animal);
             pst.execute();
             pst.close();
         } catch (Exception ex){
@@ -286,7 +298,8 @@ public class DBChat extends DBAdaptor{
                     "localnick=?,fname=?,lname=?,email=?,city=?,homepage=?,gender=?," +
                     "birthyear=?,birthmonth=?,birthday=?,age=?,country=?,language=?," +
                     "state=?,basesn=?,createtime=?,room=?, lastkick=?, grouptime=?, data=?," +
-                    "lastclosed=?, ball=?, answer=?, status=?, clansman=?, clangroup=?, wedding=? where id=" + us.id);
+                    "lastclosed=?, ball=?, answer=?, status=?, clansman=?, clangroup=?, wedding=?," +
+                    "car=?, home=?, clothing=?, animal=? where id=" + us.id);
             pst.setString(1,us.sn);
             pst.setString(2,us.nick);
             pst.setString(3,us.localnick);
@@ -316,6 +329,10 @@ public class DBChat extends DBAdaptor{
             pst.setInt(27,us.clansman);
             pst.setString(28,us.clangroup);
             pst.setInt(29,us.wedding);
+            pst.setString(30,us.car);
+            pst.setString(31,us.home);
+            pst.setString(32,us.clothing);
+            pst.setString(33,us.animal);
             pst.execute();
             pst.close();
         } catch (Exception ex){

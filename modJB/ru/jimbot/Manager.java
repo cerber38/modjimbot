@@ -92,6 +92,14 @@ public class Manager {
 	    getInstance().startAll();
 	}
 
+       /**
+	 * Перезапускает сервис
+	 */
+	public static void restart_service(String name) {
+           mn.stop(name);
+           mn.start(name);
+	}
+
 	/**
 	 * Возвращает экземпляр класса. При необходимости производит его создание и инициализацию.
 	 * @return

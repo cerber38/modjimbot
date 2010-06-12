@@ -150,7 +150,8 @@ public class MainPage extends HttpServlet {
      * @throws IOException
      */
     public void main_page(HttpConnection con) throws IOException {
-    	String uid = con.get("uid");
+    	int i = 1;
+        String uid = con.get("uid");
     	if(!checkSession(uid)) {
     		SrvUtil.error(con,"Ошибка авторизации!");
     		return;
@@ -175,7 +176,8 @@ public class MainPage extends HttpServlet {
     			"Управление сервисами</A><br><br>");
     	String s = "<TABLE>";
     	for(String n:Manager.getInstance().getServiceNames()){
-    		s += "<TR><TH ALIGN=LEFT>"+n+"</TD>";
+                //s += i + ") ";
+    		s += "<TR><TH ALIGN=LEFT>" + i + ") " + n + "</TD>";
     		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
     			"&page=srvs_props&ns="+n+"\">Настройки сервиса</A></TD>";
             s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +
@@ -190,19 +192,22 @@ public class MainPage extends HttpServlet {
     		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
 			"&page=srvs_stats&ns="+n+"\">Статистика</A></TD>";
     		if(Manager.getInstance().getService(n).isRun){
+                  //s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +
+    			//"&page=restart_service&ns="+n+"\">Restart service</A></TD>";
     			s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
-    				"&page=srvs_stop&ns="+n+"\">Stop</A></TD>";
+    				"&page=srvs_stop&ns="+n+"\">Stop service</A></TD>";
     		} else {
     			s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
-				"&page=srvs_start&ns="+n+"\">Start</A></TD>";
+				"&page=srvs_start&ns="+n+"\">Start service</A></TD>";
     		}
     		s += "</TR>";
+                        i++;
     	}
     	s += "</TABLE>";
     	con.print(s);
         con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=Tags\">" + "Tags</A>");
     	con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=stop_bot\">" + "Отключить бота</A>");
-    	con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=restart_bot\">" + "Перезапустить бота</A>");
+    	//con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=restart_bot\">" + "Перезапустить бота</A>");
         con.print("<hr><br><br>");
         con.print("</FONT></BODY></HTML>");
     }
@@ -230,6 +235,29 @@ public class MainPage extends HttpServlet {
         }
         Manager.restart();
         printMsgRestart(con,"main_page", "Перезапуск бота...");
+    }
+
+        public void restart_service(HttpConnection con) throws IOException {
+        String ns = con.get("ns");
+        String uid = con.get("uid");
+        if(!checkSession(uid)) {
+            SrvUtil.error(con,"Ошибка авторизации!");
+            return;
+        }
+        Manager.restart_service(ns);
+        printMsgRestart_service(con,"main_page", "Перезапуск сервиса \"" + ns.replace("&ns=", "") + "\" ...");
+    }
+
+        public void printMsgRestart_service(HttpConnection con, String pg, String msg) throws IOException {
+        String ns = con.get("ns");
+        ns = ns==null ? "" : "&ns="+ns;
+        con.print(SrvUtil.HTML_HEAD +
+                "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
+                "<H3><FONT COLOR=\"#004000\">" +
+                msg + " </FONT></H3>");
+    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + userID + "&page=" +
+    			pg + ns +"\">" + "Назад</A><br>");
+    	con.print("</FONT></BODY></HTML>");
     }
 
 
@@ -309,7 +337,7 @@ public class MainPage extends HttpServlet {
     		return;
     	}
     	Manager.getInstance().start(ns);
-    	printOkMsg(con,"main_page");
+    	printOkMsg_Start(con,"main_page");
 //    	main_page(con);
     }
     
@@ -325,7 +353,7 @@ public class MainPage extends HttpServlet {
     		return;
     	}
     	Manager.getInstance().stop(ns);
-    	printOkMsg(con,"main_page");
+    	printOkMsg_Stop(con,"main_page");
 //    	main_page(con);
     }
     
@@ -800,6 +828,10 @@ public class MainPage extends HttpServlet {
     con.print("<P>%SEX% - пол пользователя.</P>");
     con.print("<P>%AGE% - возраст пользователя.</P>");
     con.print("<P>%CITY% - город пользователя.</P>");
+    con.print("<P>%CAR% - авто.</P>");
+    con.print("<P>%HOME% - дом.</P>");
+    con.print("<P>%CLOTHING% - одежда.</P>");
+    con.print("<P>%ANIMAL% - животное.</P>");
     con.print("<P>%CLAN% - вернет либо \"Лидер клана |clan_name|\", либо \"Состоит в клане |clan_name| \", либо \"В клане не состоит\".</P>");
     con.print("<P>%WEDDING% - вернет \"В браке с |nick|\", если пользователь в браке</P>");
     con.print("<P>%VIC_GAME_TIME_0% - время начала игры в викторине.</P>");
@@ -1025,6 +1057,32 @@ public class MainPage extends HttpServlet {
                 "<H3><FONT COLOR=\"#004000\">" +
                 "Данные успешно сохранены </FONT></H3>");
     	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + userID + "&page=" + 
+    			pg + ns + "\">" + "Назад</A><br>");
+    	con.print("</FONT></BODY></HTML>");
+    }
+
+        public void printOkMsg_Start(HttpConnection con,String pg) throws IOException {
+        String ns = con.get("ns");
+        ns = ns==null ? "" : "&ns="+ns;
+    	con.print(SrvUtil.HTML_HEAD + "<meta http-equiv=\"Refresh\" content=\"3; url=" +
+    			con.getURI() + "?uid=" + userID + "&page="+ pg + ns + "\" />" +
+                "<TITLE>"+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
+                "<H3><FONT COLOR=\"#004000\">" +
+                "Сервис \"" + ns.replace("&ns=", "") + "\" успешно запущен! </FONT></H3>");
+    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + userID + "&page=" +
+    			pg + ns + "\">" + "Назад</A><br>");
+    	con.print("</FONT></BODY></HTML>");
+    }
+
+        public void printOkMsg_Stop(HttpConnection con,String pg) throws IOException {
+        String ns = con.get("ns");
+        ns = ns==null ? "" : "&ns="+ns;
+    	con.print(SrvUtil.HTML_HEAD + "<meta http-equiv=\"Refresh\" content=\"3; url=" +
+    			con.getURI() + "?uid=" + userID + "&page="+ pg + ns + "\" />" +
+                "<TITLE>"+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
+                "<H3><FONT COLOR=\"#004000\">" +
+                "Сервис \"" + ns.replace("&ns=", "") + "\" успешно остановлен! </FONT></H3>");
+    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + userID + "&page=" +
     			pg + ns + "\">" + "Назад</A><br>");
     	con.print("</FONT></BODY></HTML>");
     }

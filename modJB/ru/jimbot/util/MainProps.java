@@ -33,7 +33,6 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Vector;
-import ru.jimbot.modules.chat.ChatProps;
 import ru.jimbot.table.UserPreference;
 
 /**
@@ -42,7 +41,7 @@ import ru.jimbot.table.UserPreference;
  * @author Prolubnikov Dmitry
  */
 public class MainProps {
-    public static final String VERSION = "jImBot v.0.4.0 pre 4 (06/07/2009) mod by fraer72 (test_8) (23/4/2010)";
+    public static final String VERSION = "jImBot v.0.4.0 pre 4 (06/07/2009) mod by fraer72 (test_9-2) (12/6/2010)";
     public static final int VER_INT = 18;
 //    public static final String VER_DESC ="test version";
     private static int ver_no = 0;
@@ -296,13 +295,8 @@ public class MainProps {
         return s;
     }
     
-    public static String getAbout(){
-        return PROG_TITLE + " " + VERSION + "\n(c) Spec, 2006-2009\n" +
-                "Поддержка проекта: http://jimbot.ru" +
-                "\n[~~~~~~~]\nАвтор мода fraer72\nПоддержка мода - www.toch72.ru\n[~~~~~~~]\n";
-                /*"\nХостинг ICQ чатов ~ www.wortep.ru";*/
-    }
-    
+
+  
     public static boolean isHide(){
         return Boolean.valueOf(getProperty("isHide","true")).booleanValue();
     }

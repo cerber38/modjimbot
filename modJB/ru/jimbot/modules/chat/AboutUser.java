@@ -111,6 +111,11 @@ List += "Имя - " + u.lname + '\n';
 List += "Пол - " + u.homepage + '\n';
 List += "Возраст - " + u.age + '\n';
 List += "Город - " + u.city + '\n';
+
+List += "Дом - " + (u.home.equals("") || u.home == null ? "Бомж" : (u.home)) + '\n';
+List += "Машина - " + (u.car.equals("") || u.car == null ? "Пешеход" : (u.car)) + '\n';
+List += "Одежда - " + (u.clothing.equals("") || u.clothing == null ? "Голый" : (u.clothing)) + '\n';
+List += "Животное - " + (u.animal.equals("") || u.animal == null ? "Нету" : (u.animal)) + '\n';
 if( u.clansman != 0 )
 {
 List += (  u.id != cmd.srv.us.getClan( u.clansman ).getLeader() ? "Состоит в клане - ''" + cmd.srv.us.getClan( u.clansman ).getName() + "''" : ( "Лидер клана - ''" + cmd.srv.us.getClan( u.clansman ).getName() + "''" ) ) + '\n';

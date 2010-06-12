@@ -180,10 +180,6 @@ public class ChatProps implements AbstractProps {
         setIntProperty("about.user.st",15);
         setBooleanProperty("Priglashenie.on.off", false);
         setStringProperty("chat.Priglashenie","111111;222222");
-        setIntProperty("Alisa.Room",0);
-        setIntProperty("Alisa.UsageTime",1);
-        setIntProperty("Alisa.sayAloneTime",20);
-        setBooleanProperty("Alisa.on.off", false);
         setIntProperty("Clan.MaxCount",5);
         setIntProperty("Clan.NameLenght",20);
         setIntProperty("Clan.InfoLenght",60);
@@ -205,6 +201,7 @@ public class ChatProps implements AbstractProps {
         setIntProperty("voting.kick.time", 30 );
         setIntProperty("voting.count", 2 );
         setBooleanProperty("inchat.on.off", true);
+        setStringProperty("chat.latent.uin","111111;222222");
     }
 
     public UserPreference[] getUserPreference(){
@@ -288,6 +285,7 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.BOOLEAN_TYPE,"Questionnaire.on.off","Включить/Выключить заполнение анкеты после регистрации",getBooleanProperty("Questionnaire.on.off"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"ball.on.off","Включить/Выключить возможность передачи баллов между пользователями",getBooleanProperty("ball.on.off"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"inchat.on.off","Включить/Выключить интерактивный вход в чат",getBooleanProperty("inchat.on.off"),""),
+        //new UserPreference(UserPreference.STRING_TYPE,"chat.latent.uin","Скрытые уины: ",getStringProperty("chat.latent.uin"),""),
         //банрум
         new UserPreference(UserPreference.CATEGORY_TYPE,"banroom", "Настройки закрытия в комнате", "",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"room.tyrma","Комната Тюрьма в чате",getIntProperty("room.tyrma"),""),
@@ -642,6 +640,26 @@ public class ChatProps implements AbstractProps {
             ex.printStackTrace();
             Log.getDefault().error("Error saving preferences: ");
         }
+    }
+        /**
+         * Проверка на скрытый уин
+         * @param uin
+         * @return
+         */
+
+        public String testLatentUin(String uin) {
+        if(uin.equals("0")) return uin;
+        String s = getStringProperty("chat.latent.uin");
+        if(s.equals("")) return uin;
+        String[] ss = s.split(";");
+        try{
+            for(int i=0;i<ss.length;i++){
+                if(ss[i].equalsIgnoreCase(uin)) return "Уин засекречен";
+            }
+        } catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return uin;
     }
 
 

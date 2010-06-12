@@ -29,7 +29,7 @@ public class Monitor2 implements Runnable {
     int sleepAmount = 1000;
     private static final int testMaxCount = 30; // Период проверки файла - 15с
     private int count =0;
-    public static final String copirite = "jImBot v.0.4.0 pre 4 (06/07/2009) mod by fraer72 (test_8) (23/4/2010)";
+    public static final String copirite = "jImBot v.0.4.0 pre 4 (06/07/2009) mod by fraer72 (test_9-2) (12/6/2010)";
     
     /** Creates a new instance of Monitor */
     public Monitor2() {
