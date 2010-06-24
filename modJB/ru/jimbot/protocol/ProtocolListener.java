@@ -29,5 +29,4 @@ import ru.jimbot.modules.chat.Users;
 public interface ProtocolListener {
     public abstract void getMsg(String sendSN, String recivSN, String msg, boolean isoff);
     public abstract void getStatus(String sn, int status);    
-    public abstract void getInfo(Users u, int type);
 }

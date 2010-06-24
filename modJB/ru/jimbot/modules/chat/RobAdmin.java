@@ -19,12 +19,10 @@
 package ru.jimbot.modules.chat;
 
 import com.mysql.jdbc.PreparedStatement;
+import java.io.File;
 import java.sql.ResultSet;
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import ru.jimbot.Manager;
@@ -296,7 +294,7 @@ public class RobAdmin implements Runnable {
         while (th == me) {
             parse();
             timeEvent();
-            /*DelLog();*/
+            if(ChatProps.getInstance(srv.getName()).getBooleanProperty("dellog.on.off")) DelLog();
             try {
                 th.sleep(sleepAmount);
             } catch (InterruptedException e) { break; }             
@@ -310,8 +308,8 @@ public class RobAdmin implements Runnable {
     ////////////////////////
 
     private void DelLog(){
-    if((System.currentTimeMillis()-TimesDelLog)> 5*60000){
-        // Тут удаление
+    if((System.currentTimeMillis()-TimesDelLog)> ChatProps.getInstance(srv.getName()).getIntProperty("dellog.time")*60*60000){
+        dellogs();// Тут удаление
     TimesDelLog = System.currentTimeMillis();
     }
     }
@@ -393,5 +391,38 @@ public class RobAdmin implements Runnable {
    }
    catch (Exception ex) {ex.printStackTrace();}
    }
+
+    public void dellogs()
+    {
+    File log = new File("./log/");
+    if(!log.exists()) return;
+    if(!log.isDirectory()) return;
+    File[] all = log.listFiles();
+    if(all.length > 0)
+    for(int i = 0; i < all.length; i++)
+    {
+    if(all[i].isFile())
+    del("./log/"+all[i].getName());
+    }
+    for(String n:Manager.getInstance().getServiceNames()){
+    File logs = new File("./log/"+n+"/");
+    if(!logs.exists()) return;
+    if(!logs.isDirectory()) return;
+    File[] alls = logs.listFiles();
+    if(alls.length > 0)
+    for(int i = 0; i < alls.length; i++)
+    {
+    if(alls[i].isFile())
+    del("./log/"+n+"/"+alls[i].getName());
+    }
+    }
+    srv.us.db.executeQuery(" TRUNCATE `events` ");
+    srv.us.db.executeQuery(" TRUNCATE `log` ");
+    }
+
+    public  void del(String name) {
+    File i = new File (name);
+      if (i.exists()) i.delete();
+    }
 
 }

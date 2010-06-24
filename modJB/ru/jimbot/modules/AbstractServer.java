@@ -40,6 +40,8 @@ public class AbstractServer {
     }
     
     public void start() {}
+
+    public void Errore_bd() {}
     
     public void stop() {}
     

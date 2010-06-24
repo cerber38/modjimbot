@@ -111,7 +111,6 @@ List += "Имя - " + u.lname + '\n';
 List += "Пол - " + u.homepage + '\n';
 List += "Возраст - " + u.age + '\n';
 List += "Город - " + u.city + '\n';
-
 List += "Дом - " + (u.home.equals("") || u.home == null ? "Бомж" : (u.home)) + '\n';
 List += "Машина - " + (u.car.equals("") || u.car == null ? "Пешеход" : (u.car)) + '\n';
 List += "Одежда - " + (u.clothing.equals("") || u.clothing == null ? "Голый" : (u.clothing)) + '\n';
@@ -124,7 +123,7 @@ else
 {
 List += "В клане не состоит" + '\n';
 }
-List += "Правельных ответов в викторине - " + u.answer + '\n';
+List += "Правильных ответов в викторине - " + u.answer + '\n';
 List += (u.wedding == 0 ? "" : ("В браке с |" + cmd.srv.us.getUser(u.wedding).id + "|" + cmd.srv.us.getUser(u.wedding).localnick + '\n'));
 List += "------\n";
 List += cmd.gift.commandListGiftUser_5(id);

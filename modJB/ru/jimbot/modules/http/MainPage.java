@@ -21,17 +21,16 @@ package ru.jimbot.modules.http;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import ru.jimbot.Manager;
-import ru.jimbot.modules.AbstractProps;
 import ru.jimbot.modules.MsgStatCounter;
 import ru.jimbot.modules.chat.ChatCommandProc;
 import ru.jimbot.modules.chat.ChatServer;
@@ -41,28 +40,29 @@ import ru.jimbot.util.MainProps;
 
 /**
  * Главная страница бота, содержит ссылки на остальные разделы
- * @author Prolubnikov Dmitry
+ * @author Prolubnikov Dmitry, fraer72
  */
 public class MainPage extends HttpServlet {
-	private String userID=""; // ИД сеанса
-	private long dt = 0; // Время начала сеанса
-	Class self;
-    Class methodParamTypes[];
-    private long lastErrLogin = 0;
-    private int loginErrCount = 0;
-//    int objectCacheSizeLimit = 300000;
+    /*Не авторизованные пользователи*/
+    private ConcurrentHashMap <String, NoAuthorization> NoAuthorization = new ConcurrentHashMap<String, NoAuthorization>();
+    /*root*/
+    private String userID = "";// Ид сессии до авторизации
+    private long dt = 0; // Время начала сеанса
 
+    Class self;
+    Class methodParamTypes[];
+
+    
     @Override
     public void init() throws ServletException {
     	self = getClass();
         methodParamTypes = new Class[1];
-        userID = SrvUtil.getSessionId();
         try {
-			methodParamTypes[0] = Class.forName("ru.jimbot.modules.http.HttpConnection");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-            throw new ServletException(e.getMessage());
-		}
+	methodParamTypes[0] = Class.forName("ru.jimbot.modules.http.HttpConnection");
+	} catch (ClassNotFoundException e) {
+	e.printStackTrace();
+        throw new ServletException(e.getMessage());
+	}
         Log.getDefault().http("init MainPage");
     }
     
@@ -70,36 +70,86 @@ public class MainPage extends HttpServlet {
     public void destroy() {
         Log.getDefault().http("destroy MainPage");
     }
-    
+
+    /**
+     * Проверка сессии для root`a
+     * @param id
+     * @return
+     */
+
     private boolean checkSession(String id){
-    	boolean f = (System.currentTimeMillis()-dt)<MainProps.getIntProperty("http.delay")*60000;
-    	dt = System.currentTimeMillis();
-    	return id.equals(userID) && f;
+    boolean f = (System.currentTimeMillis()-dt)<MainProps.getIntProperty("http.delay")*60000;
+    dt = System.currentTimeMillis();
+    return userID.equals(id) && f;
     }
-    
+
+    /**
+     * Проверка сессия для пользователя
+     * @param id
+     * @param user
+     * @return
+     */
+    private boolean checkSession_user(String id, String user){
+    if(!MainProps.testUser(user)) return false;
+    boolean f = (System.currentTimeMillis()-Manager.getInstance().getBeginning(user))<MainProps.getIntProperty("http.delay")*60000;
+    Manager.getInstance().setBeginning(user, System.currentTimeMillis());
+    return Manager.getInstance().getUid(user).equals(id) && f;
+    }
+
+    /**
+     * текущеее время для записи
+     * @return
+     */
+    public String timeIn(){
+    String s = "";
+    Date date = new Date();
+    s = date.getMinutes() + ":" + date.getHours() + "   " + date.getDay()+"/"+date.getMonth()+"/"+date.getYear();
+    return s;
+    }
+
     /**
      * Обработка введенных данных при авторизации
      * @param con
      * @throws Exception
      */
     public void login(HttpConnection con) throws Exception {
-        if(loginErrCount>MainProps.getIntProperty("http.maxErrLogin"))
-            if((System.currentTimeMillis()-lastErrLogin) < (60000*MainProps.getIntProperty("http.timeBlockLogin"))) return;
-        String name = con.get("name");
-        String pass = con.get("password");
-        if (SrvUtil.getAuth(name, pass)!=1) {
-            loginErrCount++;
-            lastErrLogin = System.currentTimeMillis();
+     String ip = con.get("ip");
+     String name = con.get("name");
+     String pass = con.get("password");
+     if(!NoAuthorization.containsKey(ip)){
+     SrvUtil.error(con, "Error. It is not defined ip the address");
+     return;
+     }
+     NoAuthorization no = NoAuthorization.get(ip);
+     Integer loginErrCount = no.loginErrCount;
+     long lastErrLogin = no.lastErrLogin;
+     if(loginErrCount > MainProps.getIntProperty("http.maxErrLogin"))
+     if((System.currentTimeMillis()-lastErrLogin) < (60000*MainProps.getIntProperty("http.timeBlockLogin"))) return;
+        if (SrvUtil.getAuth(name, pass) == 0) {
+            no.loginErrCount++;
+            no.lastErrLogin = System.currentTimeMillis();
+            NoAuthorization.put(ip, no);
             if((System.currentTimeMillis()-lastErrLogin) > (60000*MainProps.getIntProperty("http.timeErrLogin"))) loginErrCount=0;
         	SrvUtil.error(con, "Incorrect password");
             return;
-        }
-        loginErrCount=0;
-        userID = SrvUtil.getSessionId();
+        } else if (SrvUtil.getAuth(name, pass) == 1) {// root
+        NoAuthorization.remove(ip);
+        String uid = "root_"+ SrvUtil.getSessionId();
+        userID = uid;
         dt = System.currentTimeMillis();
         con.addPair("uid", userID);
-//        con.addPair("person", userID);
         main_page(con);
+        } else if (SrvUtil.getAuth(name, pass) == 2) {// user
+        NoAuthorization.remove(ip);
+        Manager.getInstance().changeUser_ipAndTime(name, ip, timeIn());
+        MainProps.changeUser_ipAndTime(name, ip, timeIn());
+        String uid = name + "_" +  SrvUtil.getSessionId();
+        Manager.getInstance().setUid(name, uid);
+        Manager.getInstance().setBeginning(name, System.currentTimeMillis());
+        con.addPair("uid", uid);
+        con.addPair("us", name);
+        main_page_user(con);
+        }
     }
     
     /**
@@ -131,19 +181,67 @@ public class MainPage extends HttpServlet {
      * @param con
      * @throws IOException
      */
-    public void loginForm(HttpConnection con) throws IOException {
+    public void loginForm(HttpConnection con, String ip) throws IOException {
         con.print(SrvUtil.HTML_HEAD + "<TITLE>"+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
-                  "<H2>Панель управления ботом</H2>" +
-                  "<b>Вход для пользователя:</b>" +
-                  "<FORM METHOD=POST ACTION=\"" + con.getURI() +
-                  "\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"login\">" +
+                  "<H2>Вход в панель управления ботом</H2>" +
+                  "<FORM METHOD=POST ACTION=\"" + con.getURI() + "\">" +
+                  "<INPUT TYPE=hidden NAME=\"page\" VALUE=\"login\">" +
+                  "<INPUT TYPE=hidden NAME=\"ip\" VALUE=\"" + ip + "\">" +
                   "<TABLE><TR><TH ALIGN=LEFT>User:</TD>" +
                   "<TD><INPUT TYPE=text NAME=\"name\" SIZE=32></TD></TR>" +
                   "<TR><TH ALIGN=LEFT>Password:</TD>" +
                   "<TD><INPUT TYPE=password NAME=\"password\" SIZE=32></TD></TR></TABLE><P>" +
-                  "<INPUT TYPE=submit VALUE=\"Login\"></FORM></BODY></HTML>");
+                  "<INPUT TYPE=submit VALUE=\"Login\">" +
+                  "<p><a href=\"http://www.jimbot.ru\">jimbot</a></p>" +
+                  "</FORM></BODY></HTML>");
     }
-    
+
+
+    public void main_page_user(HttpConnection con) throws IOException {
+        String uid = con.get("uid");
+        String us = con.get("us");
+        Integer a = 1;
+        if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
+        Manager.getInstance().setBeginning(us, System.currentTimeMillis());
+        String services = Manager.getInstance().getServicesUser(us);// Доступные пользователю сервисы
+        if(services.equals("") || services == null){
+        SrvUtil.message(con, "У вас нет прав не на один сервис!");
+        }
+        String[] sn = services.split(";");
+        String s = "<TABLE>";
+        con.print(SrvUtil.HTML_HEAD + "<TITLE>"+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY);
+        con.print("<b>Вы вошли как пользователь<b><br><br>");
+        con.print("<b>Доступные вам сервисы:<b><br><br>");
+        for(int i=0; i<sn.length; i++){
+    		s += "<TR><TH ALIGN=LEFT>" + a + ") " + sn[i] + "</TD>";
+    		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us +
+    			"&page=srvs_props&ns="+sn[i]+"\">Настройки сервиса</A></TD>";
+            s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us +
+    			"&page=srvs_other&ns="+sn[i]+"\">Другие настройки</A></TD>";
+    		if(Manager.getInstance().getService(sn[i]) instanceof ChatServer){
+    		    s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us +
+    		        "&page=user_group_props&ns=" + sn[i] + "\">Полномочия</A></TD>";
+    		} else
+    		    s += "<TD> </TD>";
+
+            		if(Manager.getInstance().getService(sn[i]).isRun){
+                  s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us +
+    			"&page=restart_service&ns="+sn[i]+"\">Restart service</A></TD>";
+    		} else {
+    			s += "<TD>Сервис не запущен!</TD>";
+    		}
+    		s += "</TR>";
+                        a++;
+    	}
+    	s += "</TABLE>";
+    	con.print(s);
+        con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=exit\">" + "Exit</A>");
+        con.print("</FONT></BODY></HTML>");
+    }
+
     /**
      * Главная страница панели управления. Показывается после авторизации
      * @param con
@@ -160,10 +258,7 @@ public class MainPage extends HttpServlet {
     	con.print(SrvUtil.HTML_HEAD + "<TITLE>"+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY);
         con.print("<p align=\"center\"><b><FONT COLOR=\"#006400\">" + MainProps.VERSION + "</FONT></b></p>");
         con.print("<hr><H2>Панель управления ботом</H2>");
-        /*if(MainProps.getStringProperty("http.user").equals("admin") &&
-        MainProps.getStringProperty("http.pass").equals("admin"))
-        con.print("<H3><FONT COLOR=\"#FF0000\">В целях безопасности как можно скорее измените " +
-        "стандартный логин и пароль для доступа к этой странице! Рекомендуется также изменить порт.</FONT></H3>");*/
+        con.print("<b>Вы вошли как администратор!<b><br><br>");
     	if(MainProps.checkNewVersion()){
     	    con.print("<p>На сайте <A HREF=\"http://jimbot.ru\">jimbot.ru</A> Доступна новая версия!<br>");
     	    con.print(MainProps.getNewVerDesc().replaceAll("\n", "<BR>"));
@@ -173,16 +268,17 @@ public class MainPage extends HttpServlet {
     	con.print("<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=main_props\">" +
     			"Основные настройки</A><br>");
     	con.print("<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=srvs_manager\">" +
-    			"Управление сервисами</A><br><br>");
+    			"Управление сервисами</A><br>");
+        con.print("<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=users_manager\">" +
+    	"Управление пользователями</A><br><br>");
     	String s = "<TABLE>";
     	for(String n:Manager.getInstance().getServiceNames()){
-                //s += i + ") ";
     		s += "<TR><TH ALIGN=LEFT>" + i + ") " + n + "</TD>";
     		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
     			"&page=srvs_props&ns="+n+"\">Настройки сервиса</A></TD>";
-            s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +
+            s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
     			"&page=srvs_other&ns="+n+"\">Другие настройки</A></TD>";
-    		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
+    		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +  
 				"&page=srvs_props_uin&ns="+n+"\">Настройки UIN</A></TD>";
     		if(Manager.getInstance().getService(n) instanceof ChatServer){
     		    s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
@@ -192,8 +288,8 @@ public class MainPage extends HttpServlet {
     		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
 			"&page=srvs_stats&ns="+n+"\">Статистика</A></TD>";
     		if(Manager.getInstance().getService(n).isRun){
-                  //s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +
-    			//"&page=restart_service&ns="+n+"\">Restart service</A></TD>";
+                  s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +
+    			"&page=restart_service&ns="+n+"\">Restart service</A></TD>";
     			s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
     				"&page=srvs_stop&ns="+n+"\">Stop service</A></TD>";
     		} else {
@@ -207,7 +303,8 @@ public class MainPage extends HttpServlet {
     	con.print(s);
         con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=Tags\">" + "Tags</A>");
     	con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=stop_bot\">" + "Отключить бота</A>");
-    	//con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=restart_bot\">" + "Перезапустить бота</A>");
+    	con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=restart_bot\">" + "Перезапустить бота</A>");
+        con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=exit\">" + "Exit</A>");
         con.print("<hr><br><br>");
         con.print("</FONT></BODY></HTML>");
     }
@@ -229,6 +326,10 @@ public class MainPage extends HttpServlet {
     
     public void restart_bot(HttpConnection con) throws IOException {
         String uid = con.get("uid");
+            	if(!checkSession(uid)) {
+    		SrvUtil.error(con,"Ошибка авторизации!");
+    		return;
+    	}
         if(!checkSession(uid)) {
             SrvUtil.error(con,"Ошибка авторизации!");
             return;
@@ -239,23 +340,38 @@ public class MainPage extends HttpServlet {
 
         public void restart_service(HttpConnection con) throws IOException {
         String ns = con.get("ns");
-        String uid = con.get("uid");
-        if(!checkSession(uid)) {
-            SrvUtil.error(con,"Ошибка авторизации!");
-            return;
+    	String uid = con.get("uid");
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
+        if(us != null)
+            if(Manager.getInstance().testServicesUser(us, ns)){
+        printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+        return;
         }
         Manager.restart_service(ns);
-        printMsgRestart_service(con,"main_page", "Перезапуск сервиса \"" + ns.replace("&ns=", "") + "\" ...");
+        String page = us == null ? "main_page" : "main_page_user";
+        printMsgRestart_service(con,page, "Перезапуск сервиса \"" + ns.replace("&ns=", "") + "\" ...");
     }
 
         public void printMsgRestart_service(HttpConnection con, String pg, String msg) throws IOException {
         String ns = con.get("ns");
+        String uid = con.get("uid");
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
         ns = ns==null ? "" : "&ns="+ns;
         con.print(SrvUtil.HTML_HEAD +
                 "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
                 "<H3><FONT COLOR=\"#004000\">" +
                 msg + " </FONT></H3>");
-    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + userID + "&page=" +
+    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" +
     			pg + ns +"\">" + "Назад</A><br>");
     	con.print("</FONT></BODY></HTML>");
     }
@@ -263,12 +379,17 @@ public class MainPage extends HttpServlet {
 
         public void printMsgRestart(HttpConnection con, String pg, String msg) throws IOException {
         String ns = con.get("ns");
+        String uid = con.get("uid");
+            	if(!checkSession(uid)) {
+    		SrvUtil.error(con,"Ошибка авторизации!");
+    		return;
+    	}
         ns = ns==null ? "" : "&ns="+ns;
         con.print(SrvUtil.HTML_HEAD +
                 "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
                 "<H3><FONT COLOR=\"#004000\">" +
                 msg + " </FONT></H3>");
-    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + userID + "&page=" +
+    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=" +
     			pg + ns +"\">" + "Назад</A><br>");
     	con.print("</FONT></BODY></HTML>");
     }
@@ -338,7 +459,6 @@ public class MainPage extends HttpServlet {
     	}
     	Manager.getInstance().start(ns);
     	printOkMsg_Start(con,"main_page");
-//    	main_page(con);
     }
     
     public void srvs_stop(HttpConnection con) throws IOException {
@@ -354,10 +474,247 @@ public class MainPage extends HttpServlet {
     	}
     	Manager.getInstance().stop(ns);
     	printOkMsg_Stop(con,"main_page");
-//    	main_page(con);
     }
-    
-    
+
+    /**
+     * Управление пользователями - создание, удаление.
+     * @param con
+     * @throws IOException
+     */
+    public void users_manager(HttpConnection con) throws IOException {
+    int i = 1;
+    String uid = con.get("uid");
+    if(!checkSession(uid)) {
+    SrvUtil.error(con,"Ошибка авторизации!");
+    return;
+    }
+    con.print(SrvUtil.HTML_HEAD + "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
+    "<H2>Панель управления ботом</H2>" +
+    "<H3>Управление пользователями</H3>");
+    con.print("<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=users_create\">" +
+    "Создать пользователя</A><br><br>");
+    String s = "<TABLE>";
+    	for(String n:Manager.getInstance().getUsersNames()){
+    		s += "<TR><TH ALIGN=LEFT>"+ i + ") " +n+"</TD>";
+   		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +
+    			"&page=users_info&us="+n+"\"> Информация </A></TD>";
+    		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +
+    			"&page=users_change&us="+n+"\"> Изменить </A></TD>";
+    		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +
+    			"&page=users_delete&us="+n+"\"> Удалить </A></TD>";
+    		s += "</TR>";
+                i++;
+    	}
+    	s += "</TABLE><FORM>";
+    	con.print(s);
+    	con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
+    	con.print("</FONT></BODY></HTML>");
+    }
+
+
+    /**
+     * Удаление заданного пользователя
+     * @param con
+     * @throws IOException
+     */
+    public void users_delete(HttpConnection con) throws IOException {
+    	String uid = con.get("uid");
+    	if(!checkSession(uid)) {
+    		SrvUtil.error(con,"Ошибка авторизации!");
+    		return;
+    	}
+    	String us = con.get("us"); // Имя пользователя
+    	if(!Manager.getInstance().getUsersNames().contains(us)){
+    		SrvUtil.error(con,"Такого пользователя не существует!");
+    		return;
+    	}
+    	Manager.getInstance().delUsers(us);
+    	MainProps.delUser(us);
+    	MainProps.save();
+    	printOkMsg(con,"main_page");
+    }
+
+    /**
+     * Информация о пользователе
+     * @param con
+     * @throws IOException
+     */
+    public void users_info(HttpConnection con) throws IOException {
+    	String uid = con.get("uid");
+    	if(!checkSession(uid)) {
+    		SrvUtil.error(con,"Ошибка авторизации!");
+    		return;
+    	}
+    	String us = con.get("us"); // Имя пользователя
+            	if(!Manager.getInstance().getUsersNames().contains(us)){
+    		SrvUtil.error(con,"Такого пользователя не существует!");
+    		return;
+    	}
+        String [] Service = Manager.getInstance().getServicesUser(us).split(";");
+        String ip = Manager.getInstance().getIpUser(us);
+        String time = Manager.getInstance().getTimeUser(us);
+        con.print(SrvUtil.HTML_HEAD + "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
+        "<H2>Панель управления ботом</H2><br>" +
+        "<b>Информация о пользователе - " + us + "</b>");
+        con.print("<br><br>В последний раз заходил: " + time + " , с ip: " + ip);
+        con.print("<br><br>Права на сервисы:<br>");
+        for(int i=0; i<Service.length; i++){
+        con.print(Service[i] + "<br>");
+        }
+        con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
+        con.print("</FONT></BODY></HTML>");
+    }
+
+    /**
+     * Страница создания нового пользователя.
+     * @param con
+     * @throws IOException
+     */
+    public void users_create(HttpConnection con) throws IOException {
+    	String uid = con.get("uid");
+    	if(!checkSession(uid)) {
+    		SrvUtil.error(con,"Ошибка авторизации!");
+    		return;
+    	}
+    	con.print(SrvUtil.HTML_HEAD + "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
+                "<H2>Панель управления ботом</H2>" +
+                "<H3>Создание нового пользователя</H3>");
+               String s = "<FORM METHOD=POST ACTION=\"" + con.getURI() + "\">" +
+                "<INPUT TYPE=hidden NAME=\"page\" VALUE=\"users_create_in\">" +
+            	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
+            	"<TABLE>" +
+                "<TR><TD>Login:</TD><TD><INPUT TYPE=text NAME=\"login\" size=\"20\"></TD></TR>" +
+                "<TR><TD>Пароль:</TD><TD><INPUT TYPE=password NAME=\"pass0\" size=\"20\"></TD></TR>"+
+                "<TR><TD>Повторите пароль:</TD><TD><INPUT TYPE=password NAME=\"pass1\" size=\"20\"></TD></TR></TABLE>";
+                 s += "<b>Укажите права на сервисы:<b><br>";
+                 for(String n:Manager.getInstance().getServiceNames()){
+                 s += "<INPUT TYPE=checkbox NAME=\"" + n + "\" VALUE=\"" + n + "\">" + n + "<br>";
+                 }
+              	s += "<P><INPUT TYPE=submit VALUE=\"Создать\">";
+    	s += "<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>";
+    	s += "</FONT></BODY></HTML>";
+        con.print(s);
+    }
+
+    /**
+     * Страница измененния данных пользователя.
+     * @param con
+     * @throws IOException
+     */
+    public void users_change(HttpConnection con) throws IOException {
+    	String uid = con.get("uid");
+    	if(!checkSession(uid)) {
+    		SrvUtil.error(con,"Ошибка авторизации!");
+    		return;
+    	}
+        String us = con.get("us"); // Имя пользователя
+    	con.print(SrvUtil.HTML_HEAD + "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
+                "<H2>Панель управления ботом</H2>" +
+                "<H3>Изменить данные пользователя - " + us + "</H3>");
+               String s = "<FORM METHOD=POST ACTION=\"" + con.getURI() + "\">" +
+                "<INPUT TYPE=hidden NAME=\"us\" VALUE=\"" + us + "\">" +
+                "<INPUT TYPE=hidden NAME=\"page\" VALUE=\"users_change_in\">" +
+            	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
+            	"<TABLE>" +
+                "<TR><TD>Новый пароль:</TD><TD><INPUT TYPE=password NAME=\"pass0\" size=\"20\"></TD></TR>"+
+                "<TR><TD>Повторите пароль:</TD><TD><INPUT TYPE=password NAME=\"pass1\" size=\"20\"></TD></TR></TABLE>";
+                 s += "<b>Укажите права на сервисы:<b><br>";
+                 for(String n:Manager.getInstance().getServiceNames()){
+                 s += "<INPUT TYPE=checkbox NAME=\"" + n + "\" VALUE=\"" + n + "\">" + n + "<br>";
+                 }
+              	s += "<P><INPUT TYPE=submit VALUE=\"Изменить\">";
+    	s += "<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>";
+    	s += "</FONT></BODY></HTML>";
+        con.print(s);
+    }
+
+    /**
+     * Обработка формы создания нового пользователя
+     * @param con
+     * @throws IOException
+     */
+    public void users_create_in(HttpConnection con) throws IOException {
+    	String uid = con.get("uid");
+    	if(!checkSession(uid)) {
+    		SrvUtil.error(con,"Ошибка авторизации!");
+    		return;
+    	}
+        String service = "";
+    	String login = con.get("login");
+    	String pass0 = con.get("pass0");
+        String pass1 = con.get("pass1");
+    	if(!pass0.equalsIgnoreCase(pass1)){
+    		printMsg_users(con,"users_create","Пароли не совпадают!");
+    		return;
+    	}
+        for(String n:Manager.getInstance().getServiceNames()){
+        String srv = con.get(n);
+        if(service.equals(""))
+        service += srv == null ? "" : srv;
+        else
+        service += srv == null ? "" : ";" + srv;
+        }
+    	if(login.equals("")){
+    		printMsg_users(con,"users_create","Пустое имя пользователя!");
+    		return;
+    	}
+    	if(Manager.getInstance().getUsersNames().contains(login)){
+    		printMsg_users(con,"users_create","Такой пользователь уже существует!");
+    		return;
+    	}
+    	Manager.getInstance().addUser("", login, pass0, service,"");
+    	MainProps.addUser(login, pass0, service);
+    	MainProps.save();
+    	printOkMsg(con,"main_page");
+    }
+
+  /**
+     * Обработка формы изменения данных пользователя
+     * @param con
+     * @throws IOException
+     */
+    public void users_change_in(HttpConnection con) throws IOException {
+    	String uid = con.get("uid");
+    	if(!checkSession(uid)) {
+    		SrvUtil.error(con,"Ошибка авторизации!");
+    		return;
+    	}
+        String service = "";
+    	String us = con.get("us");
+    	String pass0 = con.get("pass0");
+        String pass1 = con.get("pass1");
+    	if(!pass0.equalsIgnoreCase(pass1)){
+    		printMsg_users(con,"users_create","Пароли не совпадают!");
+    		return;
+    	}
+        for(String n:Manager.getInstance().getServiceNames()){
+        String srv = con.get(n);
+        if(service.equals(""))
+        service += srv == null ? "" : srv;
+        else
+        service += srv == null ? "" : ";" + srv;
+        }
+    	if(us.equals("")){
+    		printMsg_users(con,"users_create","Пустое имя пользователя!");
+    		return;
+    	}
+    	Manager.getInstance().changeUser(us, pass0, service);
+    	MainProps.changeUser(us, pass0, service);
+    	MainProps.save();
+    	printOkMsg(con,"main_page");
+    }
+
+    public void printMsg_users(HttpConnection con, String pg, String msg) throws IOException {
+        String uid = con.get("uid");
+        con.print(SrvUtil.HTML_HEAD +
+                "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
+                "<H3><FONT COLOR=\"#004000\">" +
+                msg + " </FONT></H3>");
+    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=" +
+    			pg +"\">" + "Назад</A><br>");
+    	con.print("</FONT></BODY></HTML>");
+    }
+
     /**
      * Управление сервисами - создание, удаление.
      * @param con
@@ -386,7 +743,8 @@ public class MainPage extends HttpServlet {
     	con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
     	con.print("</FONT></BODY></HTML>");
     }
-    
+
+
     /**
      * Удаление заданного сервиса
      * @param con
@@ -425,7 +783,7 @@ public class MainPage extends HttpServlet {
                 "<H3>Создание нового сервиса</H3>");
         con.print("<FORM METHOD=POST ACTION=\"" + con.getURI() +
             	"\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"srvs_create_in\">" +
-            	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + userID + "\">" +
+            	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
             	"Имя сервиса: <INPUT TYPE=text NAME=\"ns\" size=\"40\"> <br>" +
             	"Тип сервиса: chat <input type=radio name=\"type\" value=\"chat\"> " +
             	"anek <input type=radio name=\"type\" value=\"anek\">" +
@@ -492,13 +850,12 @@ public class MainPage extends HttpServlet {
         String s = "<FORM METHOD=POST ACTION=\"" + con.getURI() +
         	"\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"srvs_props_uin_in\">" +
         	"<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" +ns + "\">" +
-        	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + userID + "\">";
+        	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">";
         for(int i=0;i<Manager.getInstance().getService(ns).getProps().uinCount();i++){
         	s += "UIN" + i + ": " +
 				"<INPUT TYPE=text NAME=\"uin_" + i + "\" VALUE=\"" + 
 				Manager.getInstance().getService(ns).getProps().getUin(i)+ "\"> : " +
 				"<INPUT TYPE=text NAME=\"pass_" + i + "\" VALUE=\"" + 
-//				Manager.getInstance().getService(ns).getProps().getPass(i)+
 				"\"> " +
 				"<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=srvs_props_uin_del&ns="+ns+"&cnt=" + i + "\">" +
 				"Удалить</A><br>";
@@ -583,25 +940,34 @@ public class MainPage extends HttpServlet {
      */
     public void srvs_props(HttpConnection con) throws IOException {
     	String uid = con.get("uid");
-    	if(!checkSession(uid)) {
-    		SrvUtil.error(con,"Ошибка авторизации!");
-    		return;
-    	}
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
     	String ns = con.get("ns"); // Имя сервиса
     	if(!Manager.getInstance().getServiceNames().contains(ns)){
     		SrvUtil.error(con,"Отсутствует сервис с таким именем!");
     		return;
     	}
+        if(us != null)
+            if(Manager.getInstance().testServicesUser(us, ns)){
+        printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+        return;
+        }
         con.print(SrvUtil.HTML_HEAD + "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
         	"<H2>Панель управления ботом</H2>" +
         	"<H3>Настройки сервиса " + ns + "</H3>");
         con.print("<FORM METHOD=POST ACTION=\"" + con.getURI() +
         	"\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"srvs_props_in\">" +
         	"<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" +ns + "\">" +
-        	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + userID + "\">" +
+                "<INPUT TYPE=hidden NAME=\"us\" VALUE=\"" +us + "\">" +
+        	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
         	prefToHtml(Manager.getInstance().getService(ns).getProps().getUserPreference())+
           	"<P><INPUT TYPE=submit VALUE=\"Сохранить\">");
-        con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
+        String page = us == null ? "main_page" : "main_page_user";
+        con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" + page + "\"></FORM>");
         con.print("</FONT></BODY></HTML>");
 
     }
@@ -613,10 +979,12 @@ public class MainPage extends HttpServlet {
      */
     public void srvs_props_in(HttpConnection con) throws IOException {
     	String uid = con.get("uid");
-    	if(!checkSession(uid)) {
-    		SrvUtil.error(con,"Ошибка авторизации!");
-    		return;
-    	}
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
     	String ns = con.get("ns"); // Имя сервиса
     	if(!Manager.getInstance().getServiceNames().contains(ns)){
     		SrvUtil.error(con,"Отсутствует сервис с таким именем!");
@@ -645,19 +1013,11 @@ public class MainPage extends HttpServlet {
     		}
     	}
     	Manager.getInstance().getService(ns).getProps().save();
-    	printOkMsg(con,"main_page");
+        String page = us.equals("null") ? "main_page" : "main_page_user";
+    	printOkMsg(con,page);
     }
     
-//    public void log_view(HttpConnection con) throws IOException {
-//    	String uid = con.get("uid");
-//    	if(!checkSession(uid)) {
-//    		SrvUtil.error(con,"Ошибка авторизации!");
-//    		return;
-//    	}
-//    	dt = System.currentTimeMillis();
-//    	
-//    }
-    
+
     /**
      * Страница с формой редактирования основных настроек бота
      * @param con
@@ -675,7 +1035,7 @@ public class MainPage extends HttpServlet {
                 "<H3>Основные настройки бота</H3>");
     	con.print("<FORM METHOD=POST ACTION=\"" + con.getURI() +
                 "\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"main_props_in\">" +
-                "<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + userID + "\">" +
+                "<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
                 prefToHtml(MainProps.getUserPreference())+
                 "<P><INPUT TYPE=submit VALUE=\"Сохранить\">");
     	con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
@@ -727,25 +1087,34 @@ public class MainPage extends HttpServlet {
      */
     public void srvs_other(HttpConnection con) throws IOException {
     	String uid = con.get("uid");
-    	if(!checkSession(uid)) {
-    		SrvUtil.error(con,"Ошибка авторизации!");
-    		return;
-    	}
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
     	String ns = con.get("ns"); // Имя сервиса
     	if(!Manager.getInstance().getServiceNames().contains(ns)){
     		SrvUtil.error(con,"Отсутствует сервис с таким именем!");
     		return;
     	}
+        if(us != null)
+            if(Manager.getInstance().testServicesUser(us, ns)){
+        printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+        return;
+        }
         con.print(SrvUtil.HTML_HEAD + "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
         	"<H2>Панель управления ботом</H2>" +
         	"<H3>Настройки сервиса " + ns + "</H3>");
         con.print("<FORM METHOD=POST ACTION=\"" + con.getURI() +
         	"\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"srvs_other_in\">" +
         	"<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" +ns + "\">" +
-        	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + userID + "\">" +
+                "<INPUT TYPE=hidden NAME=\"us\" VALUE=\"" +us + "\">" +
+        	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
         	prefToHtml(Manager.getInstance().getService(ns).getProps().OtherUserPreference())+
           	"<P><INPUT TYPE=submit VALUE=\"Сохранить\">");
-        con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
+        String page = us==null ? "main_page" : "main_page_user";
+        con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" + page + "\"></FORM>");
         con.print("</FONT></BODY></HTML>");
 
     }
@@ -757,10 +1126,12 @@ public class MainPage extends HttpServlet {
      */
     public void srvs_other_in(HttpConnection con) throws IOException {
     	String uid = con.get("uid");
-    	if(!checkSession(uid)) {
-    		SrvUtil.error(con,"Ошибка авторизации!");
-    		return;
-    	}
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
     	String ns = con.get("ns"); // Имя сервиса
     	if(!Manager.getInstance().getServiceNames().contains(ns)){
     		SrvUtil.error(con,"Отсутствует сервис с таким именем!");
@@ -789,7 +1160,8 @@ public class MainPage extends HttpServlet {
     		}
     	}
     	Manager.getInstance().getService(ns).getProps().save();
-    	printOkMsg(con,"main_page");
+        String page = us.equals("null") ? "main_page" : "main_page_user";
+    	printOkMsg(con,page);
     }
 
     public void Tags(HttpConnection con) throws IOException {
@@ -850,41 +1222,49 @@ public class MainPage extends HttpServlet {
      * @throws IOException
      */
     public void user_group_props(HttpConnection con) throws IOException {
-        String uid = con.get("uid");
-        if(!checkSession(uid)) {
-            SrvUtil.error(con,"Ошибка авторизации!");
-            return;
+    	String uid = con.get("uid");
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
         }
         String ns = con.get("ns"); // Имя сервиса
         if(!Manager.getInstance().getServiceNames().contains(ns)){
             SrvUtil.error(con,"Отсутствует сервис с таким именем!");
             return;
         }
+        us = us == null ? "null" : us;
+        if(!us.equals("null"))
+        if(Manager.getInstance().testServicesUser(us, ns)){
+        printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+        return;
+        }
         con.print(SrvUtil.HTML_HEAD + "<TITLE> "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
                 "<H2>Панель управления ботом</H2>" +
                 "<H3>Управление группами пользователей</H3>");
         con.print("<FORM METHOD=POST ACTION=\"" + con.getURI() +
                 "\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"user_group_props_add\">" +
-                "<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + userID + "\">" +
+                "<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
                 "<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" + ns + "\">" +
+                "<INPUT TYPE=hidden NAME=\"us\" VALUE=\"" +us + "\">" +
                 "Имя группы: <INPUT TYPE=text NAME=\"gr\" size=\"20\"> " +
                 "<INPUT TYPE=submit VALUE=\"Создать новую группу\"></FORM>");
-//        con.print("<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=user_group_props_add\">" +
-//                "Создать новую группу</A><br><br>");
         String s = "<TABLE>";
         String[] gr = Manager.getInstance().getService(ns).getProps().getStringProperty("auth.groups").split(";");
         for(int i=0; i<gr.length; i++){
             s += "<TR><TH ALIGN=LEFT>"+gr[i]+"</TD>";
             
             s += i==0 ? "" : "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
-                "&page=user_group_props_del&ns="+ns+"&gr=" + gr[i] + "\">(Удалить)</A></TD>";
+                "&page=user_group_props_del&ns="+ns+"&gr=" + gr[i] + "&us=" + us + "\">(Удалить)</A></TD>";
             s += "</TR>";
         }
         s += "</TABLE>";
         con.print(s);
-        con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=user_auth_props&ns="+ns+"\">" +
+        con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=user_auth_props&ns="+ns+"\">" +
                 "Редактировать полномочия</A><br>");
-        con.print("<FORM><P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
+        String page = us.equals("null") ? "main_page" : "main_page_user";
+        con.print("<FORM><P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" + page + "\"></FORM>");
         con.print("</FONT></BODY></HTML>");
     }
     
@@ -894,15 +1274,22 @@ public class MainPage extends HttpServlet {
      * @throws IOException
      */
     public void user_group_props_add(HttpConnection con) throws IOException {
-        String uid = con.get("uid");
-        if(!checkSession(uid)) {
-            SrvUtil.error(con,"Ошибка авторизации!");
-            return;
+    	String uid = con.get("uid");
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
         }
         String ns = con.get("ns"); // Имя сервиса
         if(!Manager.getInstance().getServiceNames().contains(ns)){
             SrvUtil.error(con,"Отсутствует сервис с таким именем!");
             return;
+        }
+        if(!us.equals("null"))
+            if(Manager.getInstance().testServicesUser(us, ns)){
+        printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+        return;
         }
         String gr = con.get("gr");
         if(gr.equals("")){
@@ -924,15 +1311,22 @@ public class MainPage extends HttpServlet {
     }
         
     public void user_auth_props(HttpConnection con) throws IOException {
-        String uid = con.get("uid");
-        if(!checkSession(uid)) {
-            SrvUtil.error(con,"Ошибка авторизации!");
-            return;
+    	String uid = con.get("uid");
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
         }
         String ns = con.get("ns"); // Имя сервиса
         if(!Manager.getInstance().getServiceNames().contains(ns)){
             SrvUtil.error(con,"Отсутствует сервис с таким именем!");
             return;
+        }
+        if(!us.equals("null"))
+        if(Manager.getInstance().testServicesUser(us, ns)){
+        printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+        return;
         }
         con.print(SrvUtil.HTML_HEAD + "<TITLE>"+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
                 "<H2>Панель управления ботом</H2>" +
@@ -953,7 +1347,8 @@ public class MainPage extends HttpServlet {
         String s = "<FORM METHOD=POST ACTION=\"" + con.getURI() +
         "\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"user_auth_props_in\">" +
         "<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" +ns + "\">" +
-        "<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + userID + "\">";
+        "<INPUT TYPE=hidden NAME=\"us\" VALUE=\"" +us + "\">" +
+        "<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">";
         s += "<TABLE><tbody><TR style=\"background-color: rgb(217, 217, 200);\"><TH ALIGN=LEFT>";
         for(int i=0;i<gr.length;i++)
             s += "<TD><b><u>" + gr[i] + "</u></b></TD>";
@@ -971,20 +1366,28 @@ public class MainPage extends HttpServlet {
         }
         s += "</tbody></TABLE><P><INPUT TYPE=submit VALUE=\"Сохранить\">";
         con.print(s);
-        con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
+        String page = us.equals("null") ? "main_page" : "main_page_user";
+        con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" + page + "\"></FORM>");
         con.print("</FONT></BODY></HTML>");
     }
     
     public void user_auth_props_in(HttpConnection con) throws IOException {
-        String uid = con.get("uid");
-        if(!checkSession(uid)) {
-            SrvUtil.error(con,"Ошибка авторизации!");
-            return;
+    	String uid = con.get("uid");
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
         }
         String ns = con.get("ns"); // Имя сервиса
         if(!Manager.getInstance().getServiceNames().contains(ns)){
             SrvUtil.error(con,"Отсутствует сервис с таким именем!");
             return;
+        }
+        if(!us.equals("null"))
+            if(Manager.getInstance().testServicesUser(us, ns)){
+        printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+        return;
         }
         String[] gr = Manager.getInstance().getService(ns).getProps().getStringProperty("auth.groups").split(";");
         Set<String> au = ((ChatCommandProc)Manager.getInstance().getService(ns).cmd).getAuthObjects().keySet();
@@ -1025,15 +1428,22 @@ public class MainPage extends HttpServlet {
      * @throws IOException
      */
     public void user_group_props_del(HttpConnection con) throws IOException {
-        String uid = con.get("uid");
-        if(!checkSession(uid)) {
-            SrvUtil.error(con,"Ошибка авторизации!");
-            return;
+    	String uid = con.get("uid");
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
         }
         String ns = con.get("ns"); // Имя сервиса
         if(!Manager.getInstance().getServiceNames().contains(ns)){
             SrvUtil.error(con,"Отсутствует сервис с таким именем!");
             return;
+        }
+        if(!us.equals("null"))
+            if(Manager.getInstance().testServicesUser(us, ns)){
+        printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+        return;
         }
         String gr = con.get("gr");
         if(gr.equals("")){
@@ -1049,54 +1459,99 @@ public class MainPage extends HttpServlet {
     }
     
     public void printOkMsg(HttpConnection con,String pg) throws IOException {
+    	String uid = con.get("uid");
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
         String ns = con.get("ns");
         ns = ns==null ? "" : "&ns="+ns;
     	con.print(SrvUtil.HTML_HEAD + "<meta http-equiv=\"Refresh\" content=\"3; url=" + 
-    			con.getURI() + "?uid=" + userID + "&page="+ pg + ns + "\" />" +
+    			con.getURI() + "?uid=" + uid + "&page="+ pg + ns + "&us=" + us + "\" />" +
                 "<TITLE>"+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
                 "<H3><FONT COLOR=\"#004000\">" +
                 "Данные успешно сохранены </FONT></H3>");
-    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + userID + "&page=" + 
+    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" +
     			pg + ns + "\">" + "Назад</A><br>");
     	con.print("</FONT></BODY></HTML>");
     }
 
         public void printOkMsg_Start(HttpConnection con,String pg) throws IOException {
+    	String uid = con.get("uid");
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
         String ns = con.get("ns");
         ns = ns==null ? "" : "&ns="+ns;
     	con.print(SrvUtil.HTML_HEAD + "<meta http-equiv=\"Refresh\" content=\"3; url=" +
-    			con.getURI() + "?uid=" + userID + "&page="+ pg + ns + "\" />" +
+    			con.getURI() + "?uid=" + uid + "&page="+ pg + ns + "\" />" +
                 "<TITLE>"+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
                 "<H3><FONT COLOR=\"#004000\">" +
                 "Сервис \"" + ns.replace("&ns=", "") + "\" успешно запущен! </FONT></H3>");
-    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + userID + "&page=" +
+    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" +
     			pg + ns + "\">" + "Назад</A><br>");
     	con.print("</FONT></BODY></HTML>");
     }
 
         public void printOkMsg_Stop(HttpConnection con,String pg) throws IOException {
+    	String uid = con.get("uid");
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
         String ns = con.get("ns");
         ns = ns==null ? "" : "&ns="+ns;
     	con.print(SrvUtil.HTML_HEAD + "<meta http-equiv=\"Refresh\" content=\"3; url=" +
-    			con.getURI() + "?uid=" + userID + "&page="+ pg + ns + "\" />" +
+    			con.getURI() + "?uid=" + uid + "&page="+ pg + ns + "\" />" +
                 "<TITLE>"+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
                 "<H3><FONT COLOR=\"#004000\">" +
                 "Сервис \"" + ns.replace("&ns=", "") + "\" успешно остановлен! </FONT></H3>");
-    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + userID + "&page=" +
+    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" +
     			pg + ns + "\">" + "Назад</A><br>");
     	con.print("</FONT></BODY></HTML>");
     }
     
     public void printMsg(HttpConnection con, String pg, String msg) throws IOException {
+    	String uid = con.get("uid");
+        String us = con.get("us");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
         String ns = con.get("ns");
         ns = ns.equals("") ? "" : "&ns="+ns;
         con.print(SrvUtil.HTML_HEAD +
                 "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
                 "<H3><FONT COLOR=\"#004000\">" +
                 msg + " </FONT></H3>");
-    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + userID + "&page=" + 
+    	con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" +
     			pg + ns +"\">" + "Назад</A><br>");
     	con.print("</FONT></BODY></HTML>");
+    }
+
+    public void exit(HttpConnection con)throws IOException {
+            String us = con.get("us");
+            String uid = con.get("uid");
+    	if(!checkSession(uid))
+                    if(!checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
+            if(us == null)
+                userID = "";
+            else
+            Manager.getInstance().setUid(us, "");
+        con.print(SrvUtil.HTML_HEAD + "<TITLE>JimBot error</TITLE></HEAD><BODY>");
+        con.print("<P><CENTER><A HREF=\"" + con.getURI() + "\">Login</A></CENTER>");
+    	con.print("</BODY></HTML>");
     }
 
     @Override
@@ -1113,13 +1568,19 @@ public class MainPage extends HttpServlet {
     
     void doGetOrPost(HttpServletRequest request, HttpServletResponse response) throws
     IOException, ServletException {
+        /*Провери ip в черном списке?*/
+        if(MainProps.isIpIgnor(request.getRemoteAddr().replace("/", ""))) return;
     	response.setContentType("text/html; charset=\"utf-8\"");
-    	Log.getDefault().http("HTTP LOG: " + request.getRemoteAddr()+"("+request.getRemoteHost()+") "+
-    			request.getQueryString());
+    	Log.getDefault().http("HTTP LOG: " + request.getRemoteAddr()+"("+request.getRemoteHost()+") "+  			request.getQueryString());
     	HttpConnection con = new HttpConnection(request, response);
     	String page = request.getParameter("page");
-    	if (page == null) {
-    		loginForm(con);
+        /*Новый не авторизованный пользователь*/
+        if(!NoAuthorization.containsKey(request.getRemoteAddr())){
+        NoAuthorization no = new NoAuthorization( 0, 0);
+        NoAuthorization.put(request.getRemoteAddr(), no);
+        }
+    	if (page == null/*|| page.equals("exit")*/) {
+    		loginForm(con, request.getRemoteAddr());
     	} else {
     		try {
     			Method method = self.getMethod(page, methodParamTypes);
@@ -1143,6 +1604,22 @@ public class MainPage extends HttpServlet {
     		}
     	}
     	con.send();
+    }
+
+
+
+
+
+    class NoAuthorization
+    {
+    public long lastErrLogin = 0;
+    public int loginErrCount = 0;
+
+    NoAuthorization(long lastErrLogin, int loginErrCount)
+    {
+    this.lastErrLogin = lastErrLogin;
+    this.loginErrCount = loginErrCount;
+    }
     }
 
 }

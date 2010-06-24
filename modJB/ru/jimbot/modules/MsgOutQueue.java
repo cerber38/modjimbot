@@ -103,9 +103,6 @@ public class MsgOutQueue implements Runnable {
             if(q.size()<=0) return;
             m = q.poll();
             switch (m.type){
-            case Msg.TYPE_INFO:
-            	proc.userInfoRequest(m.uin, m.text);
-            	break;
             case Msg.TYPE_AUTH:
             	proc.authRequest(m.uin, m.text);
             	break;
@@ -174,8 +171,7 @@ public class MsgOutQueue implements Runnable {
     
     public class Msg{
     	public static final int TYPE_MSG = 0; // Обычное сообщение
-    	public static final int TYPE_INFO = 1; // запрос инфы
-    	public static final int TYPE_AUTH = 2; // запрос авторизации
+    	public static final int TYPE_AUTH = 1; // запрос авторизации
         public String uin="";
         public String text = "";
         public int type = 0;

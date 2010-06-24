@@ -25,7 +25,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import ru.jimbot.Manager;
@@ -184,7 +183,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         authObj.put("robmsg", "Возможность добовлять фразы для админ-бота");
         authObj.put("group_time", "Назначать временную группу");
         authObj.put("xst","Изминить х-статус чата");
-        //authObj.put("restart","Перезагрузка бота");
+        authObj.put("restart","Перезагрузка сервиса");
         authObj.put("shophist","Смотреть историю покупок в магазине");
         authObj.put("gift","Добавлять/удалять подарки/товар в ларьке/магазине");
         authObj.put("status_user", "Установка статусов");
@@ -302,7 +301,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         commands.put("!адмлист", new Cmd("!адмлист", "$c", 49));
         commands.put("!робмсг", new Cmd("!робмсг", "$s", 50));
         commands.put("!хстатус", new Cmd("!хстатус", "$n $s", 51));
-        //commands.put("!перезагрузить", new Cmd("!перезагрузить", "", 52));
+        commands.put("!перезагрузить", new Cmd("!перезагрузить", "", 52));
         commands.put("!статус", new Cmd("!статус", "$s", 53));
         commands.put("!разбанлист", new Cmd("!разбанлист", "", 54));
         commands.put("!удалить", new Cmd("!удалить", "$n", 55));
@@ -319,6 +318,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         commands.put("!спрятаться", new Cmd("!спрятаться","",65));
         commands.put("!показаться", new Cmd("!показаться","",66));
         commands.put("!скрылись", new Cmd("!скрылись","",67));
+        commands.put("!уин", new Cmd("!уин","$n",68));
     	WorkScript.getInstance(srv.getName()).installAllChatCommandScripts(this);
     }
     
@@ -873,6 +873,9 @@ firstStartMsg=true;
                 break;
            case 67:
                 commandListInvise(proc, uin);
+                break;
+           case 68:
+                commandGetUinUser(proc, uin, parser.parseArgs(tmsg));
                 break;
                 default:
      //Дополнительные команды из других классов
@@ -3186,7 +3189,7 @@ firstStartMsg=true;
   return;
   }
   if(!auth(proc,uin, "restart")) return;
-  Manager.restart();
+  Manager.restart_service(srv.getName());
   }
 
     /**
@@ -3614,8 +3617,8 @@ firstStartMsg=true;
         {
         try
         {
-        msg = mmsg;
-        msg.toLowerCase();
+        msg = mmsg.trim();
+        msg = msg.toLowerCase();
         }
         catch(NumberFormatException e)
         {
@@ -3697,7 +3700,7 @@ firstStartMsg=true;
 
         public boolean TestMsgWedding( String msg )
         {
-        return ( msg.equalsIgnoreCase( "да" ) || msg.equalsIgnoreCase( "нет" ) );
+        return ( msg.equals( "да" ) || msg.equals( "нет" ) );
         }
 
         /**
@@ -4185,6 +4188,36 @@ firstStartMsg=true;
        ex.printStackTrace();
        ex.getMessage().toString();
        proc.mq.add(uin, "Ошибка " + ex.getMessage());
+       }
+       }
+
+       /**
+        * Дать пользователю свой уин
+        * @param proc
+        * @param uin
+        */
+
+       public void commandGetUinUser(IcqProtocol proc, String uin, Vector v){
+       if(!isChat(proc,uin) && !psp.testAdmin(uin)) return;
+       try{
+       int id = (Integer)v.get(0);
+       Users u = srv.us.getUser(id);
+       Users uss = srv.us.getUser(uin);
+       if(u.id == 0){
+       proc.mq.add(uin,"Пользователь не найден!");
+       return;
+       }
+       if(u.state != UserWork.STATE_CHAT){
+       proc.mq.add(uin,"Пользователь не в чате!");
+       return;
+       }
+       proc.mq.add(uin,"Uin отправлен");
+       srv.getIcqProcess(u.basesn).mq.add(u.sn,"Пользователь " + uss.localnick + " дал вам свой уин, - " + uss.sn);
+       }
+       catch (Exception ex)
+       {
+       ex.printStackTrace();
+       proc.mq.add(uin,"Ошибка " + ex.getMessage().toString());
        }
        }
 

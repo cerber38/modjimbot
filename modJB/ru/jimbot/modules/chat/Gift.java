@@ -492,11 +492,12 @@ try{
 PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("select time, user_id2, gift, text from gift_user WHERE user_id="+id);
 ResultSet rs = pst.executeQuery();
 for(int i=1 ; i<6 ; i++){
-while(rs.next())
-{
+if(rs.next()){
 a++;
 Users u = cmd.srv.us.getUser(rs.getInt(2));
 L += a + ". - |" + u.id + "|" + u.localnick +  " » " + rs.getString(3) + " » " + rs.getString(4) + '\n';
+} else {
+break;
 }
 }
 if(L.equals("")){list = ""; return list;}//Если нет подарков

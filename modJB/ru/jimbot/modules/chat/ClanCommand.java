@@ -515,8 +515,8 @@ if( ClanMap.containsKey( uin ) )
 {
 try
 {
-msg = mmsg;
-msg.toLowerCase();
+msg = mmsg.trim();
+msg = msg.toLowerCase();
 }
 catch( NumberFormatException e )
 {
@@ -588,10 +588,7 @@ return s;
 
 public boolean TestMsgInvitation( String msg )
 {
-if( msg.equals( "да" ) || msg.equals( "нет" ) )
-{
-return true;
-} else return false;
+return msg.equals( "да" ) || msg.equals( "нет" );
 }
 
 /**

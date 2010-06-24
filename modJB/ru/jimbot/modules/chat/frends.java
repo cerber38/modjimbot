@@ -4,7 +4,7 @@
  */
 
 package ru.jimbot.modules.chat;
-import com.mysql.jdbc.PreparedStatement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Collections;

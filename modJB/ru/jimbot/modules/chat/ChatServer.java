@@ -18,7 +18,6 @@
 
 package ru.jimbot.modules.chat;
 
-import ru.jimbot.Manager;
 import ru.jimbot.db.DBAdaptor;
 import ru.jimbot.modules.AbstractProps;
 import ru.jimbot.modules.AbstractServer;
@@ -39,41 +38,34 @@ public class ChatServer extends AbstractServer{
     public UserWork us;
     public ChatQueue cq;
     public MsgInQueue inq;
-    //public Messages msg;
     private ChatProps props = null;
     
     /** Creates a new instance of ChatServer */
 
     public ChatServer(String name) {
     	this.setName(name);
-    	ChatProps.getInstance(name).load();
+    	props = ChatProps.getInstance(name);
+        props.load();
         cmd = new ChatCommandProc(this);
-//        us = new UserWork(name);
         con = new ChatConnection(this);
-        //msg = new Messages(name);
-        //msg = new Messages(this);
         con.server = MainProps.getServer();
         con.port = MainProps.getPort();
         con.proxy = MainProps.getProxy();
+        cq = new ChatQueue(this);
+        inq = new MsgInQueue(cmd);
+    }
+    
+    public void start() {
+        us = new UserWork(getName());
         String[] icq = new String[ChatProps.getInstance(this.getName()).uinCount()];
         String[] pass = new String[ChatProps.getInstance(this.getName()).uinCount()];
         for(int i=0;i<ChatProps.getInstance(this.getName()).uinCount();i++){
             icq[i] = ChatProps.getInstance(this.getName()).getUin(i);
             pass[i] = ChatProps.getInstance(this.getName()).getPass(i);
         }
-        con.uins = new UINmanager(icq, pass, con, 
-                ChatProps.getInstance(this.getName()).getBooleanProperty("chat.IgnoreOfflineMsg"), 
+        con.uins = new UINmanager(icq, pass, con,
+                ChatProps.getInstance(this.getName()).getBooleanProperty("chat.IgnoreOfflineMsg"),
                 ChatProps.getInstance(this.getName()), this.getName());
-        cq = new ChatQueue(this);
-        cq.start();
-        inq = new MsgInQueue(cmd);
-    }
-    
-    public void start() {
-        /*boolean testBD = Manager.getInstance().getService(getName()).testBd;
-        if(testBD == false)
-        return;*/
-        us = new UserWork(getName());
     	WorkScript.getInstance(getName()).startScript("start", "", this);
         if(!con.server.equals("")) {
             con.uins.start();
@@ -82,6 +74,7 @@ public class ChatServer extends AbstractServer{
              inq.addReceiver((IcqProtocol)con.uins.proc.get(i));
          }
         inq.start();
+        cq.start();
         isRun = true;
         if(ChatProps.getInstance(this.getName()).getBooleanProperty("vic.on.off")){
         Log.getLogger(getName()).talk("I start quiz for service - \"" + this.getName() + "\"");
@@ -90,17 +83,33 @@ public class ChatServer extends AbstractServer{
     }
     
     public void stop() {
-    	WorkScript.getInstance(getName()).startScript("stop", "", this);
-        closeDB();
-        if(!con.server.equals("")) con.uins.stop();
         isRun = false;
-        //if(!((ChatCommandProc)this.cmd).Quiz.testStartQuiz  &
-                //((ChatCommandProc)this.cmd).Quiz.th.isAlive())
-        //((ChatCommandProc)this.cmd).Quiz.stop();
+        closeDB();
+        us = null;
+        inq.stop();
+        cq.stop();   	
+        if(!con.server.equals("")) con.uins.stop();
+        /*Убьем остальные потоки*/
+        if(((ChatCommandProc)this.cmd).Quiz != null) ((ChatCommandProc)this.cmd).Quiz.stop();
+        if(((ChatCommandProc)this.cmd).radm != null) ((ChatCommandProc)this.cmd).radm.stop();
+        if(((ChatCommandProc)this.cmd).xstatus != null) ((ChatCommandProc)this.cmd).xstatus.stop();
+        WorkScript.getInstance(getName()).startScript("stop", "", this);
+    }
+
+        public void Errore_bd() {
+        isRun = false;
+        inq.stop();
+        cq.stop();   	
+        if(!con.server.equals("")) con.uins.stop();
+        /*Убьем остальные потоки*/
+        if(((ChatCommandProc)this.cmd).Quiz != null) ((ChatCommandProc)this.cmd).Quiz.stop();
+        if(((ChatCommandProc)this.cmd).radm != null) ((ChatCommandProc)this.cmd).radm.stop();
+        if(((ChatCommandProc)this.cmd).xstatus != null) ((ChatCommandProc)this.cmd).xstatus.stop();
+        Log.getLogger(this.getName()).info("Остановка сервиса - \"" + this.getName() + "\"");
     }
     
     public void closeDB(){
-        us.closeDB();
+    us.closeDB();
     }
     
     public IcqProtocol getIcqProcess(String baseUin) {

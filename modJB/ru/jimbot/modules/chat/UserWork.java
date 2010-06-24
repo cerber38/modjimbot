@@ -21,13 +21,11 @@ package ru.jimbot.modules.chat;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-
 import ru.jimbot.protocol.IcqProtocol;
 import ru.jimbot.util.Log;
 import ru.jimbot.Messages;
@@ -469,22 +467,6 @@ public class UserWork {
     
     public Vector getUsers(int state) {
         return db.getObjectVector("select * from users where state = " + state);
-    }
-    
-    public String getUserInfo(int id) {
-        Users u = getUser(id);
-        if(u.state==-1) 
-            return u.getInfo()+"\n"+getBanDesc(u.sn);
-        else
-            return u.getInfo();
-    }
-    
-    public String getUserInfo(String uin) {
-        Users u = getUser(uin);
-        if(u.state==-1) 
-            return u.getInfo()+"\n"+getBanDesc(uin);
-        else
-            return u.getInfo();
     }
     
     /**
@@ -1367,5 +1349,6 @@ public class UserWork {
       }
       return s;
       }
+
 
 }

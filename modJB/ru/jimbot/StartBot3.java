@@ -18,20 +18,11 @@
 
 package ru.jimbot;
 
-//import java.io.IOException;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.PrintStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Vector;
 
-//import javax.servlet.http.HttpServletRequest;
-//import javax.servlet.http.HttpServletResponse;
+import java.io.PrintStream;
+import java.util.Vector;
 import ru.jimbot.modules.AbstractProps;
-import ru.jimbot.modules.AbstractServer;
 import ru.jimbot.modules.WorkScript;
-//import ru.jimbot.modules.http.HttpConnection;
 import ru.jimbot.modules.http.Server;
 import ru.jimbot.util.Log;
 import ru.jimbot.util.MainProps;
@@ -43,17 +34,14 @@ import ru.jimbot.util.SystemErrLogger;
  *
  */
 public class StartBot3 implements Runnable {
-private static boolean start = true;
 private Thread th;
 int sleepAmount = 1000;
-private static StartBot3 botstart = null;
 long Time = System.currentTimeMillis();
 long Time2 = MainProps.testtime;
 private String Fucking = "You Fucking!!! Put copyrights of authors into place! Immediate!";
 public static String name = System.getProperty("os.name"); //Название операционной системы
 public static String version = System.getProperty("os.version"); //Версия операционной системы
 public static String java = System.getProperty("java.version"); //Версия JRE
-//String newString = new String( advertising.getBytes( "ISO-8859-1" ), "windows-1251"  );
 private AbstractProps props = null;
 
 public StartBot3(){}
@@ -108,30 +96,17 @@ stop();
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
-        // Самосоздание батника для запуска бота :)
-/*File bat = new File("JimBot_Start.bat");
-            if( !bat.exists() ){
-            try{
-            MainProps.AddFail( "bat", "./JimBot_Start", "mode con cp select=1251\njava -jar JimBot.jar" );
-            } catch ( Exception ex ) {
-            ex.printStackTrace();
-            Log.info( "При создании bat. файла возникла ошибка: " + ex );
-            }
-            }*/
-            	//Log.init("");
-                //Log.info( "Операционная система: " + name );
-                //Log.info( "Версия операционной системы: " + version );
-
             	System.setErr(new PrintStream(new SystemErrLogger(), true));
                 MainProps.load();
                 Manager.getInstance();
                 if(MainProps.getBooleanProperty("main.StartHTTP"))
                     try {
                         Vector<String> v = WorkScript.getInstance("").listHTTPScripts();
-                        String[] s = new String[2+v.size()*2];
+                        String[] s = new String[/*4*/2+v.size()*2];
                         s[0] = "/";
                         s[1] = "ru.jimbot.modules.http.MainPage";
+                        //s[2] = "sms";
+                        //s[3] = "ru.jimbot.modules.http.SmsWork";
                         for(int i=0;i<v.size();i++){
                             s[i*2+2] = v.get(i);
                             s[i*2+3] = "ru.jimbot.modules.http.HTTPScriptRequest";
@@ -145,8 +120,6 @@ stop();
                  } catch (Exception ex) {
                 	 ex.printStackTrace();
                  }
-//            }
-//        });
     }
 
 

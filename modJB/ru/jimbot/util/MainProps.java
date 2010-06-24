@@ -41,27 +41,22 @@ import ru.jimbot.table.UserPreference;
  * @author Prolubnikov Dmitry
  */
 public class MainProps {
-    public static final String VERSION = "jImBot v.0.4.0 pre 4 (06/07/2009) mod by fraer72 (test_9-2) (12/6/2010)";
+    public static final String VERSION = "jImBot v.0.4.0 pre 4 (06/07/2009) mod by fraer72 (test_10) (24/6/2010)";
     public static final int VER_INT = 18;
-//    public static final String VER_DESC ="test version";
     private static int ver_no = 0;
     public static final int testtime = 30000;
     private static long ver_last_read = 0;
     private static String ver_desc = "";
-//    public static final String VER_DESC = "Поправлена работа при условии нестабильного соединения с MySQL;" +
-//    		"Кеширование скриптов;" +
-//    		"";
     public static final String PROG_TITLE = "jImBot";
     public static final String PROPS_FILE = "./jimbot.xml";
     public static final String ENCODING = "windows-1251";
     private static Properties appProps;
-    private static Properties langProps;
-    private static boolean isLoaded = false;
     private static Vector servers = new Vector();
     private static String currentServer = "";
     private static int currentPort = 0;
     private static int countServer = 0;
     private static HashSet<String> ignor;
+    private static HashSet<String> ignorIP;
     
     /** Creates a new instance of MainProps */
     public MainProps() {
@@ -71,9 +66,6 @@ public class MainProps {
         appProps = new Properties();
         setStringProperty("icq.serverDefault","login.icq.com");
         setIntProperty("icq.portDefault",5190);
-//        setStringProperty("main.logLevel","INFO");
-//        setBooleanProperty("main.useConsoleLog",true);
-//        setBooleanProperty("main.useTray",true);
         setStringProperty("main.Socks5ProxyHost","");
         setStringProperty("main.Socks5ProxyPort","");
         setStringProperty("main.Socks5ProxyUser","");
@@ -81,14 +73,9 @@ public class MainProps {
         setBooleanProperty("main.autoStart",true);
         setIntProperty("icq.AUTORETRY_COUNT",5);
         setBooleanProperty("icq.md5login",false);
-//        setStringProperty("main.dbType","MYSQL");
-//        setStringProperty("db.host","localhost:3306");
-//        setStringProperty("db.user","root");
-//        setStringProperty("db.pass","");
-//        setStringProperty("db.dbname","botdb");
         setBooleanProperty("main.StartHTTP",true);
-        setStringProperty("http.user","admin"); // юзер для админки
-        setStringProperty("http.pass","admin"); // пароль для доступа в админку
+        setStringProperty("http.user","admin");
+        setStringProperty("http.pass","admin"); 
         setIntProperty("http.delay",10);
         setIntProperty("http.maxErrLogin",3);
         setIntProperty("http.timeErrLogin",10);
@@ -103,10 +90,6 @@ public class MainProps {
         UserPreference[] p = {
             new UserPreference(UserPreference.CATEGORY_TYPE,"main", "Основные настройки","",""),
             new UserPreference(UserPreference.BOOLEAN_TYPE,"main.checkNewVer","Уведомлять о новых версиях",getBooleanProperty("main.checkNewVer"),""),
-//            new UserPreference(UserPreference.STRING_TYPE,"main.logLevel", "Уровень ведения лога",getStringProperty("main.logLevel"),new String[]{"INFO","WARN","DEBUG","ERROR","FATAL","TRACE","ALL"}),
-//            new UserPreference(UserPreference.STRING_TYPE,"main.dbType", "Тип базы данных",getStringProperty("main.dbType"),new String[]{"HSQLDB","MYSQL"}),
-//            new UserPreference(UserPreference.BOOLEAN_TYPE,"main.useConsoleLog","Выводить лог на консоль",getBooleanProperty("main.useConsoleLog")),
-//            new UserPreference(UserPreference.BOOLEAN_TYPE,"main.useTray","Сворачивать в трей",getBooleanProperty("main.useTray")),
             new UserPreference(UserPreference.BOOLEAN_TYPE,"main.autoStart","Автозапуск при загрузке",getBooleanProperty("main.autoStart"),""),
             new UserPreference(UserPreference.BOOLEAN_TYPE,"main.StartHTTP","Запускать HTTP сервер",getBooleanProperty("main.StartHTTP"),""),
             new UserPreference(UserPreference.INTEGER_TYPE,"http.delay","Время жизни HTTP сессии",getIntProperty("http.delay"),""),
@@ -145,6 +128,26 @@ public class MainProps {
             ex.printStackTrace();
         }
     }
+
+    /**
+     * Загружает заигноренные ip адреса из файла
+     */
+    public static void loadIgnorIPList(){
+    	String s;
+    	ignorIP = new HashSet<String>();
+        try{
+            BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream("ignoreIP.txt"),"windows-1251"));
+            while (r.ready()){
+                s = r.readLine();
+                if(!s.equals("")){
+                    ignorIP.add(s);
+                }
+            }
+            r.close();
+        } catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
     
     /**
      * Уин в игноре?
@@ -155,11 +158,159 @@ public class MainProps {
     	if(ignor==null) return false;
     	return ignor.contains(uin);
     }
+
+    /**
+     * IP в игноре?
+     * @param uin
+     * @return
+     */
+    public static boolean isIpIgnor(String uin){
+    	if(ignorIP==null) return false;
+    	return ignorIP.contains(uin);
+    }
     
     public static Properties getProps(){
         return appProps;
     }
     
+    public static int getUserCount(){
+    	return getIntProperty("users.Count");
+    }
+
+    public static String getUserName(int i){
+    	return getStringProperty("users.Name"+i);
+    }
+
+    public static String getUserPass(int i) {
+    	return getStringProperty("users.Pass"+i);
+    }
+
+    public static String getUserService(int i) {
+    	return getStringProperty("users.Service"+i);
+    }
+
+    public static String getUserIp(int i) {
+    	return getStringProperty("users.ip"+i);
+    }
+
+    public static String getUserInTime(int i) {
+    	return getStringProperty("users.inTume"+i);
+    }
+
+ /**
+  * Добавление пользователя
+  * @param name
+  * @param pass
+  * @param service
+  * @return
+  */
+
+    public static int addUser(String name, String pass, String service){
+    	int c = getUserCount();
+    	setIntProperty("users.Count", c+1);
+    	setStringProperty("users.Name"+c, name);
+    	setStringProperty("users.Pass"+c, pass);
+        setStringProperty("users.Service"+c, service);
+    	setStringProperty("users.ip"+c, "");
+        setStringProperty("users.inTume"+c, "");
+        return c;
+    }
+
+ /**
+  * Изменение данных пользователя
+  * @param name
+  * @param pass
+  * @param services
+  */
+
+    public static void changeUser(String name, String pass, String services){
+        Integer a = 0;
+        for(int i=0; i<(getUserCount()-1); i++){
+        if(getUserName(i).equals(name)) a = i;
+        }
+        setStringProperty("users.Pass"+a, pass);
+        setStringProperty("users.Service"+a, services);
+    }
+
+/**
+ * Проверка логина и пароля
+ * @param name
+ * @param pass
+ * @return
+ */
+
+    public static boolean testAuth(String name, String pass){
+        Integer a = 0;
+        boolean f = false;
+        for(int i=0; i<getUserCount(); i++){
+        if(getUserName(i).equals(name)){
+        a = i;
+        f = true;
+        }
+        }
+        if(!f) return false;
+        if(getUserPass(a).trim().equals(pass.trim())) return true;
+        return false;
+    }
+
+ /**
+  * Изменение не постоянных данных пользователя
+  * @param name
+  * @param ip
+  * @param time
+  */
+
+   public static void changeUser_ipAndTime(String name, String ip, String time){
+        Integer a = 0;
+        for(int i=0; i<getUserCount(); i++){
+        if(getUserName(i).equals(name)) a = i;
+        }
+        setStringProperty("users.ip"+a, ip);
+        setStringProperty("users.inTume"+a, time);
+        save();
+   }
+
+/**
+ * Есть такой пользователь?
+ * @param name
+ * @return
+ */
+
+   public static boolean testUser(String name) {
+        for(int i=0; i<getUserCount(); i++){
+    	if(getUserName(i).equals(name)) return true;
+        }
+        return false;
+   }
+
+ /**
+  * Удаление пользователя
+  * @param name
+  */
+
+   public static void delUser(String name) {
+    	// Сдвигаем элементы после удаленного на его место
+    	boolean f = false;
+    	for(int i=0; i<(getUserCount()-1); i++){
+    	if(getUserName(i).equals(name))
+    	f = true;
+    	if(f){
+    	setStringProperty("users.Name"+i, getUserName(i+1));
+    	setStringProperty("users.Pass"+i, getUserPass(i+1));
+        setStringProperty("users.Service"+i, getUserService(i+1));
+    	setStringProperty("users.ip"+i, getUserIp(i+1));
+        setStringProperty("users.inTume"+i, getUserInTime(i+1));
+    	}
+    	}
+    	//Удаляем самый последний элемент
+    	appProps.remove("users.Name"+(getUserCount()-1));
+    	appProps.remove("users.Pass"+(getUserCount()-1));
+        appProps.remove("users.Service"+(getUserCount()-1));
+        appProps.remove("users.ip"+(getUserCount()-1));
+        appProps.remove("users.inTume"+(getUserCount()-1));
+    	setIntProperty("users.Count", getUserCount()-1);
+    }
+
     public static int getServicesCount(){
     	return getIntProperty("srv.servicesCount");
     }
@@ -229,9 +380,6 @@ public class MainProps {
     	setIntProperty("srv.servicesCount", getServicesCount()-1);
     }
     
-//    public static boolean isExtdb(){
-//        return !getStringProperty("main.dbType").equals("HSQLDB");
-//    }
     
     public static String getServer() {
         if(currentServer.equals("")) 
@@ -283,7 +431,6 @@ public class MainProps {
     }
         
     public static String[] getProxy(){
-//      return new String[] {"192.168.0.1","1080","admin","rtyuehe"};
         String[] s = new String[4];
         s[0] = getStringProperty("main.Socks5ProxyHost");
         s[1] = getStringProperty("main.Socks5ProxyPort");
@@ -307,9 +454,9 @@ public class MainProps {
         File file = new File(fileName);
         setDefault();
         loadIgnorList();
+        loadIgnorIPList();
         try {
             FileInputStream fi = new FileInputStream(file);
-//            appProps.load(fi);
             appProps.loadFromXML(fi);
             fi.close();
             Log.getDefault().info("Load preferences ok");

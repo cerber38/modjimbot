@@ -35,7 +35,7 @@ import ru.jimbot.util.MainProps;
  * @author Prolubnikov Dmitry
  */;
 public class ChatProps implements AbstractProps {
-	public static HashMap<String,ChatProps> props = new HashMap<String,ChatProps>();
+    public static HashMap<String,ChatProps> props = new HashMap<String,ChatProps>();
     public String PROPS_FILE = "";
     private String PROPS_FOLDER = "";
     public String ENCODING = "windows-1251";
@@ -56,7 +56,6 @@ public class ChatProps implements AbstractProps {
     		p.PROPS_FILE = "./services/"+name+"/"+name+".xml";
     		p.PROPS_FOLDER = "./services/"+name;
     		p.setDefault();
-    		      /*p.load();*/
     		props.put(name, p);
     		return p;
     	}
@@ -202,6 +201,11 @@ public class ChatProps implements AbstractProps {
         setIntProperty("voting.count", 2 );
         setBooleanProperty("inchat.on.off", true);
         setStringProperty("chat.latent.uin","111111;222222");
+    //    setBooleanProperty("smswork.modsms.on.off", false);
+    //    setIntProperty("smswork.modnumder", 1161 );
+    //    setIntProperty("smswork.modmaxday", 30 );
+        setBooleanProperty("dellog.on.off", false);
+        setIntProperty("dellog.time", 5 );
     }
 
     public UserPreference[] getUserPreference(){
@@ -285,7 +289,9 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.BOOLEAN_TYPE,"Questionnaire.on.off","Включить/Выключить заполнение анкеты после регистрации",getBooleanProperty("Questionnaire.on.off"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"ball.on.off","Включить/Выключить возможность передачи баллов между пользователями",getBooleanProperty("ball.on.off"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"inchat.on.off","Включить/Выключить интерактивный вход в чат",getBooleanProperty("inchat.on.off"),""),
-        //new UserPreference(UserPreference.STRING_TYPE,"chat.latent.uin","Скрытые уины: ",getStringProperty("chat.latent.uin"),""),
+    //    new UserPreference(UserPreference.STRING_TYPE,"chat.latent.uin","Скрытые уины: ",getStringProperty("chat.latent.uin"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"dellog.on.off","Включить/Выключить авто-очистку логов",getBooleanProperty("dellog.on.off"),""),
+        new UserPreference(UserPreference.INTEGER_TYPE,"dellog.time","Интервал чистки логов(в часах)",getIntProperty("dellog.time"),""),
         //банрум
         new UserPreference(UserPreference.CATEGORY_TYPE,"banroom", "Настройки закрытия в комнате", "",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"room.tyrma","Комната Тюрьма в чате",getIntProperty("room.tyrma"),""),
@@ -367,6 +373,11 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.INTEGER_TYPE,"voting.time","Время голосования",getIntProperty("voting.time")," минут"),
         new UserPreference(UserPreference.INTEGER_TYPE,"voting.kick.time","Время кик при окончании голосования",getIntProperty("voting.kick.time")," минут"),
         new UserPreference(UserPreference.INTEGER_TYPE,"voting.count","Количество голосований для пользователя в сутки ",getIntProperty("voting.count"),""),
+        // смс
+   //     new UserPreference(UserPreference.CATEGORY_TYPE,"sms", "Настройки sms услуг чата" +"","",""),
+   //     new UserPreference(UserPreference.BOOLEAN_TYPE,"smswork.modsms.on.off","Включить/Выключить возможность покупки мода за sms",getBooleanProperty("smswork.modsms.on.off"),""),
+   //     new UserPreference(UserPreference.INTEGER_TYPE,"smswork.modnumder","sms номер для получения модера",getIntProperty("smswork.modnumder"),""),
+   //     new UserPreference(UserPreference.INTEGER_TYPE,"smswork.modmaxday","Количество дней в группе модер",getIntProperty("smswork.modmaxday"),""),
         };
         return p;
         }
@@ -584,44 +595,6 @@ public class ChatProps implements AbstractProps {
         //ДОПОЛНИТЕЛЬНЫЕ КОМАНДЫ
         //////////////////////////////////////////////////////
 
-    public boolean Time()
-    {
-    return (System.currentTimeMillis()-startTime)>1000*60*60*getIntProperty("time.dellog");
-    }
-
-    public void del_logs_time()
-    {
-    if(Time())
-    {
-    startTime = System.currentTimeMillis();
-    dellogs();
-    }
-
-    }
-
-
-    public void dellogs()
-    {
-    File log = new File("./log/");
-    if(!log.exists()) return;
-    if(!log.isDirectory()) return;
-    File[] all = log.listFiles();
-    if(all.length > 0)
-    for(int i = 0; i < all.length; i++)
-    {
-    if(all[i].isFile())
-    del("./log/"+all[i].getName());
-    }
-    //Log.info("Папка log успешно очищенна");
-    //srv.us.db.executeQuery(" TRUNCATE `events` ");
-    //srv.us.db.executeQuery(" TRUNCATE `log` ");
-    //Log.info("Таблицы log и events успешно очищенны");
-    }
-
-    public   void del(String name) {
-    File i = new File (name);
-      if (i.exists()) i.delete();
-    }
 
     /**
      * Авто создание конфига

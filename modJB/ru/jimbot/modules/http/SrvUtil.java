@@ -91,10 +91,10 @@ static final String HTML_HEAD =
      */
     public static int getAuth(String user, String pass){
     	if(user.equals(MainProps.getStringProperty("http.user")) && 
-    			pass.equals(MainProps.getStringProperty("http.pass")))
-    		return 1;
-    	else
-    		return 0;
+        pass.equals(MainProps.getStringProperty("http.pass")))  return 1;// root
+    	if(MainProps.testAuth(user, pass)) return 2;// user
+        else
+    	return 0;// no Auth
     }
 
     public static void mainMenuReference(HttpConnection con) throws IOException {

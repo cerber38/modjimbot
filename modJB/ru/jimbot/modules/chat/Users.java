@@ -118,25 +118,7 @@ public class Users extends DBObject {
         tableName="users";        
     }
    
-    public String getInfo(){
-        String s = "User info id = " + id + '\n';
-        s += "SN="+sn+'\n';
-        s += "local nick=" + localnick + '\n';
-        s += "nick="+nick+'\n';
-        s += "fname="+fname+'\n';
-        s += "lname="+lname+'\n';
-        s += "email="+email+'\n';
-        s += "city="+city+'\n';
-        s += "homepage="+homepage+'\n';
-        s += "gender="+gender+'\n';
-        s += "birthYear="+birthyear+'\n';
-        s += "birthMonth="+birthmonth+'\n';
-        s += "birthDay="+birthday+'\n';
-        s += "age="+age;
-        if(state==-1) s += "\nuser banned";
-        return s;
-    }    
-   
+
     public String[] getFields(){
         return fields;
     }

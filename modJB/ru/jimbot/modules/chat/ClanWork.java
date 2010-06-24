@@ -5,9 +5,10 @@
 
 package ru.jimbot.modules.chat;
 
-import com.mysql.jdbc.Statement;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;

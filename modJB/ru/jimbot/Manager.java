@@ -27,10 +27,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import ru.jimbot.modules.AbstractServer;
 import ru.jimbot.modules.anek.AnekServer;
@@ -47,6 +45,7 @@ import ru.jimbot.util.MainProps;
  */
 public class Manager {
 	private HashMap<String,AbstractServer> services = new HashMap<String,AbstractServer>();
+        private HashMap<String,httpUsers> users = new HashMap<String,httpUsers>();
 	private Monitor2 mon = new Monitor2();
 	private static Manager mn = null;
 	private ConcurrentHashMap<String, Object> data = null;
@@ -60,6 +59,15 @@ public class Manager {
 		for(int i=0;i<MainProps.getServicesCount();i++){
 			addService(MainProps.getServiceName(i),MainProps.getServiceType(i));
 		}
+                if(MainProps.getUserCount() != 0){
+                for(int i=0;i<MainProps.getUserCount();i++){
+		addUser(MainProps.getUserIp(i),
+                        MainProps.getUserName(i),
+                        MainProps.getUserPass(i),
+                        MainProps.getUserService(i),
+                        MainProps.getUserInTime(i));
+		}
+                }
 	}
 
 	/**
@@ -113,6 +121,163 @@ public class Manager {
 	}
 
 	/**
+         *  Добавление нового пользователя
+         * @param ip
+         * @param name
+         * @param pass
+         * @param services
+         * @param time
+         */
+	public void addUser(String ip,String name, String pass, String services, String time) {
+        httpUsers no = new httpUsers(ip, name, pass, services, time);
+        users.put(name, no);
+	}
+        
+	/**
+         * Изменить данные пользователя
+         * @param name
+         * @param pass
+         * @param services
+         */
+
+        public void changeUser(String name, String pass, String services){
+        httpUsers no = users.get(name);
+        no.pass = pass;
+        no.services = services;
+        users.put(name, no);
+        }
+
+        /**
+         * Изменение не постоянных данных пользователя
+         * @param name
+         * @param ip
+         * @param time
+         */
+
+        public void changeUser_ipAndTime(String name, String ip, String time){
+        httpUsers no = users.get(name);
+        no.ip = ip;
+        no.time = time;
+        users.put(name, no);
+        }
+
+        /**
+         * Вернет ip адрес
+         * @param name
+         * @return
+         */
+        
+        public String getIpUser(String name){
+        httpUsers no = users.get(name);
+        return no.ip;
+        }
+
+        /**
+         * Вернет доступные пользователю сервисы
+         * @param name
+         * @return
+         */
+
+        public String getServicesUser(String name){
+        httpUsers no = users.get(name);
+        return no.services;
+        }
+
+        /**
+         * Доступен пользователю сервис?
+         * @param name
+         * @param service
+         * @return
+         */
+
+        public boolean testServicesUser(String name, String service){
+        httpUsers no = users.get(name);
+        return no.services.indexOf(service) == -1;
+        }
+
+
+        /**
+         * Вернет время последнего входа пользователя
+         * @param name
+         * @return
+         */
+
+        public String getTimeUser(String name){
+        httpUsers no = users.get(name);
+        return no.time;
+        }
+
+	/**
+	 * Общее число пользователей
+	 * @return
+	 */
+	public int getUsersCount() {
+		return users.keySet().size();
+	}
+
+	/**
+	 * Возвращает набор имен пользователей (для последующего перебора)
+	 * @return
+	 */
+	public Set<String> getUsersNames() {
+		return users.keySet();
+	}
+
+	/**
+	 * Удаление пользователя
+	 * @param name
+	 */
+	public void delUsers(String name){
+        users.remove(name);
+	}
+
+        /**
+         * Сохраним ид сесии
+         * @param name
+         * @param uid
+         */
+
+        public void setUid(String name, String uid){
+        httpUsers no = users.get(name);
+        no.uid = uid;
+        users.put(name, no);
+        }
+
+        /**
+         * Вернет ид сесии пользователя
+         * @param name
+         * @return
+         */
+
+        public String getUid(String name){
+        httpUsers no = users.get(name);
+        return no.uid;
+        }
+
+        /**
+         * Сохраним время сесии пользователя
+         * @param name
+         * @param beginning
+         */
+
+        public void setBeginning(String name, long beginning){
+        httpUsers no = users.get(name);
+        no.beginning = beginning;
+        users.put(name, no);
+        }
+
+        /**
+         * Вернет время сесии пользователя
+         * @param name
+         * @return
+         */
+
+        public long getBeginning(String name){
+        httpUsers no = users.get(name);
+        return no.beginning;
+        }
+
+	/**
 	 * Общее число зареганых сервисов
 	 * @return
 	 */
@@ -153,29 +318,17 @@ public class Manager {
         }
     }
 
-    /**
-     * Проверка подключения к БД. Повоторят попытку подключиться если база недоступна.
-     */
-    
-    /*public boolean gettestBD(String name){
-    return services.get(name).testBd;
-    }
-    
-    public void settestBD(String name, boolean test){
-    services.put(name, services.get(name).testBd);
-    }*/
 
     public void testDB(){
     	for(String s : services.keySet()){
-            //if(services.get(s).testBd)
-                //return;
-    		if(services.get(s).isRun){
+            AbstractServer service = services.get(s);
+    		if(service.isRun){
     			try {
-    				if(services.get(s).getDB().isClosed()){
-    					services.get(s).getDB().getDb();
+    				if(service.getDB().isClosed()){
+    					service.getDB().getDb();
     				}
     			} catch (SQLException e) {
-    				e.printStackTrace();
+                    Log.getLogger(s).error("Errore testDB() - " + e.getMessage().toString());
     			}
     		}
     	}

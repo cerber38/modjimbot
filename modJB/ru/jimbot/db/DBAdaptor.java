@@ -24,10 +24,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.Properties;
 import java.util.Vector;
-
 import ru.jimbot.Manager;
-import ru.jimbot.modules.chat.ChatServer;
 import ru.jimbot.util.Log;
 
 /**
@@ -72,7 +71,6 @@ public abstract class DBAdaptor {
     
     public boolean openConnection(String host, String name, String user, String pass) {
         	while(!open(host, name, user, pass)){
-        		//Log.getLogger(serviceName).info("Подключение к БД...");
         	}
         	return true;
     }
@@ -95,18 +93,20 @@ public abstract class DBAdaptor {
             return false;
             try {
                 Class.forName("com.mysql.jdbc.Driver");
-                db = DriverManager.getConnection("jdbc:mysql://" + host + "/" + name, user, pass);
+                Properties info = new Properties();
+                info.setProperty("user",user);
+                info.setProperty("password",pass);
+                info.setProperty("useUnicode","true");
+                info.setProperty("characterEncoding","utf8");
+                db = DriverManager.getConnection("jdbc:mysql://" + host + "/" + name, info);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                f=false;
+                Manager.getInstance().getService(serviceName).Errore_bd();
+                f = false;
                 lastConnect = System.currentTimeMillis();
-                //Log.getLogger(serviceName).talk("Ошибка подключения к базе данных!!!" +
-                //" Сервис \"" + serviceName + "\" будет остановлен");
-                //ChatServer srv = ( ChatServer ) Manager.getInstance().getService( serviceName );
-                //srv.stop();
-                //Manager.getInstance().getService(serviceName).stop();// Остановис данный сервис
-                //shutdown();// Закрываем соединение с БД
-                Log.getLogger(serviceName).talk("Ошибка подключения к базе данных!!!");
+                Log.getLogger(serviceName).error("Не удалось подключится к базе данных," +
+                " по причине - \n" + ex.getMessage().toString() +
+                "\nСервис \"" + serviceName + "\" будет остановлен");              
             }
         return f;
     }    
