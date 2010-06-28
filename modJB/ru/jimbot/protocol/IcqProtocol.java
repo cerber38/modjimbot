@@ -79,7 +79,6 @@ connected = true;
 	
 public void reConnect(){
 try {
-mq.stop();
 con.close();
 con.removeOurStatusListener(this);
 con.removeMessagingListener(this);
@@ -91,7 +90,6 @@ catch (Exception e)
 {
 e.printStackTrace();
 }
-mq.start();
 con = new OscarConnection(server, port, screenName, password);
 con.addOurStatusListener(this);
 con.addMessagingListener(this);
@@ -102,7 +100,6 @@ connected = true;
 
 public void disconnect() {
 if(con == null) return;
-mq.stop();
 try {
 mq.stop();
 con.close();
@@ -110,7 +107,6 @@ con.removeOurStatusListener(this);
 con.removeMessagingListener(this);
 con.removeXStatusListener(this);
 con = null;
-connected = false;
 }
 catch (Exception ex)
 {
@@ -164,7 +160,7 @@ if(e.getSenderID().equals("1"))
 {
 Log.getLogger(serviceName).error("Ошибка совместимости клиента ICQ. Будет произведена попытка переподключения...");
 try{
-disconnect();
+connected = false;
 }
 catch (Exception ex) {ex.printStackTrace();
 }
@@ -173,11 +169,21 @@ return;
 protList.getMsg(e.getSenderID(), screenName, e.getMessage(), false);
 }
 
+/**
+ UNKNOWN_ERROR           = 0; "Unknown Error"
+ BAD_UIN_ERROR           = 1; "Bad UIN.";
+ PASSWORD_ERROR          = 2; "Password incorrect.";
+ NOT_EXISTS_ERROR        = 3; "This ICQ number does not exist.";
+ LIMIT_EXCEEDED_ERROR    = 4; "Rate limit exceeded. Please try to reconnect in a few minutes."
+ MAXIMUM_USERS_IP_ERROR  = 5; "The amount of users connected from this IP has reached the maximum."
+ OLDER_ICQ_VERSION_ERROR = 6; "You are using an older version of ICQ. Please upgrade."
+ CANT_REGISTER_ERROR     = 7; "Can't register on the ICQ network. Reconnect in a few minutes."
+ */
 
 public void onAuthorizationFailed(LoginErrorEvent e)
 {
 Log.getLogger(serviceName).error("Авторизация с сервером ICQ не удалась. Причина: " +  e.getErrorMessage());
-disconnect();
+connected = false;
 }
 
 public void onStatusChange(StatusEvent e)
@@ -203,7 +209,7 @@ OscarInterface.changeXStatus(con, new XStatusModeEnum(props.getIntProperty("icq.
 
 public void onLogout(Exception excptn) {
 Log.getLogger(serviceName).error("Разрыв соединения: " + screenName + " - " + server + ":" + port);
-disconnect();
+connected = false;
 }
 
 
