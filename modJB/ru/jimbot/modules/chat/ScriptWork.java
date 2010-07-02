@@ -340,6 +340,7 @@ public class ScriptWork {
 			if (prot != null) {
 				String[] ss = cmd.srv.getProps().getAdmins();
 				for(int i=0;i<ss.length;i++){
+                                        if(!ss[i].trim().equals("111111") & ss[i].trim().equals("222222"))
 					prot.mq.add(ss[i], sss);
 				}
 			}

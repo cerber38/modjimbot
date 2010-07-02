@@ -69,23 +69,6 @@ public class MsgInQueue implements Runnable {
     	}
     }
     
-//    private synchronized void addMsgCount(){
-//    	msgCountAll++;
-//    	long c = System.currentTimeMillis();
-//    	if((c-msgTime[0])>60000)
-//    		msgCount[0] = msgCountAll-msgCount[0];
-//    	if((c-msgTime[1])>300000)
-//    		msgCount[1] = msgCountAll-msgCount[1];
-//    	if((c-msgTime[2])>3600000)
-//    		msgCount[2] = msgCountAll-msgCount[2];
-//    	if((c-msgTime[3])>86400000)
-//    		msgCount[3] = msgCountAll-msgCount[3];
-//    }
-    
-//    public synchronized int getMsgCount(int i){
-//    	if(i>3) return msgCountAll;
-//    	return msgCount[i];
-//    }
     
     public void start(){
         th = new Thread(this,"msg_in");
@@ -100,7 +83,7 @@ public class MsgInQueue implements Runnable {
     }
     
     private void parseMsg(){
-        try{
+        try{         
             if(q.size()==0) return;
             MsgQueueElement m = q.poll();
             if(m.type==MsgQueueElement.TYPE_TEXT){
@@ -110,7 +93,6 @@ public class MsgInQueue implements Runnable {
             }else if(m.type==MsgQueueElement.TYPE_FLOOD_NOTICE){
             	cmd.parseFloodNotice(m.sn, m.msg, m.proc);
             } else {
-//                Log.info(m.u.nick);
                 cmd.parseInfo(m.u, m.info_type);
             }
             

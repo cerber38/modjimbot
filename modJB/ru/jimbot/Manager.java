@@ -162,6 +162,30 @@ public class Manager {
         }
 
         /**
+         * Изменение пароля пользователя
+         * @param name
+         * @param pass
+         */
+
+        public void changeUserPass(String name, String pass){
+        httpUsers no = users.get(name);
+        no.pass = pass;
+        users.put(name, no);
+        }
+
+        /**
+         * Изменение полномочий пользователя
+         * @param name
+         * @param pass
+         */
+
+        public void changeUserService(String name, String services){
+        httpUsers no = users.get(name);
+        no.services = services;
+        users.put(name, no);
+        }
+
+        /**
          * Вернет ip адрес
          * @param name
          * @return
@@ -188,9 +212,11 @@ public class Manager {
          * @param name
          * @param service
          * @return
+         * Если -1 , то нет прав на сервис!
          */
 
         public boolean testServicesUser(String name, String service){
+        if(name == null) return true;
         httpUsers no = users.get(name);
         return no.services.indexOf(service) == -1;
         }

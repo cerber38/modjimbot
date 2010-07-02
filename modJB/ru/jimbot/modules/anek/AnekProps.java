@@ -64,9 +64,8 @@ public class AnekProps implements AbstractProps {
         setIntProperty("conn.uinCount",1);
         setStringProperty("conn.uin0","111");
         setStringProperty("conn.pass0","Password");
-        setIntProperty("icq.status",0/*Icq.STATUS_ONLINE*/);
+        setIntProperty("icq.status",0);
         setIntProperty("icq.xstatus",0);
-//        setIntProperty("icq.statusFlag",0);
         setIntProperty("bot.pauseIn",3000); //Пауза входящих сообщений
         setIntProperty("bot.pauseOut",500); //Пауза исходящих сообщений
         setIntProperty("bot.msgOutLimit",20); //Ограничение очереди исходящих сообщений
@@ -92,12 +91,10 @@ public class AnekProps implements AbstractProps {
             new UserPreference(UserPreference.BOOLEAN_TYPE,"main.StartBot","Запускать анекдотный бот",getBooleanProperty("main.StartBot"),""),
             new UserPreference(UserPreference.CATEGORY_TYPE,"anek", "Настройки анекдотного бота","",""),
             new UserPreference(UserPreference.INTEGER_TYPE,"icq.status","ICQ статус",getIntProperty("icq.status"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"icq.xstatus","x-статус (0-34)",getIntProperty("icq.xstatus"),""),
+            new UserPreference(UserPreference.INTEGER_TYPE,"icq.xstatus","x-статус (0-37)",getIntProperty("icq.xstatus"),""),
             new UserPreference(UserPreference.STRING_TYPE,"icq.STATUS_MESSAGE1","Сообщение x-статуса 1",getStringProperty("icq.STATUS_MESSAGE1"),""),
             new UserPreference(UserPreference.STRING_TYPE,"icq.STATUS_MESSAGE2","Сообщение x-статуса 2",getStringProperty("icq.STATUS_MESSAGE2"),""),
-//            new UserPreference(UserPreference.INTEGER_TYPE,"icq.statusFlag","Дополнительный статус",getIntProperty("icq.statusFlag")),
             new UserPreference(UserPreference.INTEGER_TYPE,"icq.AUTORETRY_COUNT","Число переподключений движка при обрыве",getIntProperty("icq.AUTORETRY_COUNT"),""),
-//            new UserPreference(UserPreference.STRING_TYPE,"icq.STATUS_MESSAGE","Сообщение статуса",getStringProperty("icq.STATUS_MESSAGE")),
             new UserPreference(UserPreference.INTEGER_TYPE,"bot.pauseIn","Пауза для входящих сообщений",getIntProperty("bot.pauseIn"),""),
             new UserPreference(UserPreference.INTEGER_TYPE,"bot.pauseOut","Пауза для исходящих сообщений",getIntProperty("bot.pauseOut"),""),
             new UserPreference(UserPreference.INTEGER_TYPE,"bot.msgOutLimit","Ограничение очереди исходящих",getIntProperty("bot.msgOutLimit"),""),
@@ -298,7 +295,7 @@ public class AnekProps implements AbstractProps {
 	}
 
 
-       /**
+   /**
      * Авто создание конфига
      * @param name
      */

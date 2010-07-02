@@ -41,7 +41,7 @@ import ru.jimbot.table.UserPreference;
  * @author Prolubnikov Dmitry
  */
 public class MainProps {
-    public static final String VERSION = "jImBot v.0.4.0 pre 4 (06/07/2009) mod by fraer72 (test_10) (24/6/2010)";
+    public static final String VERSION = "jImBot v.0.4.0 pre 4 (06/07/2009) mod by fraer72 (test_10-2) (3/07/2010)";
     public static final int VER_INT = 18;
     private static int ver_no = 0;
     public static final int testtime = 30000;
@@ -164,9 +164,9 @@ public class MainProps {
      * @param uin
      * @return
      */
-    public static boolean isIpIgnor(String uin){
+    public static boolean isIpIgnor(String ip){
     	if(ignorIP==null) return false;
-    	return ignorIP.contains(uin);
+    	return ignorIP.contains(ip);
     }
     
     public static Properties getProps(){
@@ -268,6 +268,34 @@ public class MainProps {
         setStringProperty("users.ip"+a, ip);
         setStringProperty("users.inTume"+a, time);
         save();
+   }
+
+   /**
+    * Изменение пароля пользователя
+    * @param name
+    * @param pass
+    */
+   
+   public static void changeUserPass(String name, String pass){
+        Integer a = 0;
+        for(int i=0; i<getUserCount(); i++){
+        if(getUserName(i).equals(name)) a = i;
+        }    
+        setStringProperty("users.Pass"+a, pass);
+   }
+
+   /**
+    * Изменение полномочий пользователя
+    * @param name
+    * @param pass
+    */
+
+   public static void changeUserService(String name, String service){
+        Integer a = 0;
+        for(int i=0; i<getUserCount(); i++){
+        if(getUserName(i).equals(name)) a = i;
+        }
+        setStringProperty("users.Service"+a, service);
    }
 
 /**

@@ -34,24 +34,9 @@ public class DBAneks extends DBAdaptor{
     
     /** Creates a new instance of DBAneks */
     public DBAneks() throws Exception  {
-//        this.DRIVER = "org.hsqldb.jdbcDriver";
-//        this.URL = "jdbc:hsqldb:file:";
-//        this.dbName = "db/aneks";
     }
     
     public void createDB(){
-//        if(!MainProps.isExtdb()){
-//            Log.info("DB aneks not found. Create new DB...");
-//            try{
-//                executeQuery("CREATE CACHED TABLE ANEKS(ID INTEGER NOT NULL PRIMARY KEY,TEXT LONGVARCHAR)");
-//                executeQuery("insert into aneks values (0, 'test')");
-////                commit();
-//            }catch(Exception ex){
-//                ex.printStackTrace();
-//            }
-//        } else {
-//            
-//        }
     }
     
     public DBObject getObject(String q){

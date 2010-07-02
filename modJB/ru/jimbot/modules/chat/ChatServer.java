@@ -133,6 +133,8 @@ public class ChatServer extends AbstractServer{
     }
     
     public IcqProtocol getIcqProcess(int baseUin) {
+        if(con.uins == null) return null;
+               if(con.uins.proc.get(baseUin) == null) return null;
    	 return con.uins.proc.get(baseUin);
     }
     

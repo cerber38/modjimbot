@@ -55,30 +55,9 @@ public class AnekCommandProc extends AbstractCommandProcessor {
     public AnekCommandProc(AnekServer s) {
         srv = s;
         uq = new ConcurrentHashMap<String,StateUin>();
-//        ignore = new HashSet<String>();
-//        readIgnore();
     }
         
-//    private void readIgnore(){
-//        String s;
-//        try{
-//            BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream("ignore.txt"),"windows-1251")); 
-//            while (r.ready()){
-//                s = r.readLine();
-//                if(!s.equals("")){
-//                    ignore.add(s);
-//                }
-//            }
-//            r.close();
-//        } catch (Exception ex){
-//            ex.printStackTrace();
-//        }
-//    }
-//    
-//    public boolean testIgnor(String uin){
-//    	if(ignore.isEmpty()) return false;
-//    	return ignore.contains(uin);
-//    }
+
     
     private void firstMsg(IcqProtocol proc){
     	if(!firstStartMsg){

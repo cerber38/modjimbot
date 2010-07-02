@@ -18,8 +18,6 @@
 
 package ru.jimbot.protocol;
 
-import ru.jimbot.modules.chat.Users;
-
 /**
  * Передача и прием сообщений, события смены статуса
  *

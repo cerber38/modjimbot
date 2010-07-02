@@ -47,18 +47,18 @@ public class AnekServer extends AbstractServer{
         con.server = MainProps.getServer();
         con.port = MainProps.getPort();
         con.proxy = MainProps.getProxy();
+        inq = new MsgInQueue(cmd);
+     }
+    
+     public void start(){
         String[] icq = new String[AnekProps.getInstance(this.getName()).uinCount()];
         String[] pass = new String[AnekProps.getInstance(this.getName()).uinCount()];
         for(int i=0;i<AnekProps.getInstance(this.getName()).uinCount();i++){
             icq[i] = AnekProps.getInstance(this.getName()).getUin(i);
             pass[i] = AnekProps.getInstance(this.getName()).getPass(i);
         }
-        con.uins = new UINmanager(icq, pass, con, true, 
+        con.uins = new UINmanager(icq, pass, con, true,
                 AnekProps.getInstance(this.getName()), this.getName());
-        inq = new MsgInQueue(cmd);
-     }
-    
-     public void start(){
          con.uins.start();
          for(int i=0;i<con.uins.count();i++){
              inq.addReceiver((IcqProtocol)con.uins.proc.get(i));
@@ -66,7 +66,6 @@ public class AnekServer extends AbstractServer{
          inq.start();
          // Удалить из запуска инициализацию базы. Она должна проходить по мере необходимости.
          WorkScript.getInstance(getName()).startScript("start", "", this);
-//         an.initDB();
          isRun=true;
      }
      
@@ -75,6 +74,14 @@ public class AnekServer extends AbstractServer{
     	 inq.stop();
          con.uins.stop();
          closeDB();
+         isRun=false;
+     }
+
+     public void Errore_bd(){
+    	 WorkScript.getInstance(getName()).startScript("stop", "", this);
+    	 inq.stop();
+         con.uins.stop();
+         //closeDB();
          isRun=false;
      }
      
@@ -96,7 +103,9 @@ public class AnekServer extends AbstractServer{
     	 return inq.size();
      }
      
-     public IcqProtocol getIcqProcess(int baseUin) {
-    	 return con.uins.proc.get(baseUin);
-     }
+    public IcqProtocol getIcqProcess(int baseUin) {
+        if(con.uins == null) return null;
+               if(con.uins.proc.get(baseUin) == null) return null;
+   	 return con.uins.proc.get(baseUin);
+    }
 }

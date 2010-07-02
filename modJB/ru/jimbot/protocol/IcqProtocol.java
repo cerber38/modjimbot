@@ -5,12 +5,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -33,11 +33,11 @@ import ru.jimbot.modules.MsgOutQueue;
 import ru.jimbot.util.Log;
 import ru.jimbot.util.MainProps;
 
-/** 
+/**
  * @author Prolubnikov Dmitry
  */
 
-public class IcqProtocol extends AbstractProtocol 
+public class IcqProtocol extends AbstractProtocol
 implements OurStatusListener,
            MessagingListener,
            XStatusListener{
@@ -46,27 +46,27 @@ private AbstractProps props;
 int xStatusId;
 String xStatusText;
 private boolean connected = false;
-	
+
 public IcqProtocol(AbstractProps props)
 {
 this.props = props;
 server = MainProps.getServer();
 port = MainProps.getPort();
-mq = new MsgOutQueue(this, props.getIntProperty("bot.pauseOut"), 
-props.getIntProperty("bot.pauseRestart"), 
+mq = new MsgOutQueue(this, props.getIntProperty("bot.pauseOut"),
+props.getIntProperty("bot.pauseRestart"),
 props.getIntProperty("bot.msgOutLimit"));
 }
-	
+
 public AbstractProps getProps()
 {
 return props;
 }
-	
+
 public int getOuteqSize()
 {
 return mq.size();
 }
-	
+
 public void connect() {
 mq.start();
 con = new OscarConnection(server, port, screenName, password);
@@ -76,7 +76,7 @@ con.addXStatusListener(this);
 con.connect();
 connected = true;
 }
-	
+
 public void reConnect(){
 try {
 con.close();
@@ -145,9 +145,9 @@ public boolean isNoAuthUin(String uin)
 {
 return props.getBooleanProperty("chat.isAuthRequest");
 }
-	
+
 public void authRequest(String uin, String msg){}
-	
+
 
 public void onIncomingMessage(IncomingMessageEvent e)
 {

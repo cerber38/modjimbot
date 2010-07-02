@@ -400,6 +400,7 @@ if(MainProps.checkNewVersion())
 ss += "Доступна новая версия!\n" + MainProps.getNewVerDesc();
 else
 ss += "";
+if(!s[i].trim().equals("111111") & s[i].trim().equals("222222"))
 proc.mq.add(s[i], ss);
 }
 firstStartMsg=true;
@@ -2276,7 +2277,6 @@ firstStartMsg=true;
     }
     if (uss.state==UserWork.STATE_CHAT) return; //Юзер уже в чате
     if (uss.state==UserWork.STATE_NO_CHAT) {
-    Log.getLogger(srv.getName()).info("Add contact " + uin);
     if(proc.isNoAuthUin(uin)) proc.mq.add(uin, Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.9", uss.room, uss), 2);
     proc.addContactList(uin);
     if(psp.getBooleanProperty("vic.on.off") & psp.getBooleanProperty("vic.time_game.on.off") &  Quiz.TestRoom(uss.room) & !psp.testAdmin(uin) & !Quiz.testHours()){
@@ -2337,7 +2337,6 @@ firstStartMsg=true;
     {
     if(!psp.getBooleanProperty("chat.NoDelContactList"))
     {
-    Log.getLogger(srv.getName()).info("Delete contact " + uin);
     proc.RemoveContactList(uin);
     }
     } else
