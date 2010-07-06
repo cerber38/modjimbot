@@ -216,7 +216,7 @@ public class Manager {
          */
 
         public boolean testServicesUser(String name, String service){
-        if(name == null) return true;
+        if(name == null || name.equals("null")) return true;
         httpUsers no = users.get(name);
         return no.services.indexOf(service) == -1;
         }

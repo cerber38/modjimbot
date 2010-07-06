@@ -103,7 +103,7 @@ public class MainPage extends HttpServlet {
     public String timeIn(){
     String s = "";
     Date date = new Date();
-    s = date.getMinutes() + ":" + date.getHours() + "   " + date.getDay()+"/"+date.getMonth()+"/"+date.getYear();
+    s = date.getHours() + ":" + date.getMinutes() + "   0" + date.getDate() +"/"+date.getMonth()+"/"+date.getYear();
     return s;
     }
 
