@@ -157,9 +157,12 @@ import java.sql.*;
     if(adm.srv.getProps().getBooleanProperty("adm.useMatFilter") &&
     adm.testMat1(adm.changeChar(ms.msg))&& 
 	ms.room != adm.srv.getProps().getIntProperty("room.tyrma") && 
-	!adm.srv.getProps().testAdmin(ms.uin)) 
-	{
+	!adm.srv.getProps().testAdmin(ms.uin)) {
     int i=0;
+	//ПОНИЖЕНИЕ РЕЙТИНГА ЗА МАТ
+	if(adm.srv.getProps().getBooleanProperty("minus.ball.mat.on.off"))
+	adm.srv.us.getUser(uin).ball -= adm.srv.getProps().getIntProperty("minus.ball.mat");
+	adm.srv.us.updateUser(adm.srv.us.getUser(uin));
 	// ОПОВЕЩЕНИЕ(ПРЕДУПРЕЖДЕНИЕ) ЗА МАТ
 	boolean test = true; // ВКЛЮЧИТЬ/ВЫКЛЮЧИТЬ
 	String nick_m = adm.srv.us.getUser(ms.uin).localnick;

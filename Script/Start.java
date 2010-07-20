@@ -120,7 +120,7 @@ out="Ok";
 ((ChatCommandProc)srv.cmd).addCommand("!адмлист", new Cmd("!адмлист", "$c", 49));
 ((ChatCommandProc)srv.cmd).addCommand("!робмсг", new Cmd("!робмсг", "$s", 50));
 ((ChatCommandProc)srv.cmd).addCommand("!хстатус", new Cmd("!хстатус", "$n $s", 51));
-//((ChatCommandProc)srv.cmd).addCommand("!перезагрузить", new Cmd("!перезагрузить", "", 52));
+((ChatCommandProc)srv.cmd).addCommand("!перезагрузить", new Cmd("!перезагрузить", "", 52));
 ((ChatCommandProc)srv.cmd).addCommand("!статус", new Cmd("!статус", "$s", 53));
 ((ChatCommandProc)srv.cmd).addCommand("!разбанлист", new Cmd("!разбанлист", "", 54));
 ((ChatCommandProc)srv.cmd).addCommand("!удалить", new Cmd("!удалить", "$n", 55));
@@ -130,8 +130,6 @@ out="Ok";
 ((ChatCommandProc)srv.cmd).addCommand("!деладм", new Cmd("!деладм", "", 59));
 ((Shop)srv.cmd.shop).addCommand("!магазин", new Cmd("!магазин","",1));
 ((Shop)srv.cmd.shop).addCommand("!учет", new Cmd("!учет","",2));
-((AboutUser)srv.cmd.abv).addCommand("!данные", new Cmd("!данные","",1));
-((AboutUser)srv.cmd.abv).addCommand("!личное", new Cmd("!личное","$n",2));
 ((ClanCommand)srv.cmd.clan).addCommand( "!аддклан", new Cmd( "!аддклан", "", 1 ) );
 ((ClanCommand)srv.cmd.clan).addCommand( "!кланлист", new Cmd( "!кланлист", "", 2 ) );
 ((ClanCommand)srv.cmd.clan).addCommand( "!топклан", new Cmd( "!топклан", "", 3 ) );
@@ -175,7 +173,14 @@ out="Ok";
 ((Shop2)srv.cmd.shop2).addCommand("!делтовар", new Cmd("!делтовар","$c $n",5));
 ((Shop2)srv.cmd.shop2).addCommand("!аддтовар", new Cmd("!аддтовар","$c $n $s",6));
 ((ChatCommandProc)srv.cmd).addCommand("!уин", new Cmd("!уин","$n",68));
-
+((ChatCommandProc)srv.cmd).addCommand("!личное", new Cmd("!личное","$n",69));
+((ChatCommandProc)srv.cmd).addCommand("!данные", new Cmd("!данные","",70));
+((ChatCommandProc)srv.cmd).addCommand("!юзеру", new Cmd("!юзеру","$c $s",71));
+((ChatCommandProc)srv.cmd).addCommand("!затащить", new Cmd("!затащить", "$n", 72));
+((ChatCommandProc)srv.cmd).addCommand("!бот", new Cmd("!бот", "$s", 73));
+((ChatCommandProc)srv.cmd).addCommand("!регистрировать",new Cmd("!регистрировать","$c $c",74));
+((ChatCommandProc)srv.cmd).addCommand("!казино",new Cmd("!казино","",75));
+((ChatCommandProc)srv.cmd).addCommand("!рулетка",new Cmd("!рулетка","$n",76));
 
 
 
