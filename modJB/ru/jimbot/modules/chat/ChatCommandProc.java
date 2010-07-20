@@ -4457,7 +4457,7 @@ firstStartMsg=true;
        try {
        String msg = (String) v.get(0);
        Users uss = srv.us.getUser(uin);
-       srv.cq.addMsg(psp.getStringProperty("adm.NICK") + " " + psp.getStringProperty("chat.delimiter") + " " + msg, "", uss.room);
+       srv.cq.addMsg(radm.NICK + " " + psp.getStringProperty("chat.delimiter") + " " + msg, "", uss.room);
        proc.mq.add(uin, "Собщение отправлено");
        } catch (Exception ex) {
        ex.printStackTrace();
