@@ -34,8 +34,7 @@ R = new Random(System.nanoTime());
 }
 private boolean QuizStart = true;
 private boolean autofilling = true;
-private boolean translated = true;
-public boolean testStartQuiz = false;
+public boolean isStart = false;
 
 private long throwOut = 5000;
 
@@ -169,8 +168,8 @@ QuizInfo.put(i, quiz);
 /**
  * Главный метод, парсит время и все остальное!
  */
-private void Quiz()
-{
+private void Quiz(){
+    if(!isStart) setStart(true);
     // Тест времени
    if(psp.getBooleanProperty("vic.on.off") & psp.getBooleanProperty("vic.time_game.on.off") & !testHours()){
    if(psp.getBooleanProperty("vic.throwout.on.off")){
@@ -375,14 +374,12 @@ public void start()
 th = new Thread(this);
 th.setPriority(Thread.NORM_PRIORITY);
 th.start();
-testStartQuiz = true;
 }
 
 public synchronized void stop()
 {
 th = null;
 notify();
-testStartQuiz = false;
 }
 
 public void run()
@@ -580,6 +577,14 @@ QuizInfo quiz = new QuizInfo(count, room, Random_ID(), System.currentTimeMillis(
 QuizInfo.put(count, quiz);
 count++;
 }
+
+   public void setStart(boolean start){
+   isStart = start;
+   }
+
+   public boolean isStart(){
+   return isStart;
+   }
 
 
 }

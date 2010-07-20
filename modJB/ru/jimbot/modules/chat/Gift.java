@@ -216,10 +216,11 @@ return f;
     int id_user = (Integer)v.get(0);
     int id_gift = (Integer)v.get(1);
     String text = (String)v.get(2);
+    System.out.print((Integer)v.get(0) + " " + id_gift + " " + (String)v.get(2) + "\n");
     Users u = cmd.srv.us.getUser(id_user);
     if(id_user == uss.id){proc.mq.add(uin,uss.localnick + " вы не можите дарить подарки себе :)");return;}
     if(u == null){proc.mq.add(uin,uss.localnick + " такого пользователя не существует");return;}
-    if(u.state == UserWork.STATE_NO_CHAT){proc.mq.add(uin,uss.localnick +" пользователь не в чате");return;}
+    //if(u.state == UserWork.STATE_NO_CHAT){proc.mq.add(uin,uss.localnick +" пользователь не в чате");return;}
     if(getCountThing(uss.id, id_gift) == 0)
     {
     proc.mq.add(uin,uss.localnick + " и что вы собрались дарить, у вас нет такого подарка" +

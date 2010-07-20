@@ -89,24 +89,27 @@ public class Manager {
 	    data.put(key, o);
 	}
 
-	/**
-	 * Перезапускает все действующие процессы
-	 */
-	public  static void restart() {
-	    mn.stopAll();
-	    mn.mon.stop();
-	    mn = null;
-	    System.gc();
-	    getInstance().startAll();
-	}
+        /**
+         * Перезапускает все действующие процессы
+         */
+        public  static void restart() {
+            mn.stopAll();
+            mn.mon.stop();
+            mn = null;
+            System.gc();
+            getInstance().startAll();
+        }
+
 
        /**
 	 * Перезапускает сервис
 	 */
-	public static void restart_service(String name) {
-           mn.stop(name);
-           mn.start(name);
-	}
+
+        public void restartService(String name) {
+        delService(name);
+        addService(name, MainProps.getType(name));
+        start(name);
+        }
 
 	/**
 	 * Возвращает экземпляр класса. При необходимости производит его создание и инициализацию.
@@ -456,7 +459,7 @@ public class Manager {
 	 */
 	public void stopAll() {
 		for(AbstractServer s : services.values()){
-			if(s.isRun)s.stop();
+			if(s.isRun) s.stop();
 		}
 	}
 

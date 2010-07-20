@@ -157,21 +157,21 @@ public class MainPage extends HttpServlet {
      * @param p
      * @return
      */
-    private String prefToHtml(UserPreference[] p) {
+    private String prefToHtml(UserPreference[] p, boolean user) {
     	String s = "<TABLE>";
     	for(int i=0;i<p.length;i++){
-    		if(p[i].getType()==UserPreference.CATEGORY_TYPE){
+    		if(p[i].getType()==UserPreference.CATEGORY_TYPE & !UserPreference.testCATEGORY(user, p[i].getKey())){
     			s += "<TR><TH ALIGN=LEFT><u>" + p[i].getDisplayedKey() + "</u></TD></TR>";
     		} else if(p[i].getType()==UserPreference.BOOLEAN_TYPE) {
     			s += "<TR><TH ALIGN=LEFT>"+p[i].getDisplayedKey()+ "</TD> " +
     			"<TD><INPUT TYPE=CHECKBOX NAME=\"" + p[i].getKey() +
     			"\" VALUE=\"true\" " + ((Boolean)p[i].getValue() ? "CHECKED" : "") + "></TD></TR>";
-    		} else {
+    		} else if(!UserPreference.testKEY(user, p[i].getKey())) {
     			s += "<TR><TH ALIGN=LEFT>"+p[i].getDisplayedKey()+ "</TD> " +
     					"<TD><div class=\"field\"><INPUT class=\"container\" size=\"70\" TYPE=text NAME=\"" + p[i].getKey() +
     					"\" VALUE=\"" + p[i].getValue() + "\"></div></TD></TR>";
-    		}
-    	}
+        }
+        }
     	s += "</TABLE>";
     	return s;
     }
@@ -217,11 +217,18 @@ public class MainPage extends HttpServlet {
         con.print("<b>Вы вошли как пользователь<b><br><br>");
         con.print("<b>Доступные вам сервисы:<b><br><br>");
         for(int i=0; i<sn.length; i++){
-    		s += "<TR><TH ALIGN=LEFT>" + a + ") " + sn[i] + "</TD>";
-    		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us +
-    			"&page=srvs_props&ns="+sn[i]+"\">Настройки сервиса</A></TD>";
-            s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us +
-    			"&page=srvs_other&ns="+sn[i]+"\">Другие настройки</A></TD>";
+    	s += "<TR><TH ALIGN=LEFT>" + a + ") " + sn[i] + "</TD>";
+    	s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=srvs_props&ns="+sn[i]+"\">Настройки сервиса</A></TD>";
+        if(!MainProps.getType(sn[i]).equalsIgnoreCase("Anek")){
+        s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=srvs_other&ns="+sn[i]+"\">Другие настройки</A></TD>";
+        } else {
+        s += "<TD> </TD>";
+        }
+        if(!MainProps.getType(sn[i]).equalsIgnoreCase("Anek")){
+    	s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=srvs_messages&ns="+sn[i]+"\">messages.xml</A></TD>";
+        } else {
+        s += "<TD> </TD>";
+        }
     		if(Manager.getInstance().getService(sn[i]) instanceof ChatServer){
     		    s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us +
     		        "&page=user_group_props&ns=" + sn[i] + "\">Полномочия</A></TD>";
@@ -240,6 +247,7 @@ public class MainPage extends HttpServlet {
     	s += "</TABLE>";
     	con.print(s);
         con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=exit\">" + "Exit</A>");
+        con.print("<br><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=Tags\">" + "Tags</A>");
         con.print("</FONT></BODY></HTML>");
     }
 
@@ -277,10 +285,20 @@ public class MainPage extends HttpServlet {
     		s += "<TR><TH ALIGN=LEFT>" + i + ") " + n + "</TD>";
     		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
     			"&page=srvs_props&ns="+n+"\">Настройки сервиса</A></TD>";
+            if(!MainProps.getType(n).equalsIgnoreCase("Anek")){
             s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
     			"&page=srvs_other&ns="+n+"\">Другие настройки</A></TD>";
+            } else {
+            s += "<TD> </TD>";
+            }
     		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +  
 				"&page=srvs_props_uin&ns="+n+"\">Настройки UIN</A></TD>";
+            if(!MainProps.getType(n).equalsIgnoreCase("Anek")){
+    		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +
+				"&page=srvs_messages&ns="+n+"\">messages.xml</A></TD>";
+            } else {
+            s += "<TD> </TD>";
+            }
     		if(Manager.getInstance().getService(n) instanceof ChatServer){
     		    s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
     		        "&page=user_group_props&ns=" + n + "\">Полномочия</A></TD>";
@@ -335,7 +353,7 @@ public class MainPage extends HttpServlet {
             SrvUtil.error(con,"Ошибка авторизации!");
             return;
         }
-        Manager.restart();
+        Manager.getInstance().restart();
         printMsgRestart(con,"main_page", "Перезапуск бота...");
     }
 
@@ -351,7 +369,7 @@ public class MainPage extends HttpServlet {
         printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
         return;
         }
-        Manager.restart_service(ns);
+        Manager.getInstance().restartService(ns);
         String page = us == null ? "main_page" : "main_page_user";
         printMsgRestart_service(con,page, "Перезапуск сервиса \"" + ns.replace("&ns=", "") + "\" ...");
     }
@@ -476,6 +494,81 @@ public class MainPage extends HttpServlet {
     	}
     	Manager.getInstance().stop(ns);
     	printOkMsg_Stop(con,"main_page");
+    }
+
+    /**
+     * Форма для редоктирования messages.xml
+     * @param con
+     * @throws IOException
+     */
+
+    public void srvs_messages(HttpConnection con) throws IOException {
+    String uid = con.get("uid");
+    String us = con.get("us");
+    if(!checkSession(uid) & !checkSession_user(uid, us)) {
+    SrvUtil.error(con,"Ошибка авторизации!");
+    return;
+    }
+    String ns = con.get("ns"); // Имя сервиса
+    if(!Manager.getInstance().getServiceNames().contains(ns)){
+    SrvUtil.error(con,"Отсутствует сервис с таким именем!");
+    return;
+    }
+    if(us != null & Manager.getInstance().testServicesUser(us, ns)){
+    printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+    return;
+    }
+    con.print(SrvUtil.HTML_HEAD + "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
+    "<H2>Панель управления ботом</H2>" +
+    "<H3>Редактирование Messages.xml</H3>");
+    
+    MessagesLoad msg = MessagesLoad.getInstance(ns);
+    String s = "<TABLE>";
+    for(Object m : msg.getKeys()){
+    s += "<TR><TH ALIGN=LEFT>"+m+ "</TD> " +
+    "<TD><div class=\"field\"><INPUT class=\"container\" size=\"70\" TYPE=text NAME=\"" + m +
+    "\" VALUE=\"" + msg.getStringProperty((String)m).replace("\n", "<br>") + "\"></div></TD></TR>";
+    }
+    s += "</TABLE>";
+    con.print("<FORM METHOD=POST ACTION=\"" + con.getURI() +
+    "\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"srvs_messages_in\">" +
+    "<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" +ns + "\">" +
+    "<INPUT TYPE=hidden NAME=\"us\" VALUE=\"" +us + "\">" +
+    "<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
+    s +
+    "<P><INPUT TYPE=submit VALUE=\"Сохранить\">");
+    String page = us == null || us.equals("null") ? "main_page" : "main_page_user";
+    con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" + page + "\"></FORM>");
+    con.print("</FONT></BODY></HTML>");
+    }
+
+    /**
+     * Редактирование messages.xml
+     * @param con
+     * @throws IOException
+     */
+
+    public void srvs_messages_in(HttpConnection con) throws IOException {
+    String uid = con.get("uid");
+    String us = con.get("us");
+    if(!checkSession(uid) & !checkSession_user(uid, us)) {
+    SrvUtil.error(con,"Ошибка авторизации!");
+    return;
+    }
+    	String ns = con.get("ns"); // Имя сервиса
+    	if(!Manager.getInstance().getServiceNames().contains(ns)){
+    		SrvUtil.error(con,"Отсутствует сервис с таким именем!");
+    		return;
+    	}
+    MessagesLoad msg = MessagesLoad.getInstance(ns);
+    for(Object m : msg.getKeys()){
+    String s = SrvUtil.getStringVal(con, (String)m);
+    s = s.replace("<br>", "\n");
+    msg.setStringProperty((String)m, s);
+    }
+    msg.save();
+    String page = us.equals("null") || us == null ? "main_page" : "main_page_user";
+    printOkMsg(con,page);
     }
 
     /**
@@ -870,6 +963,7 @@ public class MainPage extends HttpServlet {
     	}
         MainProps.AddDirectory(ns);
         MainProps.AddLogProperties(ns);
+        MainProps.CopyingScript(ns, type);        
     	Manager.getInstance().addService(ns, type);
         Manager.getInstance().getService(ns).getProps().AddXmlConfig(ns);
     	MainProps.addService(ns, type);
@@ -1005,6 +1099,8 @@ public class MainPage extends HttpServlet {
         printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
         return;
         }
+        boolean user = false;
+        if(us != null) user = true;
         con.print(SrvUtil.HTML_HEAD + "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
         	"<H2>Панель управления ботом</H2>" +
         	"<H3>Настройки сервиса " + ns + "</H3>");
@@ -1013,7 +1109,7 @@ public class MainPage extends HttpServlet {
         	"<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" +ns + "\">" +
                 "<INPUT TYPE=hidden NAME=\"us\" VALUE=\"" +us + "\">" +
         	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
-        	prefToHtml(Manager.getInstance().getService(ns).getProps().getUserPreference())+
+        	prefToHtml(Manager.getInstance().getService(ns).getProps().getUserPreference(), user)+
           	"<P><INPUT TYPE=submit VALUE=\"Сохранить\">");
         String page = us == null ? "main_page" : "main_page_user";
         con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" + page + "\"></FORM>");
@@ -1084,7 +1180,7 @@ public class MainPage extends HttpServlet {
     	con.print("<FORM METHOD=POST ACTION=\"" + con.getURI() +
                 "\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"main_props_in\">" +
                 "<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
-                prefToHtml(MainProps.getUserPreference())+
+                prefToHtml(MainProps.getUserPreference(), false)+
                 "<P><INPUT TYPE=submit VALUE=\"Сохранить\">");
     	con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
     	con.print("</FONT></BODY></HTML>");
@@ -1157,7 +1253,7 @@ public class MainPage extends HttpServlet {
         	"<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" +ns + "\">" +
                 "<INPUT TYPE=hidden NAME=\"us\" VALUE=\"" +us + "\">" +
         	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
-        	prefToHtml(Manager.getInstance().getService(ns).getProps().OtherUserPreference())+
+        	prefToHtml(Manager.getInstance().getService(ns).getProps().OtherUserPreference(), false)+
           	"<P><INPUT TYPE=submit VALUE=\"Сохранить\">");
         String page = us==null ? "main_page" : "main_page_user";
         con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" + page + "\"></FORM>");
@@ -1209,9 +1305,16 @@ public class MainPage extends HttpServlet {
     	printOkMsg(con,page);
     }
 
+    /**
+     * Форма для тегов в messages.xml
+     * @param con
+     * @throws IOException
+     */
+
     public void Tags(HttpConnection con) throws IOException {
     String uid = con.get("uid");
-    if(!checkSession(uid)) {
+    String us = con.get("us");
+    if(!checkSession(uid) & !checkSession_user(uid, us)) {
     SrvUtil.error(con,"Ошибка авторизации!");
     return;
     }
@@ -1254,10 +1357,11 @@ public class MainPage extends HttpServlet {
     con.print("<P>%VIC_GAME_TIME_0% - время начала игры в викторине.</P>");
     con.print("<P>%VIC_GAME_TIME_1% - время конца игры в викторине.</P>");
     con.print("<P>%VIC_USERS_COUNT% - максимальное количество пользователей которое может играть в викторину.</P>");
+    con.print("<P>%SOCIAL_STATUS% - социальный статус.</P>");
     con.print("<b>exitChat:</b>");
     con.print("<P>%NICK% - ник пользователя.</P>");
     con.print("<P>%ID% - id пользователя.</P>");
-    con.print("<FORM><P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
+    con.print("<FORM><P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=main_page\"></FORM>");
     con.print("</FONT></BODY></HTML>");
     }
     

@@ -84,7 +84,6 @@ con.removeOurStatusListener(this);
 con.removeMessagingListener(this);
 con.removeXStatusListener(this);
 con = null;
-connected = false;
 }
 catch (Exception e)
 {
@@ -95,7 +94,6 @@ con.addOurStatusListener(this);
 con.addMessagingListener(this);
 con.addXStatusListener(this);
 con.connect();
-connected = true;
 }
 
 public void disconnect() {
@@ -196,19 +194,21 @@ try {
 OscarInterface.sendXStatus(con, new XStatusModeEnum(props.getIntProperty("icq.xstatus")),
 props.getStringProperty("icq.STATUS_MESSAGE1"),
 props.getStringProperty("icq.STATUS_MESSAGE2"), e.getTime(), e.getMsgID(), e.getSenderID(), e.getSenderTcpVersion());
-}
-catch(ConvertStringException ex) {
+}catch(ConvertStringException ex) {
 System.err.println(ex.getMessage());
 }
 }
 
 public void onLogin() {
+connected = true;
 OscarInterface.changeStatus(con, new StatusModeEnum(props.getIntProperty("icq.status")));
 OscarInterface.changeXStatus(con, new XStatusModeEnum(props.getIntProperty("icq.xstatus")));
+Log.getLogger(serviceName).talk("UIN - " + screenName + " online");
 }
 
-public void onLogout(Exception excptn) {
-Log.getLogger(serviceName).error("Разрыв соединения: " + screenName + " - " + server + ":" + port);
+public void onLogout(Exception e) {
+Log.getLogger(serviceName).error("Разрыв соединения: " + screenName + " - " + server + ":" + port +
+" По причине: " + e.getMessage());
 connected = false;
 }
 
@@ -250,6 +250,9 @@ s+="31 - Дорога \n";
 s+="32 - Сердце \n";
 s+="33 - Поиск \n";
 s+="34 - Дневник\n";
+s+="35 - Секс\n";
+s+="36 - RuLove\n";
+s+="37 - Курю\n";
 proc.mq.add(uin, s);
 }
 

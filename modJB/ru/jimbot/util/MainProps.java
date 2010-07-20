@@ -19,11 +19,13 @@
 package ru.jimbot.util;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
@@ -41,7 +43,7 @@ import ru.jimbot.table.UserPreference;
  * @author Prolubnikov Dmitry
  */
 public class MainProps {
-    public static final String VERSION = "jImBot v.0.4.0 pre 4 (06/07/2009) mod by fraer72 (test_10-3) (6/07/2010)";
+    public static final String VERSION = "jImBot v.0.4.0 (с)Spec (06/07/2009)\nBy modifying - fraer72\nVersion update - pre-release 1 (20/07/2010)";
     public static final int VER_INT = 18;
     private static int ver_no = 0;
     public static final int testtime = 30000;
@@ -359,6 +361,14 @@ public class MainProps {
     	return c;
     }
 
+   public static String getType(String name){
+
+        for(int i=0; i<getServicesCount(); i++){
+        if(getServiceName(i).equals(name)) return getServiceType(i);
+        }
+        return null;
+   }
+
     /**
      * Авто создание log4j.PROPERTIES для заданного сервиса
      * @param name
@@ -390,6 +400,44 @@ public class MainProps {
     NEW.mkdirs();
     }
 
+ 
+    /**
+     * Копирование скриптов
+     * @param name - имя сервиса
+     */
+
+  public static synchronized void CopyingScript(String name, String type){
+  String[] files = null;
+  if(type.equals("chat")){
+  files = new String[4];
+  files[0] = "admin.bsh";
+  files[1] = "messages.bsh";
+  files[2] = "start.bsh";
+  files[3] = "stop.bsh";
+  }else{
+  files = new String[3];
+  files[0] = "main.bsh";
+  files[1] = "start.bsh";
+  files[2] = "stop.bsh";
+  }
+  try{
+     for(int i=0; i < files.length; i++){
+     InputStream stream = MainProps.class.getClassLoader().getResourceAsStream("ru/jimbot/scripts/" + type + "/" + files[i]);
+     BufferedInputStream in = new BufferedInputStream(stream);
+     BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream("./services/" + name+  "/scripts/" + files[i]));
+          int len = 0, b = 0;
+     while ((b = in.read()) != -1) {
+        out.write(b);
+        len += b;
+     }
+     in.close();
+     out.flush();
+     out.close();
+     }
+    } catch (Exception ex){
+    Log.getDefault().error("Errore copyring script - " + ex.getMessage());
+    }
+  }
 
     public static void delService(String name) {
     	// Сдвигаем элементы после удаленного на его место
@@ -607,7 +655,7 @@ Log.getDefault().error( "Ошибка создания файла: " , ex );
     private static void counter(String s){
         try {
             String u = s.substring(8);
-            u = u.replaceAll("@", "chat_ver=" + VERSION);
+            u = u.replaceAll("@", "chat_ver=" + "jImBot v.0.4.0 (с)Spec (06/07/2009) mod by fraer72");
             u = u.replaceAll(" ", "%20");
             getStringFromHTTP(u);
         } catch (Exception e) {

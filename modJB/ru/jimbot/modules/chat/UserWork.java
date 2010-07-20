@@ -474,11 +474,18 @@ public class UserWork {
      * @param n
      * @return
      */
-    public boolean isUsedNick(String n){
-    	String q = "select count(*) from users where localnick like '"+n+"'";
-    	Vector<String[]> v = db.getValues(q);
-//    	System.out.println(v.get(0)[0]);
-    	return !v.get(0)[0].equals("0");
+    public boolean isUsedNick(String n) {
+        boolean result=false;       //При ошибке возвращаем false
+        try {
+            PreparedStatement pst = db.getDb().prepareStatement("SELECT id FROM users WHERE localnick LIKE CONVERT(? USING utf8) COLLATE utf8_general_ci LIMIT 1");
+            pst.setString(1, n.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_"));
+            ResultSet rs = pst.executeQuery();
+            result = rs.next();      //Если удалось перейти к 1-й записи, то такой ник есть
+            pst.close();
+        } catch (java.sql.SQLException ex) {
+            ex.printStackTrace();
+        }
+        return result;
     }
     
     /**
@@ -577,15 +584,6 @@ public class UserWork {
         addUser(u);
         Log.getLogger(serviceName).info("Add user " + u.sn + ", " + u.nick + ", id=" + u.id);
     }
-    
-
-        public void deleteUser(String uin){
-        Users u = getUserFromDB(uin);
-        uu.remove(u.id);
-        uc.remove(u.sn);
-    }
-
-
     
     /**
      * Работа с объектами полномочий
@@ -1030,7 +1028,7 @@ public class UserWork {
         ResultSet rs = pst.executeQuery();
         for(int i=1;i<6;i++){
         if(rs.next()){
-        s += i+". - |" + rs.getInt(1) + "|" + rs.getString(2) + ", правельных ответов - " + rs.getInt(3) + "; \n";
+        s += i+". - |" + rs.getInt(1) + "|" + rs.getString(2) + ", правильных ответов - " + rs.getInt(3) + "; \n";
         } 
         else 
         {
@@ -1349,6 +1347,88 @@ public class UserWork {
       }
       return s;
       }
+
+
+    /**
+     * Число игр в миллионер за последние 24 часа
+     * @param id
+     * @return
+     */
+    /*public int getCountGame(int id) {
+    String q = "SELECT count(*) FROM `events` WHERE user_id="+id+" and type='MILLIONER' and (to_days( now( ) ) - to_days( time )) <1";
+    Vector<String[]> v = db.getValues(q);
+    return Integer.parseInt(v.get(0)[0]);
+    }*/
+
+      /**
+       * Вернет социальный статус пользователя
+       * @param id
+       * @return
+       */
+
+    public String getStatus(int id){
+        int ball = getUser(id).ball;
+        if (ball >= ChatProps.getInstance(serviceName).getIntProperty("status.oligarch")) return "Олигарх";
+        else if (ball>=ChatProps.getInstance(serviceName).getIntProperty("status.tycoon")) return "Магнат";
+        else if (ball>=ChatProps.getInstance(serviceName).getIntProperty("status.millionaire")) return "Миллионер";
+        else if (ball>=ChatProps.getInstance(serviceName).getIntProperty("status.bourgeois")) return "Буржуй";
+        else if (ball>=ChatProps.getInstance(serviceName).getIntProperty("status.rich")) return "Богатый";
+        else if (ball>=ChatProps.getInstance(serviceName).getIntProperty("status.influential")) return "Влиятельный";
+        else if (ball>=ChatProps.getInstance(serviceName).getIntProperty("status.respected")) return "Уважаемый";
+        else if (ball>=ChatProps.getInstance(serviceName).getIntProperty("status.wealthy")) return "Состоятельный";
+        else if (ball>=ChatProps.getInstance(serviceName).getIntProperty("status.beggar")) return "Нищий";
+        return "Бомж";
+    }
+
+    /**
+     * При смене ида так же должны менятся данные из других ьаблиц
+     * @param id_old - старый id
+     * @param id_new - новый id
+     */
+
+   public void changeInfo(int id_old, int id_new){
+   Users u = getUser(id_old);
+   // Кланны
+   if( u.clansman != 0 )
+   {
+   if( u.id == getClan( u.clansman ).getLeader() )/*Если лидер*/
+   {
+   getClan( u.clansman ).setLeader(id_new);
+   }
+   }
+   // Подарки
+   db.executeQuery( "delete from thing WHERE user_id=" + id_old );
+   db.executeQuery( "delete from gift_user WHERE user_id2=" + id_old );
+   // Друзья
+   db.executeQuery( "delete from demand WHERE frend_id=" + id_old );
+   db.executeQuery( "delete from frends WHERE user_id=" + id_old );
+   db.executeQuery( "delete from frends WHERE frend_id=" + id_old );
+   }
+
+   /**
+    * Смена клана при смене ида
+    * @param id
+    * @param clansman
+    * @param clangroup
+    */
+
+   public void changeClan(int id, int clansman, String clangroup){
+   Users u = getUser(id);
+   u.clangroup = clangroup;
+   u.clansman = clansman;
+   this.updateUser(u);
+   }
+   
+   /**
+    * Удаляем пользователя из кеша
+    * @param uin
+    */
+
+   public void deleteUser(String uin){
+   Users u = getUserFromDB(uin);
+   uu.remove(u.id);
+   uc.remove(u.sn);
+   }
 
 
 }

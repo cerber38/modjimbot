@@ -206,6 +206,44 @@ public class ChatProps implements AbstractProps {
     //    setIntProperty("smswork.modmaxday", 30 );
         setBooleanProperty("dellog.on.off", false);
         setIntProperty("dellog.time", 5 );
+        /*setBooleanProperty("millioner.on.off", false);
+        setIntProperty("millioner.room", 1000 );
+        setIntProperty("millioner.game.in.day", 3 );
+        setIntProperty("millioner.question.time", 3 );
+        setIntProperty("millioner.not.consumed.1", 50 );
+        setIntProperty("millioner.not.consumed.2", 100 );
+        setIntProperty("millioner.not.consumed.3", 150 );*/
+        setBooleanProperty("social.status.on.off", false);
+        setIntProperty("status.beggar",0);
+        setIntProperty("status.wealthy",500);
+        setIntProperty("status.respected",30000);
+        setIntProperty("status.influential",50000);
+        setIntProperty("status.rich",100000);
+        setIntProperty("status.bourgeois",500000);
+        setIntProperty("status.millionaire",1000000);
+        setIntProperty("status.tycoon",10000000);
+        setIntProperty("status.oligarch",1000000000);
+        setBooleanProperty("replace.nick.on.off", false);
+        setBooleanProperty("messages.script.on.off", false);
+        setBooleanProperty("antiadvertising.on.off", true);
+        setIntProperty("antiadvertising.integer.cnt",3);
+        setStringProperty("antiadvertising.number","0;1;2;3;4;5;6;7;8;9;ноль;один;два;три;четыре;пять;шесть;семь;восемь;девять");
+        setStringProperty("antiadvertising.delimiters"," \t\n\r,.");
+        setStringProperty("chat.adm","111111;222222");
+        setBooleanProperty("adm.on.off", false);
+        setBooleanProperty("minus.ball.mat.on.off", false);
+        setBooleanProperty("minus.ball.kick.off", false);
+        setIntProperty("minus.ball.mat",5);
+        setIntProperty("minus.ball.kick",5);
+        setIntProperty("russian.roulette.kick.time",10);
+        setIntProperty("russian.roulette.room",333);
+        setIntProperty("russian.roulette.ball",1);
+        setIntProperty("casino.room", 0);
+        setBooleanProperty("casino.on.off", true);
+        setIntProperty("casino.price", 2);
+        setIntProperty("casino.amount", 9);
+        setIntProperty("casino.win2", 25);
+        setIntProperty("casino.win3", 50);
     }
 
     public UserPreference[] getUserPreference(){
@@ -292,6 +330,12 @@ public class ChatProps implements AbstractProps {
     //    new UserPreference(UserPreference.STRING_TYPE,"chat.latent.uin","Скрытые уины: ",getStringProperty("chat.latent.uin"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"dellog.on.off","Включить/Выключить авто-очистку логов",getBooleanProperty("dellog.on.off"),""),
         new UserPreference(UserPreference.INTEGER_TYPE,"dellog.time","Интервал чистки логов(в часах)",getIntProperty("dellog.time"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"replace.nick.on.off","Включить/Выключить быстрое написание ника",getBooleanProperty("replace.nick.on.off"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"messages.script.on.off","Включить/Выключить скрипт messages.bsh",getBooleanProperty("messages.script.on.off"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"minus.ball.mat.on.off","Включить/Выключить понижение рейтинга за мат",getBooleanProperty("minus.ball.mat.on.off"),""),
+        new UserPreference(UserPreference.INTEGER_TYPE,"minus.ball.mat","На сколько понижать рейтинг при мате",getIntProperty("minus.ball.mat"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"minus.ball.kick.on.off","Включить/Выключить понижение рейтинга при кике",getBooleanProperty("minus.ball.kick.on.off"),""),
+        new UserPreference(UserPreference.INTEGER_TYPE,"minus.ball.kick","На сколько понижать рейтинг при кике",getIntProperty("minus.ball.kick"),""),
         //банрум
         new UserPreference(UserPreference.CATEGORY_TYPE,"banroom", "Настройки закрытия в комнате", "",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"room.tyrma","Комната Тюрьма в чате",getIntProperty("room.tyrma"),""),
@@ -378,6 +422,46 @@ public class ChatProps implements AbstractProps {
    //     new UserPreference(UserPreference.BOOLEAN_TYPE,"smswork.modsms.on.off","Включить/Выключить возможность покупки мода за sms",getBooleanProperty("smswork.modsms.on.off"),""),
    //     new UserPreference(UserPreference.INTEGER_TYPE,"smswork.modnumder","sms номер для получения модера",getIntProperty("smswork.modnumder"),""),
    //     new UserPreference(UserPreference.INTEGER_TYPE,"smswork.modmaxday","Количество дней в группе модер",getIntProperty("smswork.modmaxday"),""),
+        //Настройки миллионера
+   //     new UserPreference(UserPreference.CATEGORY_TYPE,"million", "Настройки игры миллионер" +"","",""),
+   //     new UserPreference(UserPreference.BOOLEAN_TYPE,"millioner.on.off","Включить/Выключить игру",getBooleanProperty("millioner.on.off"),""),
+   //     new UserPreference(UserPreference.INTEGER_TYPE,"millioner.room","Комната игры",getIntProperty("millioner.room"),""),
+   //     new UserPreference(UserPreference.INTEGER_TYPE,"millioner.game.in.day","Количество игр в сутки",getIntProperty("millioner.game.in.day"),""),
+   //     new UserPreference(UserPreference.INTEGER_TYPE,"millioner.question.time","Время на один вопрос(минуты)",getIntProperty("millioner.question.time")," минут"),
+   //     new UserPreference(UserPreference.INTEGER_TYPE,"millioner.not.consumed.1","Первая не сгораемая сумма",getIntProperty("millioner.not.consumed.1"),""),
+   //     new UserPreference(UserPreference.INTEGER_TYPE,"millioner.not.consumed.2","Вторая не сгораемая сумма",getIntProperty("millioner.not.consumed.2"),""),
+   //     new UserPreference(UserPreference.INTEGER_TYPE,"millioner.not.consumed.3","Третья не сгораемая сумма",getIntProperty("millioner.not.consumed.3"),""),
+          // Социальный статус
+          new UserPreference(UserPreference.CATEGORY_TYPE,"status", "Настройки социального статуса","",""),
+          new UserPreference(UserPreference.BOOLEAN_TYPE,"social.status.on.off","Включить/Выключить социальный статус",getBooleanProperty("social.status.on.off"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"status.beggar","Нищий",getIntProperty("status.beggar"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"status.wealthy","Состоятельный",getIntProperty("status.wealthy"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"status.respected","Уважаемый",getIntProperty("status.respected"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"status.influential","Влиятельный",getIntProperty("status.influential"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"status.rich","Богатый",getIntProperty("status.rich"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"status.bourgeois","Буржуй",getIntProperty("status.bourgeois"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"status.millionaire","Миллионер",getIntProperty("status.millionaire"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"status.tycoon","Магнат",getIntProperty("status.tycoon"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"status.oligarch","Олигарх",getIntProperty("status.oligarch"),""),
+          // Анти-Реклама
+          new UserPreference(UserPreference.CATEGORY_TYPE,"antiadvertising", "Настройки анти-рекламы","",""),
+          new UserPreference(UserPreference.BOOLEAN_TYPE,"antiadvertising.on.off","Включить/Выключить анти-рекламу",getBooleanProperty("antiadvertising.on.off"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"antiadvertising.integer.cnt","Максимальное число цифр в сообщении",getIntProperty("antiadvertising.integer.cnt"),""),
+          new UserPreference(UserPreference.STRING_TYPE,"antiadvertising.number","Числа", getStringProperty("antiadvertising.number"),""),
+          new UserPreference(UserPreference.STRING_TYPE,"antiadvertising.delimiters","Разделители", getStringProperty("antiadvertising.delimiters"),""),
+          // Русская рулетка
+          new UserPreference(UserPreference.CATEGORY_TYPE,"russian.roulette", "Настройки игры Русская рулетка","",""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"russian.roulette.kick.time","Максимальный кик в игре",getIntProperty("russian.roulette.kick.time"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"russian.roulette.room","Комната для игры",getIntProperty("russian.roulette.room"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE,"russian.roulette.ball","Количество балов при выйгрыше",getIntProperty("russian.roulette.ball"),""),
+          // Казино
+          new UserPreference(UserPreference.CATEGORY_TYPE, "casino", "Настройки игры 'Казино'(барабан)", "",""),
+          new UserPreference(UserPreference.BOOLEAN_TYPE, "chat.useGame", "Использовать Казино в чате", getBooleanProperty("chat.useGame"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE, "casino.room", "Комната для игры в казино", getIntProperty("casino.room"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE, "casino.price", "Стоимость одной игры в казино", getIntProperty("casino.price"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE, "casino.amount", "Количество цифр в барабане казино (от 1 до 9)", getIntProperty("casino.amount"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE, "casino.win2", "Сумма выигрыша при 2х совпадениях", getIntProperty("casino.win2"),""),
+          new UserPreference(UserPreference.INTEGER_TYPE, "casino.win3", "Сумма выигрыша при 3х совпадениях", getIntProperty("casino.win3"),""),
         };
         return p;
         }

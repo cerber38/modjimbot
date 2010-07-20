@@ -6,10 +6,7 @@
 package ru.jimbot.modules.chat;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import ru.jimbot.modules.Cmd;
@@ -26,11 +23,6 @@ public class frends {
 private HashMap<String, Cmd> commands = new HashMap<String, Cmd>();
 private CommandParser parser;
 private ChatCommandProc cmd;
-private Random r = new Random();
-private String R0 = "Шесть случайных друзей пользователя ";
-private String R1 = "\n";
-private String R2 = "Что бы просматреть всех друзей набери !аллдруг <id>";
-
 
 public frends(ChatCommandProc c)
 {
@@ -383,36 +375,29 @@ Vector<String[]> v = cmd.srv.us.db.getValues(q);
 return Integer.parseInt(v.get(0)[0]);
 }
 
-/*
- * Метод который показывает определенное количество друзей,
- * его следует вызывать из других методов
+/**
+ * Рандомный вывод 6-ти друзей
+ * @param id
+ * @return
  */
 public String Random_Frends(int id)
 {
-String list = "";
+Users u = cmd.srv.us.getUser(id);
+if(MaxFrends(u.id) == 0) return "Нет друзей";
+String frends = "Шесть случайных друзей пользователя:\n";
+frends += "Всего друзей |" + MaxFrends(u.id) + "|\n";
+frends += "Ид|Ник|Рейтинг\n";
 try{
-PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("select frend_id from frends WHERE user_id=" + id);
+PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("select frend_id from frends WHERE user_id=" + id + " ORDER BY RAND( ) LIMIT 0 , 6");
 ResultSet rs = pst.executeQuery();
-while(rs.next()){list += rs.getInt(1)+",";}
+while(rs.next()){
+frends += "|" + cmd.srv.us.getUser(rs.getInt(1)).id + "|" + cmd.srv.us.getUser(rs.getInt(1)).localnick +  " » " + "|" + cmd.srv.us.getUser(rs.getInt(1)).ball + "|" + '\n';
+}
 rs.close();
 pst.close();
 }catch (Exception ex){
-ex.printStackTrace();}
-String frends = "";
-if(list.equals("")){return frends;}//Если нет друзей
-Users u = cmd.srv.us.getUser(id);
-frends += "Друзья пользователя:\n";
-frends += "Всего друзей |" + MaxFrends(u.id) + "|\n";
-frends += "Ид|Ник|Рейтинг\n";
-String[] IdsFrends = list.split(",");
-List<String> List = Arrays.asList(IdsFrends);
-Collections.shuffle(List);//Тусуем список друзей в случайном порядке
-for(int f = 0; f<(IdsFrends.length); f++)
-{
-if(f>5){return R0  + u.localnick + R1 + frends + R2;}//Выводим шесть случайных
-int L = Integer.valueOf(List.get(f));
-frends += "|" + cmd.srv.us.getUser(L).id + "|" + cmd.srv.us.getUser(L).localnick +  " » " + "|" + cmd.srv.us.getUser(L).ball + "|" + '\n';
+ex.printStackTrace();
 }
-return frends;
+return frends + "\nЧто бы просматреть всех друзей набери !аллдруг <id>";
 }
 }

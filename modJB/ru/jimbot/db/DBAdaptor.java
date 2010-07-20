@@ -100,7 +100,7 @@ public abstract class DBAdaptor {
                 info.setProperty("characterEncoding","utf8");
                 db = DriverManager.getConnection("jdbc:mysql://" + host + "/" + name, info);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                /*ex.printStackTrace();*/
                 Manager.getInstance().getService(serviceName).Errore_bd();
                 f = false;
                 lastConnect = System.currentTimeMillis();

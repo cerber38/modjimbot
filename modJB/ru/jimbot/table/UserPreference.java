@@ -242,6 +242,21 @@ public class UserPreference {
         this.collapsed = collapsed;
     }
 
+    public static boolean testCATEGORY(boolean user, String category){
+    if(user){
+    if(category.equalsIgnoreCase("db")) return true;    
+    }
+    return false;
+    }
+
+    public static boolean testKEY(boolean user, String key){
+    if(user){
+    if(key.equalsIgnoreCase("db.host") || key.equalsIgnoreCase("db.user") ||
+    key.equalsIgnoreCase("db.pass") || key.equalsIgnoreCase("db.dbname")) return true;
+    }
+    return false;
+    }
+
 }
 
 

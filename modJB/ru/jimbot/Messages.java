@@ -21,6 +21,7 @@ package ru.jimbot;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -46,6 +47,7 @@ private String fileName = "";
 private String ServiceName = null;
 private static ConcurrentHashMap<String,Messages> instances = new ConcurrentHashMap<String,Messages>();
 private static Messages mainInst = new Messages("");
+private Properties props = null;
 
     public Messages(String name)
     {
@@ -81,10 +83,8 @@ private static Messages mainInst = new Messages("");
         return bundle;
     }
 
-
         public synchronized String getString_Room(String key, int room, Users uss) {
         try {
-     //System.out.print("Messages >>> " + getNewBundle().getString(key));
             ChatServer srv = ( ChatServer ) Manager.getInstance().getService( ServiceName );
             String msg = getNewBundle().getString(key);
             msg = msg.replace("%NICK%", uss.localnick);// Ник пользователя который набрал команду
@@ -105,7 +105,6 @@ private static Messages mainInst = new Messages("");
 
         public synchronized String getString_goChat(String key, int room, Users uss) {
         try {
-     //System.out.print("Messages >>> " + getNewBundle().getString(key));
             ChatServer srv = ( ChatServer ) Manager.getInstance().getService( ServiceName );
             String msg = getNewBundle().getString(key);
             msg = msg.replace("%NICK%", uss.localnick);// Ник пользователя который набрал команду
@@ -135,6 +134,8 @@ private static Messages mainInst = new Messages("");
             msg = msg.replace("%HOME%", uss.home);
             msg = msg.replace("%CLOTHING%", uss.clothing);
             msg = msg.replace("%ANIMAL%", uss.animal);
+            if(ChatProps.getInstance(ServiceName).getBooleanProperty("social.status.on.off"))
+            msg = msg.replace("%SOCIAL_STATUS%", srv.us.getStatus(uss.id));
             return msg;
         } catch (MissingResourceException e) {
             return '!' + key + '!';
@@ -199,7 +200,7 @@ private static Messages mainInst = new Messages("");
          */
         @Override
         public Enumeration<String> getKeys() {
-            // TODO Auto-generated method stub
+            props.keys();
             return null;
         }
     }

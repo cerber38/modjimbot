@@ -31,6 +31,7 @@ private int id = 0;
 private int number = 0;
 private String text = "";
 private boolean testType = false;
+public boolean isStart = false;
 
 public AutoStatus(ChatServer s) {
         srv = s;
@@ -97,12 +98,13 @@ th=null;
 }
 
     private void timeEvent() {
+     if(!isStart) setStart(true);
         // Первый запуск? Если да то везде ставим type=0
         if(!testType){
             setTypeAll();
             Log.getLogger(srv.getName()).talk("Change auto x-status dump");
             testType = true;
-        }
+        }        
        if((System.currentTimeMillis() - time)>ChatProps.getInstance(srv.getName()).getIntProperty( "auto_status.time")*60000){
            if(getCountStatus() == 0){
             time = System.currentTimeMillis();
@@ -224,5 +226,13 @@ private void Random_ID()
     pst.close();
     } catch (Exception ex) {}
 }
+
+   public void setStart(boolean start){
+   isStart = start;
+   }
+
+   public boolean isStart(){
+   return isStart;
+   }
 
 }

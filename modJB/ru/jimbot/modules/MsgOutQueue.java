@@ -123,15 +123,10 @@ public class MsgOutQueue implements Runnable {
     
     public void testOnline(){
         try{
-            if(proc==null) {
+            if(proc == null) {
                 stopCon=0;
                 return;
             }
-            //TODO Как сообщить сюда о запуске процесса?
-//            if(!proc.con.srv.isRun) {
-//                stopCon=0;
-//                return;
-//            }
             if(proc.isOnLine()) {
                 stopCon=0;
                 counter=0;
@@ -139,8 +134,7 @@ public class MsgOutQueue implements Runnable {
                 return;
             }
             if(stopCon>0) {
-                if((System.currentTimeMillis()-stopCon)>=p_restart/*PAUSE_RESTART/*Props.getIntProperty("bot.pauseRestart")*/){
-                    MainProps.nextServer();
+                if((System.currentTimeMillis()-stopCon)>=p_restart){
                     proc.server = MainProps.getServer();
                     proc.port = MainProps.getPort();
                     Log.getLogger(proc.serviceName).info("Попытка нового подключения... " + proc.server + ":" + proc.port);

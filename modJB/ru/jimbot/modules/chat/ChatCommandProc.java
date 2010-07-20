@@ -25,10 +25,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import ru.jimbot.Manager;
 import ru.jimbot.Messages;
+import ru.jimbot.modules.AboutExtend;
 import ru.jimbot.modules.AbstractCommandProcessor;
 import ru.jimbot.modules.AbstractServer;
 import ru.jimbot.modules.Cmd;
@@ -50,8 +52,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     public IcqProtocol icq;
     private ScriptWork scr;
     public frends frends;
-    public AboutUser abv;
     public ClanCommand clan;
+    //public Millionaire millionaire;
     public Shop shop;
     public Shop2 shop2;
     public Gift gift;
@@ -62,9 +64,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     public MyQuiz Quiz = null;
     private ConcurrentHashMap <String,String> up; // Запоминаем последний пришедший приват
     private ConcurrentHashMap <String, KickInfo> statKick; // Расширенная статистика киков
-    private ConcurrentHashMap <String, ModInfo> statMod; // Расширенная статистика времяных модераторов
     private HashSet<String> warnFlag; // Флаг предупреждения о молчании
-    public int state=0;
+    public int state = 0;
     private CommandParser parser;
     public ChatProps psp;
     private boolean firstStartMsg = false;
@@ -82,21 +83,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     private ConcurrentHashMap <Integer, WeddingInfo> WeddingInfo;// Расширенная свадьба
     private ConcurrentHashMap <String,Integer> Wedding_ID;// Хранит ид свадьбы
     private ConcurrentHashMap <String,Integer> Wedding_STATUS;// Хранит статус пользователей при свадьбе
-    private ConcurrentHashMap <String,Integer> Questionnaire;// Хранит шаги при заполнении анкеты
-    private ConcurrentHashMap <String,String> Questionnaire_CMD;// Хранит команду при заполнении анкеты
+    private HashMap<String, AboutExtend> About;// Храним данные при заполнении анкеты
 
-    class ModInfo
-    {
-    public int id=0;
-    public String m = "";
-
-    ModInfo(int id, String msg)
-    {
-    this.id = id;
-    this.m = msg;
-    }
-    }
-    
     class KickInfo {
         public int id=0;
         public int len=0;
@@ -128,20 +116,20 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         comMap = new HashMap<String, CommandExtend>();
         comNew = new HashMap<String, NewExtend>();
         warnFlag = new HashSet<String>();
-        statMod = new ConcurrentHashMap<String, ModInfo>();
         shop = new Shop(this);
         shop2 = new Shop2(this);
         frends = new frends(this);
         clan = new ClanCommand(this);
-        abv = new AboutUser(this);
         gift = new Gift(this);
         voting = new Voting(s);
         WeddingInfo = new ConcurrentHashMap<Integer, WeddingInfo>();
         Wedding_ID = new ConcurrentHashMap<String, Integer>();
         Wedding_STATUS = new ConcurrentHashMap<String, Integer>();
-        Questionnaire = new ConcurrentHashMap<String, Integer>();
-        Questionnaire_CMD = new ConcurrentHashMap<String, String>();
+        About = new HashMap<String, AboutExtend>();
         Quiz = new MyQuiz(s);
+        radm = new RobAdmin(srv);
+        xstatus = new AutoStatus(srv);
+        //millionaire = new Millionaire(srv);
         init();
     }
     
@@ -200,6 +188,11 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         authObj.put("invise","Возможность прятаться");
         authObj.put("invisible","невидимый");
         authObj.put("listinvise","Возможность смотреть список скрытых пользователей");
+        //authObj.put("millionaire", "Играть в игру миллионер");
+        authObj.put("usermessages","Возможность отправлять сообщение пользователю");
+        authObj.put("uchat","Затаскивать пользователя а чат");
+        authObj.put("bot_messages","Отправить сообщение вместо бота");
+        authObj.put("reg_user","Регистрировать пользователей");
     	
        	commands.put("!help", new Cmd("!help","",1));
         commands.put("!справка", new Cmd("!справка", "", 1));
@@ -313,13 +306,22 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         commands.put("!развод", new Cmd("!развод", "$n $n", 61));
         commands.put("!отдать", new Cmd("!отдать", "$n $n", 62));
         commands.put("!chstatus", new Cmd("!chstatus","$n $s",63));
-        commands.put("!cмстатус", new Cmd("!смстатус","$n $s",63));
+        commands.put("!смстатус", new Cmd("!смстатус","$n $s",63));
         commands.put("!измид", new Cmd("!измид","$n $n",64));
         commands.put("!спрятаться", new Cmd("!спрятаться","",65));
         commands.put("!показаться", new Cmd("!показаться","",66));
         commands.put("!скрылись", new Cmd("!скрылись","",67));
         commands.put("!уин", new Cmd("!уин","$n",68));
-    	WorkScript.getInstance(srv.getName()).installAllChatCommandScripts(this);
+        commands.put("!личное", new Cmd("!личное","$n",69));
+        commands.put("!данные", new Cmd("!данные","",70));
+        commands.put("!юзеру", new Cmd("!юзеру","$c $s",71));
+        commands.put("!затащить", new Cmd("!затащить", "$n", 72));
+        commands.put("!бот", new Cmd("!бот", "$s", 73));
+        commands.put("!регистрировать",new Cmd("!регистрировать","$c $c",74));
+        commands.put("!казино",new Cmd("!казино","",75));
+        commands.put("!рулетка",new Cmd("!рулетка","$n",76));
+        //commands.put("!миллионер", new Cmd("!миллионер","",69));
+        WorkScript.getInstance(srv.getName()).installAllChatCommandScripts(this);
     }
     
     /**
@@ -400,15 +402,12 @@ if(MainProps.checkNewVersion())
 ss += "Доступна новая версия!\n" + MainProps.getNewVerDesc();
 else
 ss += "";
-if(!s[i].trim().equals("111111") & s[i].trim().equals("222222"))
 proc.mq.add(s[i], ss);
 }
 firstStartMsg=true;
 }
 }
-    
-
-    
+   
     public AbstractServer getServer()
     {
     return srv;
@@ -418,22 +417,9 @@ firstStartMsg=true;
      * Основная процедура парсера команд
      */
     public void parse(IcqProtocol proc, String uin, String mmsg) {
-    if(radm == null)
-    {
-    radm = new RobAdmin(srv);
-    radm.start();
-    }
-    if(psp.getBooleanProperty("auto_status.on.off")){
-    if(xstatus == null)
-    {
-    xstatus = new AutoStatus(srv);
-    xstatus.start();
-    }
-    }
     firstMsg(proc);//Первое сообщение
     firstScript(proc);//Запуск скриптов
     state++;
-    /*psp.del_logs_time();*/
     Log.getLogger(srv.getName()).debug("CHAT: parse " + proc.baseUin + ", " + uin + ", " + mmsg);
     if(psp.getBooleanProperty("chat.writeInMsgs"))
     //Слишком длинные сообщения записывать в БД не нужно для избежания переполнений
@@ -549,11 +535,23 @@ firstStartMsg=true;
             e.addMsg(tmsg);
             floodMap.put(uin, e);
             }
-            testFlood(proc,uin);
+            if (testFlood(proc,uin)) return;// Если пользователь был кикнут за флуд
             
+            if(psp.getBooleanProperty("messages.script.on.off"))
             mmsg = WorkScript.getInstance(srv.getName()).startMessagesScript(mmsg, srv, uin);
-            if(mmsg.equals("")) return; // Сообщение было удалено в скрипте
+            if(psp.getBooleanProperty("antiadvertising.on.off"))
+            mmsg = antiadvertising(mmsg);
+            if(mmsg.equals("")) return; // Сообщение было удалено в скрипте или в анте рекламе
             int tp = 0;
+            /*if(millionaire.isGame(uin)){
+            millionaire.parse(proc, uin, tmsg);
+            return;
+             }*/
+            if(About.containsKey(uin))
+            if(!About.get(uin).isExpire()){
+            InteractiveQuestions(proc, uin, mmsg);
+            return;
+            }
             if(comMap.containsKey(uin))
             if(!comMap.get(uin).isExpire())
             tp = parser.parseCommand(comMap.get(uin).getCmd());
@@ -578,7 +576,7 @@ firstStartMsg=true;
             /********************************/
             if (comNew.containsKey("Wedding_"+uin)){
             if (!comNew.get("Wedding_"+uin).isExpire()){
-            TestWedding(proc, uin, mmsg, parser.parseArgs(mmsg));
+            TestWedding(uin, mmsg, parser.parseArgs(mmsg));
             }
             else
             {
@@ -588,41 +586,6 @@ firstStartMsg=true;
             Wedding_STATUS.remove("Wedding_"+uin);
             }
             }else 
-            tp = parser.parseCommand(tmsg);
-            /********************************/
-            if (comNew.containsKey(uin + "Questionnaire")){
-            if (!comNew.get(uin + "Questionnaire").isExpire()){
-            if(Questionnaire.get(uin) == 0)
-            {
-            NAME(proc, uin, parser.parseArgs(mmsg), mmsg);
-            }
-            if(Questionnaire.get(uin) == 1)
-            {
-            AGE(proc, uin, parser.parseArgs(mmsg), mmsg);
-            }
-            if(Questionnaire.get(uin) == 2)
-            {
-            SEX(proc, uin, parser.parseArgs(mmsg), mmsg);
-            }
-            if(Questionnaire.get(uin) == 3)
-            {
-            CITY(proc, uin, parser.parseArgs(mmsg), mmsg);
-            }
-            if(Questionnaire.get(uin) == 4)
-            {
-            Questionnaire.remove(uin);
-            Questionnaire_CMD.remove(uin);
-            proc.mq.add(uin,"Информация успешно заполнена!");
-            }
-            }
-            else
-            {
-            tp = parser.parseCommand(tmsg);
-            comNew.remove(uin + "Questionnaire");
-            Questionnaire.remove(uin);
-            Questionnaire_CMD.remove(uin);
-            }
-            }else
             tp = parser.parseCommand(tmsg);
             /********************************/
             if (comNew.containsKey("goChat_"+uin)){
@@ -878,19 +841,48 @@ firstStartMsg=true;
            case 68:
                 commandGetUinUser(proc, uin, parser.parseArgs(tmsg));
                 break;
+           case 69:
+                commandLichUser(proc, uin, parser.parseArgs(tmsg));
+                break;
+           case 70:
+                InteractiveQuestions(proc, uin, mmsg);
+                break;
+           case 71:
+                getUserMessages(proc, uin, parser.parseArgs(tmsg));
+                break;
+           case 72:
+                commandDragSomewhere(proc, uin, parser.parseArgs(tmsg), mmsg);
+                break;
+           case 73:
+                commandBotMessages(proc, uin, parser.parseArgs(tmsg));
+                break;
+           case 74:
+                RegUser(proc, uin, parser.parseArgs(tmsg));
+                break;
+           case 75:
+                if (psp.getBooleanProperty("casino.on.off")) {
+                commandCasino(proc, uin);
+                } else proc.mq.add(uin, "Эта команда закрыта администрацией чата");  
+                break;
+           case 76:
+                commandRussianRoulette(proc, uin, parser.parseArgs(tmsg), mmsg);
+                break;
+                /*case 69:
+                commandMillionaire(proc, uin);
+                break;*/
                 default:
      //Дополнительные команды из других классов
-     if(scr.commandExec(proc, uin, mmsg)) return;
-     if(voting.commandVoting(proc, uin, mmsg)) return;
-     if(shop.commandShop(proc, uin, mmsg)) return;
-     if(shop2.commandShop2(proc, uin, mmsg)) return;
-     if(frends.commandFrends(proc, uin, mmsg)) return;
-     if(abv.commandAboutUser(proc, uin, mmsg)) return;
-     if(gift.commandShop(proc, uin, mmsg)) return;
-     if(clan.commandClan(proc, uin, mmsg)) return;
+     if(scr.commandExec(proc, uin, tmsg)) return;
+     if(voting.commandVoting(proc, uin, tmsg)) return;
+     if(shop.commandShop(proc, uin, tmsg)) return;
+     if(shop2.commandShop2(proc, uin, tmsg)) return;
+     if(frends.commandFrends(proc, uin, tmsg)) return;
+     if(gift.commandShop(proc, uin, tmsg)) return;
+     if(clan.commandClan(proc, uin, tmsg)) return;
      if(srv.us.getUser(uin).state==UserWork.STATE_CHAT){
      //Сообщения начинающиеся с "!" и "+" не выводим в чат
      try{
+     if(psp.getBooleanProperty("replace.nick.on.off")) mmsg = replaceNick(mmsg);
      if(mmsg.substring(0, 1).equals("!")){proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.parse.3"));return;}
      } catch (Exception ex){ex.printStackTrace();}
      String s = "";
@@ -916,7 +908,7 @@ firstStartMsg=true;
      } 
      else
      {
-     if(srv.us.getUser(uin).state==UserWork.STATE_NO_CHAT & !comNew.containsKey(uin + "Questionnaire")){
+     if(srv.us.getUser(uin).state==UserWork.STATE_NO_CHAT){
      proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.parse.5", new Object[] {psp.getStringProperty("chat.name")}));
      return;
      }
@@ -933,6 +925,75 @@ firstStartMsg=true;
      * Команды чата
      */
 
+    /**
+     * Замена id`a на ник пользователя
+     * @param mmsg
+     * @return
+     */
+
+    private String replaceNick(String mmsg){
+    String chars = "%";// Символ с идом
+    boolean f = true;
+    Set<String> nick = new HashSet();
+    if(mmsg.indexOf(chars) == -1) return mmsg; // Нет символа в строке   
+    StringTokenizer st = new StringTokenizer(mmsg, " ");
+    while(st.hasMoreTokens()){// переберем все сообщение
+    String token = st.nextToken();
+    if(token.indexOf(chars) != -1) nick.add(token);
+    }
+    for (String p : nick){
+    if(!testInteger(p.replace(chars, ""))) f = false;// Если попалось не число
+    else
+    f = true;
+    if(f){
+    p = p.replace(chars, "");
+    Integer id = Integer.parseInt(p);
+    mmsg = mmsg.replace(chars + p, srv.us.getUser(id).localnick);
+    }
+    }
+    return mmsg;
+    }
+
+    /**
+     * Анти-Реклама
+     * @author fraer72
+     * @param msg
+     * @v 0.4
+     */
+
+    private String antiadvertising(String msg){
+    Integer maxCnt = psp.getIntProperty("antiadvertising.integer.cnt"); // Максимально число цифр в сообщении
+    Integer Cnt = 0;
+    String[] number = psp.getStringProperty("antiadvertising.number").split(";");
+    String delimiters = psp.getStringProperty("antiadvertising.delimiters");
+    StringTokenizer st = new StringTokenizer(msg, delimiters);
+    while(st.hasMoreTokens()){  // Перебираем сообщение
+    String s = st.nextToken();
+    for (int i = 0 ;i < number.length; i++){
+    if(s.indexOf(number[i]) != -1 & s.indexOf("%") == -1)
+    Cnt++;
+    if(Cnt > maxCnt)
+    msg = msg.replace(s, "*"); // Если выше максимального, закроем
+    }
+    }
+    return msg;
+    }
+
+    /**
+     * Число?
+     * @param msg
+     * @return
+     */
+
+    private boolean testInteger(String msg){
+    Integer answer;
+    try{
+    answer = Integer.parseInt(msg);
+    }catch(NumberFormatException e){
+    return false;
+    }
+    return true;
+    }
 
 
     public String A(int room)
@@ -1116,9 +1177,9 @@ firstStartMsg=true;
     L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.5", new Object[] {uss.group});
     L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.6", new Object[] {uss.ball});
     L += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.7", new Object[] {uss.answer});
-    if(state==-1){ Ban += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.8");}
-    if(state==1){ No_chat += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.9");}
-    if(state==2){ In_chat+= "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.10", new Object[] {testClosed(uss.sn)});}
+    if(uss.state==-1){ Ban += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.8");}
+    if(uss.state==1){ No_chat += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.9");}
+    if(uss.state==2){ In_chat+= "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.10", new Object[] {testClosed(uss.sn)});}
     if(testClosed(uss.sn)>1){ Closed += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.11", new Object[] {testClosed(uss.sn)});}
     if(testKick(uss.sn)>1){ Kick += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.12", new Object[] {testKick(uss.sn)});}
     proc.mq.add(uin,L + Ban + No_chat + In_chat + Closed + Kick);
@@ -1447,32 +1508,15 @@ firstStartMsg=true;
       * Тут начинаем задавать интерактивные вопросы
       */
      if(psp.getBooleanProperty("Questionnaire.on.off")){
-     Questionnaire(proc, uin, mmsg);
+     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandReg.12"));
+     InteractiveQuestions(proc, uin, mmsg);
      }
      }
      catch (Exception ex)
      {
      ex.printStackTrace();
-     Log.getLogger(srv.getName()).talk(uin + " Reg error: " + mmsg);
-     //proc.mq.add(uin,"Ошибка");
+     Log.getLogger(srv.getName()).talk(uin + " Ошбка регистрации " + ex.getMessage());
      }
-
-     //вызовем goChat
-     /*if(!psp.getBooleanProperty("Questionnaire.on.off")){
-     goChat(proc, uin, mmsg, v);
-     }*/
-     //return;
-
-     /*
-     }        
-     catch (Exception ex)
-     {
-     ex.printStackTrace();
-     Log.talk(uin + " Reg error: " + mmsg);
-     proc.mq.add(uin,"Ошибка");
-     }
-     */
-     
      }
 
 
@@ -1533,7 +1577,6 @@ firstStartMsg=true;
     }
     s += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAA.2", new Object[] {cnt});
     s += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAA.3", new Object[] {"«" + srv.us.statUsersCount()+ "»"});
-    //proc.mq.add(uin, s);
     cutsend(proc, uin, s);
     }
     
@@ -1710,7 +1753,7 @@ firstStartMsg=true;
    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_Room("ChatCommandProc.commandRoom.9", i, uss));
    return;
    }
-   if(psp.getBooleanProperty("vic.on.off") & Quiz.TestRoom(i) & !psp.testAdmin(uin) & Quiz.AllUsersRoom(i) > psp.getIntProperty("vic.users.cnt")){
+   if(psp.getBooleanProperty("vic.on.off") & Quiz.TestRoom(i) & !psp.testAdmin(uin) & Quiz.AllUsersRoom(i) >= psp.getIntProperty("vic.users.cnt")){
    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_Room("ChatCommandProc.commandRoom.10", i, uss));
    return;
    }
@@ -1773,6 +1816,20 @@ firstStartMsg=true;
     long z = srv.us.db.getLastIndex("admmsg");
     int id = (int) (z + 1)-1;
     srv.us.db.admmsg(id, id_2, s, t);
+    /*Оповещение админа*/
+    if(psp.getBooleanProperty("adm.on.off"))
+    {
+    String[] admins = psp.getStringProperty("chat.adm").split(";");
+    for (int i=0 ;i<admins.length; i++)
+    {
+    if(admins[i] == null || admins[i].equals("")){
+    Log.getLogger(srv.getName()).error("В админке не указан(ны) уин(ы) для оповещения!!!");
+    return;
+    }
+    Users usss = srv.us.getUser(admins[i]);
+    srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Сообщение админу: " + s);
+    }
+    }
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAdm.1"));
     }
     catch (Exception ex) {ex.printStackTrace();Log.getLogger(srv.getName()).talk("Error save msg: " + ex.getMessage());proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAdm.2"));}
@@ -2002,28 +2059,7 @@ firstStartMsg=true;
         }
         return r;
     } 
-    
-
-    
-    /**
-     * Парсер сообщений после запроса инфы юзера
-     */
-    public void parseInfo(Users u, int type){
-    	switch(type) {
-    	case 1: // Основная инфа
-    		Log.getLogger(srv.getName()).info("User: " + u.sn + ", " + u.nick);
-    		Users uu = srv.us.getUser(u.sn);
-    		uu.sn = u.sn;
-    		uu.nick = u.nick;
-    		uu.fname = u.fname;
-    		//uu.lname = u.lname;
-    		uu.email = u.email;
-    		srv.us.updateUser(uu);
-    		break;
-    	default:
-    	}
-    }
-    
+        
     /**
      * Проверка молчунов
      * @param uin
@@ -2159,7 +2195,7 @@ firstStartMsg=true;
     return;
     }
     
-    if(psp.getBooleanProperty("vic.on.off") & Quiz.TestRoom(room) & !psp.testAdmin(uin) & Quiz.AllUsersRoom(room) > psp.getIntProperty("vic.users.cnt")){
+    if(psp.getBooleanProperty("vic.on.off") & Quiz.TestRoom(room) & !psp.testAdmin(uin) & Quiz.AllUsersRoom(room) >= psp.getIntProperty("vic.users.cnt")){
     proc.mq.add(uin, Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.15", room, uss));
     return;
     }
@@ -2373,13 +2409,13 @@ firstStartMsg=true;
     	if(warnFlag.contains(uin)) warnFlag.remove(uin);
     	if(floodMap.containsKey(uin)){
     		if(floodMap.get(uin).getCount()>psp.getIntProperty("chat.floodCountLimit")){
-    			akick(proc, uin);
+    			if(!psp.testAdmin(uin)) akick(proc, uin, "Кик за флуд");
     			return true;
     		}
     	}
     	if(floodMap2.containsKey(uin)) {
     		if(floodMap2.get(uin).getCount()>psp.getIntProperty("chat.floodCountLimit")){
-    			akick(proc, uin);
+    			if(!psp.testAdmin(uin)) akick(proc, uin, "Кик за флуд");
     			return true;
     		}
     	}
@@ -2398,7 +2434,7 @@ firstStartMsg=true;
     /**
      * КИК с автоматическим определением времени
      */
-    public void akick(IcqProtocol proc, String uin, int user_id){
+    public void akick(IcqProtocol proc, String uin, int user_id, String r){
         int def = psp.getIntProperty("chat.defaultKickTime");
         int max = psp.getIntProperty("chat.maxKickTime");
         int i=def;
@@ -2407,11 +2443,11 @@ firstStartMsg=true;
             i = t<max ? t*2 : def;
             i = i>max ? max : i;
         }
-        tkick(proc, uin, i, user_id, "");
+        tkick(proc, uin, i, user_id, r);
     }
     
-    public void akick(IcqProtocol proc, String uin){
-        akick(proc, uin, 0);
+    public void akick(IcqProtocol proc, String uin, String r){
+        akick(proc, uin, 0, r);
     }
     
     /**
@@ -2420,6 +2456,9 @@ firstStartMsg=true;
     public void tkick(IcqProtocol proc, String uin, int t, int user_id, String r){
         Users uss = srv.us.getUser(uin);
         setKick(uin,t, user_id, r);
+        if(psp.getBooleanProperty("minus.ball.kick.off"))
+        uss.ball -= psp.getIntProperty("minus.ball.kick");
+        srv.us.updateUser(uss);
         Log.getLogger(srv.getName()).talk("kick user " + uin + " on " + t + " min.");
         if (srv.us.getUser(uin).state == UserWork.STATE_CHAT)
         if (psp.getBooleanProperty("chat.isShowKickReason")) {
@@ -3140,7 +3179,7 @@ firstStartMsg=true;
    public void commandXst(IcqProtocol proc, String uin, Vector v){
    if(!isChat(proc,uin) && !psp.testAdmin(uin)) return;
    if(!auth(proc,uin, "xst")) return;
-   if(xstatus != null)
+   if(xstatus.isStart())
    {
    proc.mq.add(uin,"Запущена авто смена xstatus`ов. Вы не можете сменить статус.");
    return;
@@ -3188,7 +3227,7 @@ firstStartMsg=true;
   return;
   }
   if(!auth(proc,uin, "restart")) return;
-  Manager.restart_service(srv.getName());
+  Manager.getInstance().restartService(srv.getName());
   }
 
     /**
@@ -3345,7 +3384,7 @@ firstStartMsg=true;
         return;
         }
         Users usss = srv.us.getUser(admins[t]);
-        srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Пользователя " + us.localnick +  "|" + us.id + "|" + " зовет в чат " + uss.localnick+ "|" + uss.localnick + "| "
+        srv.getIcqProcess(usss.basesn).mq.add(usss.sn,"Пользователя " + us.localnick +  "|" + us.id + "|" + " зовет в чат " + uss.id+ "|" + uss.localnick + "| "
         + "\n Сообщение: "+s);
         }
         }
@@ -3581,8 +3620,8 @@ firstStartMsg=true;
         Wedding_STATUS.put("Wedding_"+us.sn, 0);
         Wedding_STATUS.put("Wedding_"+uss.sn, 1);
         // Вызываем метод для определения согласен пользователь или нет
-        TestWedding(srv.getIcqProcess(us.basesn), us.sn, mmsg, v);// Невесиа
-        TestWedding(srv.getIcqProcess(us.basesn), uss.sn, mmsg, v);// Жених
+        TestWedding(us.sn, mmsg, v);// Невесиа
+        TestWedding(uss.sn, mmsg, v);// Жених
         }
 
         /**
@@ -3595,7 +3634,7 @@ firstStartMsg=true;
          * @param - 0 - невеста, 1 - жених
          */
 
-        private void TestWedding(IcqProtocol proc, String uin, String mmsg, Vector v)
+        private void TestWedding(String uin, String mmsg, Vector v)
         {
         Users uss = srv.us.getUser(uin);
         String[] message0 = "согласна;согласен".split(";");
@@ -3617,7 +3656,6 @@ firstStartMsg=true;
         try
         {
         msg = mmsg.trim();
-        msg = msg.toLowerCase();
         }
         catch(NumberFormatException e)
         {
@@ -3697,8 +3735,8 @@ firstStartMsg=true;
           * @return
           */
 
-        public boolean TestMsgWedding( String msg )
-        {
+        public boolean TestMsgWedding( String msg ){
+        msg = msg.toLowerCase();
         return ( msg.equals( "да" ) || msg.equals( "нет" ) );
         }
 
@@ -3805,190 +3843,221 @@ firstStartMsg=true;
         proc.mq.add(uin,"Успешно выполнено!");
   }
 
-  /**
-   * Интерактивная анкета после регистрации
-   * @param proc
-   * @param uin
-   * @param v
-   * @param mmsg
-   */
+    /**
+     * Метод задает итерактивные вопросы пользователю
+     * @param proc
+     * @param uin
+     * @param mmsg
+     */
 
-  private void Questionnaire (IcqProtocol proc, String uin, String mmsg){
-  try
-  {
-  if(!Questionnaire.containsKey(uin)){
-  proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandReg.12"));
-  }
-  if(Questionnaire.containsKey(uin)){
-  Questionnaire.remove(uin);
-  }
-  Questionnaire.put(uin, 0);
-  NAME(proc, uin, parser.parseArgs(mmsg), mmsg);
-  }
-  catch (Exception ex)
-  {
-  ex.printStackTrace();
-  proc.mq.add(uin,"При заполнении информации возникла ошибка!" +
-  "\nВоспользуйтесь командой !данные");
-  Questionnaire.remove(uin);
-  Questionnaire_CMD.remove(uin);
-  }
-  }
-
-
-  private void NAME(IcqProtocol proc, String uin, Vector v, String mmsg)
-  {
-  Users uss = srv.us.getUser(uin);
-  String msg = "";
-  boolean NAME = false;
-  if(comNew.containsKey(uin + "Questionnaire"))
-  {
-  try
-  {
-  msg = mmsg;
-  }
-  catch(NumberFormatException e)
-  {
-  proc.mq.add(uin,uss.localnick + " введите ваше имя");
-  return;
-  }
-  if (abv.Name(abv.TestMsg2(msg)).equals("errore"))
-  {
-  proc.mq.add(uin,"В имени запрещенный символы\nВведите правельно имя");
-  return;
-  }
-  if (abv.testMat(abv.changeChar(msg))){
-  proc.mq.add(uin,"В имени " + msg + " ''мат''\nВведите правельно имя");
-  return;
-  }
-  NAME = true;
-  comNew.remove(uin + "Questionnaire");
-  }
-  if(!NAME)
-  {
-  Questionnaire_CMD.put(uin, mmsg);
-  proc.mq.add(uin,"Введите ваше имя :)");
-  comNew.put(uin + "Questionnaire", new NewExtend(uin, Questionnaire_CMD.get(uin), mmsg,v, 5*60000));
-  return;
-  }
-  String Name = abv.Name(abv.TestMsg(msg));
-  if(Name.length()>psp.getIntProperty("about.user.long")){Name = Name.substring(0,psp.getIntProperty("about.user.long"));proc.mq.add(uin,"Имя было обрезанно: " + Name);}
-  uss.lname = Name;
-  srv.us.updateUser(uss);
-  Questionnaire.put(uin, 1);
+  private void InteractiveQuestions(IcqProtocol proc, String uin, String mmsg){
+        if(!isChat(proc,uin) && !psp.testAdmin(uin)) return;
+        if(!About.containsKey(uin)){
+        About.put(uin, new AboutExtend(uin, 5*6000));
+        }
+        AboutExtend about = About.get(uin);
+        switch (about.getOrder()){
+        case 0:
+        proc.mq.add(uin,"Введите ваше имя :)");
+        nextQuestion(about);
+        break;
+        case 1:
+        setName(proc, uin, mmsg, about);
+        if(!about.getAnswer()){
+        proc.mq.add(uin,"Отлично " + srv.us.getUser(uin).lname + ", сколько тебе лет?");
+        setAnswer(about, true);
+        return;
+        }
+        break;
+        case 2:
+        setAge(proc, uin, mmsg, about);
+        if(!about.getAnswer()){
+        proc.mq.add(uin,srv.us.getUser(uin).lname + " возраст успешно указан, какой у тебя пол? 'м' или 'ж' ?");
+        setAnswer(about, true);
+        return;
+        }
+        break;
+        case 3:
+        setSex(proc, uin, mmsg, about);
+        if(!about.getAnswer()){
+        proc.mq.add(uin,srv.us.getUser(uin).lname + " прекрасно, пол указан, а теперь введите город где вы живете");
+        setAnswer(about, true);
+        return;
+        }
+        break;
+        case 4:
+        setCity(proc, uin, mmsg, about);
+        proc.mq.add(uin,srv.us.getUser(uin).lname + " информация успешно заполнена," +
+        " просматреть ее ты можешь командой !личное <id>");
+        About.remove(uin);
+        break;
+        default:
+        }
   }
 
-  private void AGE(IcqProtocol proc, String uin, Vector v, String mmsg)
-  {
-  Users uss = srv.us.getUser(uin);
-  int age = 0;
-  boolean AGE = false;
-  if(comNew.containsKey(uin + "Questionnaire"))
-  {
-  try
-  {
-  age = Integer.parseInt(mmsg);
-  System.out.print(age);
-  }
-  catch(NumberFormatException e)
-  {
-  proc.mq.add(uin,uss.lname + " введите ваш возраст");
-  return;
-  }
-  if(age < psp.getIntProperty("about.age.min") || age > psp.getIntProperty("about.age.max"))
-  {
-  proc.mq.add(uin,uss.lname + " не правельно указан возраст\n" +
-  "Он дожен быть не меньше ''" + psp.getIntProperty("about.age.min") + "'' и не больше ''" + psp.getIntProperty("about.age.max") + "'' лет");
-  return;
-  }
-  AGE = true;
-  comNew.remove(uin + "Questionnaire");
-  }
-  if(!AGE)
-  {
-  proc.mq.add(uin,"Отлично " + uss.lname + ", сколько тебе лет?");
-  comNew.put(uin + "Questionnaire", new NewExtend(uin, Questionnaire_CMD.get(uin), mmsg,v, 5*60000));
-  return;
-  }
-  uss.age = age;
-  srv.us.updateUser(uss);
-  Questionnaire.put(uin, 2);
+    /**
+     * Сохраняем имя пользователя
+     * @param proc
+     * @param uin
+     * @param mmsg
+     * @param about
+     */
+
+  private void setName(IcqProtocol proc, String uin, String mmsg, AboutExtend about){
+        Users uss = srv.us.getUser(uin);
+        String msg = RepleceMsg(mmsg);
+        if (InvalidCharacters(msg))
+        {
+        proc.mq.add(uin,"В имени запрещенный символы\nВведите правельно имя");
+        return;
+        }
+        if (radm.testMat1(radm.changeChar(msg))){
+        proc.mq.add(uin,"В имени " + msg + " ''мат''\nВведите правельно имя");
+        return;
+        }
+        if(msg.length() > psp.getIntProperty("about.user.long")){
+        msg = msg.substring(0,psp.getIntProperty("about.user.long"));
+        proc.mq.add(uin,"Имя было обрезанно: " + msg);
+        }
+        uss.lname = msg;
+        srv.us.updateUser(uss);
+        setAnswer(about, false);
+        nextQuestion(about);
   }
 
-  private void SEX(IcqProtocol proc, String uin, Vector v, String mmsg)
-  {
-  Users uss = srv.us.getUser(uin);
-  String msg  = "";
-  boolean SEX = false;
-  if(comNew.containsKey(uin + "Questionnaire"))
-  {
-  try
-  {
-  msg = mmsg;
-  }
-  catch(NumberFormatException e)
-  {
-  proc.mq.add(uin,uss.lname + " введите ваш пол");
-  return;
-  }
-  if (!abv.TestFloor(msg))
-  {
-  proc.mq.add(uin,uss.lname + " пол должен быть ''ж'' или ''м''");
-  return;
-  }
-  SEX = true;
-  comNew.remove(uin + "Questionnaire");
-  }
-  if(!SEX)
-  {
-  proc.mq.add(uin,uss.lname + " возраст успешно указан, какой у тебя пол? 'м' или 'ж' ?");
-  comNew.put(uin + "Questionnaire", new NewExtend(uin, Questionnaire_CMD.get(uin), mmsg,v, 5*60000));
-  return;
-  }
-  uss.homepage = msg;
-  srv.us.updateUser(uss);
-  Questionnaire.put(uin, 3);
+    /**
+     * Сохраняем возраст
+     * @param proc
+     * @param uin
+     * @param mmsg
+     * @param about
+     */
+
+  private void setAge(IcqProtocol proc, String uin, String mmsg, AboutExtend about){
+        Users uss = srv.us.getUser(uin);
+        int age = 0;
+        if(!testInteger(mmsg)){
+        proc.mq.add(uin,uss.lname + " введите ваш возраст");
+        return;
+        }
+        age = Integer.parseInt(mmsg);
+        if(age < psp.getIntProperty("about.age.min") || age > psp.getIntProperty("about.age.max")){
+        proc.mq.add(uin,uss.lname + " неправельно указан возраст\n" +
+        "Он дожен быть не меньше ''" + psp.getIntProperty("about.age.min") + "'' и не больше ''" + psp.getIntProperty("about.age.max") + "'' лет");
+        return;
+        }
+        uss.age = age;
+        srv.us.updateUser(uss);
+        setAnswer(about, false);
+        nextQuestion(about);
   }
 
-  private void CITY(IcqProtocol proc, String uin, Vector v, String mmsg)
-  {
-  Users uss = srv.us.getUser(uin);
-  String msg = "";
-  boolean CITY = false;
-  if(comNew.containsKey(uin + "Questionnaire"))
-  {
-  try
-  {
-  msg = mmsg;
+    /**
+     * Сохраняем пол
+     * @param proc
+     * @param uin
+     * @param mmsg
+     * @param about
+     */
+
+  private void setSex(IcqProtocol proc, String uin, String mmsg, AboutExtend about){
+        Users uss = srv.us.getUser(uin);
+        if (!testSex(mmsg)){
+        proc.mq.add(uin,uss.lname + " пол должен быть ''ж'' или ''м''");
+        return;
+        }
+        uss.homepage = mmsg;
+        srv.us.updateUser(uss);
+        setAnswer(about, false);
+        nextQuestion(about);
   }
-  catch(NumberFormatException e)
-  {
-  proc.mq.add(uin,uss.localnick + " введите ваш город");
-  return;
+
+    /**
+     * Сохраняем город
+     * @param proc
+     * @param uin
+     * @param mmsg
+     * @param about
+     */
+
+  private void setCity(IcqProtocol proc, String uin, String mmsg, AboutExtend about){
+        Users uss = srv.us.getUser(uin);
+        String msg = RepleceMsg(mmsg);
+        if (radm.testMat1(radm.changeChar(msg))){
+        proc.mq.add(uin,uss.lname + "в городе " + msg + " ''мат''\nУкажите свой город правельно");
+        return;
+        }
+        if(msg.length()>psp.getIntProperty("about.user.long")){
+        msg = msg.substring(0,psp.getIntProperty("about.user.long"));
+        proc.mq.add(uin,uss.lname + " длинное название города, обрезанно: " + msg);
+        }
+        uss.city = msg;
+        srv.us.updateUser(uss);
+        setAnswer(about, false);
+        nextQuestion(about);
   }
-  if (abv.testMat(abv.changeChar(msg))){
-  proc.mq.add(uin,uss.lname + "в городе " + msg + " ''мат''\nУкажите свой город правельно");
-  return;
+
+    /**
+     * Проверка на запрещенный символы
+     * @param msg
+     * @return
+     */
+
+
+  public boolean InvalidCharacters(String msg){
+        msg = msg.toLowerCase();
+        String H  = psp.getStringProperty("about.user.bad");
+        for(int i = 0;i < H.length();i++){
+        if(msg.indexOf(H.charAt(i))>=0) return true;
+        }
+        return false;
   }
-  if (abv.City(abv.TestMsg2(msg)).equals("errore"))
-  {
-  proc.mq.add(uin,"В городе запрещенный символы\nВведите правельно имя");
-  return;
+
+     /**
+      * Проверка пола
+      * @param msg
+      * @return
+      */
+
+  public boolean testSex(String msg){
+        String Floor = msg.toLowerCase();//опустим регистр
+        return Floor.equals("м") || Floor.equals("ж");//проверим
   }
-  CITY = true;
-  comNew.remove(uin + "Questionnaire");
+
+     /**
+      * Стираем ненужные символы в целях анти-рекламы
+      * @param msg
+      * @return
+      */
+
+  public String RepleceMsg(String msg){
+        msg = msg.replace('\n',' ');
+        msg = msg.replace('\r',' ');
+        for(int i = 0;i < 9;i++){
+        msg = msg.replace(Integer.toString(i),"");
+        }
+        return msg;
   }
-  if(!CITY)
-  {
-  proc.mq.add(uin,uss.lname + " прекрасно, пол указан, а теперь введите город где вы живете");
-  comNew.put(uin + "Questionnaire", new NewExtend(uin, Questionnaire_CMD.get(uin), mmsg,v, 5*60000));
-  return;
+
+     /**
+      * Регулируем подачу вопроса
+      * @param about
+      * @param answer
+      */
+
+  public void setAnswer(AboutExtend about, boolean answer){
+        about.setAnswer(answer);
+        About.put(about.getUin(), about);
   }
-  String Name = abv.City(abv.TestMsg(msg));
-  if(Name.length()>psp.getIntProperty("about.user.long")){Name = Name.substring(0,psp.getIntProperty("about.user.long"));proc.mq.add(uin,uss.lname + " длинное название города, обрезанно: " + Name);}
-  uss.city = Name;
-  srv.us.updateUser(uss);
-  Questionnaire.put(uin, 4);
+
+     /**
+      * На следующий вопрос
+      * @param about
+      */
+
+  public void nextQuestion(AboutExtend about){
+        about.setOrder();
+        About.put(about.getUin(), about);
   }
 
   /**
@@ -4089,6 +4158,8 @@ firstStartMsg=true;
           Users u = srv.us.getUser(i);
           Users unew = srv.us.getUser(newid);
           int del = i;
+          int clansmen = u.clansman;
+          String clangroup = u.clangroup;
           Users delete = srv.us.getUser(del);
           if(u.id==0){
           proc.mq.add(uin,"Пользователь не найден!");
@@ -4102,6 +4173,7 @@ firstStartMsg=true;
           proc.mq.add(uin,"Пользователь с ID " + newid + " уже существует! Попробуй другой ID");
           return;
           }
+          srv.us.changeInfo(del, newid);
           u.id=newid;
           srv.us.updateUser(u);
           srv.us.deleteUser(delete.sn);
@@ -4109,6 +4181,7 @@ firstStartMsg=true;
           pst.setInt(1,newid);
           pst.execute();
           pst.close();
+          srv.us.changeClan(newid, clansmen, clangroup);
           boolean kk = srv.us.setUserPropsValue(u.id, "group", "user") &&
                   srv.us.setUserPropsValue(u.id, "grant", "") &&
                   srv.us.setUserPropsValue(u.id, "revoke", "");
@@ -4217,6 +4290,314 @@ firstStartMsg=true;
        {
        ex.printStackTrace();
        proc.mq.add(uin,"Ошибка " + ex.getMessage().toString());
+       }
+       }
+
+       /**
+        * Вход в игру милионер
+        * @param proc
+        * @param uin
+        */
+
+    /*public void commandMillionaire(IcqProtocol proc, String uin){
+    if(!isChat(proc,uin) && !psp.testAdmin(uin)) return;
+    if (!auth(proc, uin, "millionaire")) return;
+    try{
+    Users uss = srv.us.getUser(uin);
+    if(!psp.getBooleanProperty("millioner.on.off") & !psp.testAdmin(uin)){
+    proc.mq.add(uin,"Игра закрыта администрацией чата!");
+    return;
+    }
+    if(uss.room != psp.getIntProperty("millioner.room") & !psp.testAdmin(uin)){
+    proc.mq.add(uin,"Играть можно тока в " + psp.getIntProperty("millioner.room") + " комнате!");
+    return;
+    }
+    if(srv.us.getCountGame(uss.id) >= psp.getIntProperty("millioner.game.in.day") & !psp.testAdmin(uin)){
+    proc.mq.add(uin,"Вы можете сделать тока " + psp.getIntProperty("millioner.game.in.day") + " игры в сутки!");
+    return;
+    }
+    millionaire.start(proc, uin);
+    srv.us.db.event(uss.id, uin, "MILLIONER", 0, "", "");
+    }
+    catch (Exception ex)
+    {
+    ex.printStackTrace();
+    proc.mq.add(uin,"Ошибка " + ex.getMessage().toString());
+    }
+    }*/
+
+       /**
+         * Полная (личная) информация о пользователе
+         * @param proc
+         * @param uin
+         * @param v
+         */
+
+       private void commandLichUser(IcqProtocol proc, String uin, Vector v) {
+       if(!isChat(proc,uin) && !psp.testAdmin(uin)) return;
+       try{
+       int id = (Integer)v.get(0);
+       Users u = srv.us.getUser(id);
+       String List = "Личная информация о пользователе |" + u.localnick + "|" + '\n';
+       List += "------\n";
+       List += "Дата регистрации - " + (u.data==0 ? "Не указанна" : (("|" + new Date(u.data)).toString() + "|")) + '\n';
+       List += "Группа - " + u.group + '\n';
+       List += "Рейтинг - " + u.ball + '\n';
+       List += "Имя - " + u.lname + '\n';
+       List += "Пол - " + u.homepage + '\n';
+       List += "Возраст - " + u.age + '\n';
+       List += "Город - " + u.city + '\n';
+       if(psp.getBooleanProperty("social.status.on.off"))
+       List += "Социальный статус - " + srv.us.getStatus(id) + '\n';
+       List += "Дом - " + (u.home.equals("") || u.home == null ? "Бомж" : (u.home)) + '\n';
+       List += "Машина - " + (u.car.equals("") || u.car == null ? "Пешеход" : (u.car)) + '\n';
+       List += "Одежда - " + (u.clothing.equals("") || u.clothing == null ? "Голый" : (u.clothing)) + '\n';
+       List += "Животное - " + (u.animal.equals("") || u.animal == null ? "Нету" : (u.animal)) + '\n';
+       if( u.clansman != 0 )
+       List += (  u.id != srv.us.getClan( u.clansman ).getLeader() ? "Состоит в клане - ''" + srv.us.getClan( u.clansman ).getName() + "''" : ( "Лидер клана - ''" + srv.us.getClan( u.clansman ).getName() + "''" ) ) + '\n';
+       else List += "В клане не состоит" + '\n';
+       List += "Правильных ответов в викторине - " + u.answer + '\n';
+       List += (u.wedding == 0 ? "" : ("В браке с |" + srv.us.getUser(u.wedding).id + "|" + srv.us.getUser(u.wedding).localnick + '\n'));
+       List += "------\n";
+       List += gift.commandListGiftUser_5(id);
+       List += frends.Random_Frends(id);
+       proc.mq.add(uin,List);
+       }catch (Exception ex){
+       ex.printStackTrace();
+       proc.mq.add(uin,"При вызове личной информации возникла ошибка - "+ex.getMessage());
+       }
+       }
+
+       /**
+        * Отправить сообщение пользователю
+        * @param proc
+        * @param uin
+        * @param v
+        */
+
+       private void getUserMessages(IcqProtocol proc, String uin, Vector v){
+       if(!isChat(proc,uin) && !psp.testAdmin(uin)) return;
+       if (!auth(proc, uin, "usermessages")) return;
+       try{
+       String user = (String)v.get(0);
+       String messages = (String)v.get(1);
+       Integer id = 0;
+       if(user.length() >= 6){
+       proc.mq.add(user,"Вам сообщение от администратора чата: " + messages);
+       }else{
+       if(!testInteger(user)){
+       proc.mq.add(uin,"Ошибка выполнения команды.");
+       return;
+       }
+       id = Integer.parseInt(user);
+       Users u = srv.us.getUser(id);
+       srv.getIcqProcess(u.basesn).mq.add(u.sn, "Вам сообщение от администратора чата: " + messages);
+       }
+       proc.mq.add(uin,"Сообщение отправлено.");
+       }catch (Exception ex){
+       proc.mq.add(uin,"При отправке сообщения возникла ошибка - "+ex.getMessage());
+       }
+       }
+
+        /**
+         * Затащить в чат
+         * @param proc
+         * @param uin
+         * @param v
+         * @author mmaximm
+         */
+       public void commandDragSomewhere(IcqProtocol proc, String uin, Vector v, String mmsg) {
+       if (!isChat(proc, uin) && !psp.testAdmin(uin)) return;
+       if (!auth(proc, uin, "uchat")) return;
+       try {
+       int id = (Integer) v.get(0);
+       if (id == 0) {
+       proc.mq.add(uin, "Нет такого пользователя");
+       return;
+       }
+       Users us = srv.us.getUser(id);
+       if (us.id == 0) {
+       proc.mq.add(uin, "Пользователь не найден");
+       return;
+       }
+       if (us.state == UserWork.STATE_CHAT) {
+       proc.mq.add(uin, "Пользователь уже в чате");
+       return;
+       }
+       if (us.state == UserWork.STATE_BANNED) {
+       proc.mq.add(uin, "Нельзя затащить забаненого пользователя");
+       return;
+       }
+       goChat_Usual(srv.getIcqProcess(us.basesn), us.sn);
+       if (floodMap.containsKey(us.sn)) {
+       FloodElement e = floodMap.get(us.sn);
+       e.addMsg("!chat");
+       floodMap.put(us.sn, e);
+       } else {
+       FloodElement e = new FloodElement(psp.getIntProperty("chat.floodTimeLimit") * 1000);
+       e.addMsg("!chat");
+       floodMap.put(us.sn, e);
+       }
+       srv.getIcqProcess(us.basesn).mq.add(us.sn, "Вас затащили в чат!");
+       proc.mq.add(uin, "Пользователь " + us.localnick + "|" + us.id + "| затащен в чат");
+       } catch (Exception ex) {
+       ex.printStackTrace();
+       }
+       }
+
+        /**
+         * Отправить сообщение место бота
+         * @param proc
+         * @param uin
+         * @param v
+         */
+       public void commandBotMessages(IcqProtocol proc, String uin, Vector v) {
+       if (!isChat(proc, uin) && !psp.testAdmin(uin)) return;
+       if (!auth(proc, uin, "bot_messages")) return;
+       try {
+       String msg = (String) v.get(0);
+       Users uss = srv.us.getUser(uin);
+       srv.cq.addMsg(psp.getStringProperty("adm.NICK") + " " + psp.getStringProperty("chat.delimiter") + " " + msg, "", uss.room);
+       proc.mq.add(uin, "Собщение отправлено");
+       } catch (Exception ex) {
+       ex.printStackTrace();
+       }
+       }
+
+       /**
+        * Русская рулетка
+        * @param proc
+        * @param uin
+        * @param v
+        * @param mmsg
+        */
+
+       public void commandRussianRoulette(IcqProtocol proc, String uin, Vector v, String mmsg) {
+       if (!isChat(proc, uin) && !psp.testAdmin(uin)) return;
+       try {
+       int s = (Integer) v.get(0);
+       int kick = (int) ((Math.random() * psp.getIntProperty("russian.roulette.kick.time")));
+       int random_number = (int) ((Math.random() * 3));
+       Users uss = srv.us.getUser(uin);
+       if (uss.room != psp.getIntProperty("russian.roulette.room")){
+       proc.mq.add(uin, "Играть можно только в " + psp.getIntProperty("russian.roulette.room") + " комнате");
+       return;
+       }
+       if (s > 3 || s < 1) {
+       proc.mq.add(uin, "Русская рулетка: Число должно быть от 1 до 3...");
+       return;
+       }
+       if(random_number == 0){
+       random_number = 1;
+       }
+       if (s == random_number) {
+       srv.cq.addMsg("Русская рулетка: числа совпали! " + uss.localnick + "|" + uss.id + "|" + " выпнут из чата на " + kick + " минут", "", uss.room);
+       proc.mq.add(uin, "Русская рулетка: я загадала число: (" + random_number + ") , а у тебя выпало: (" + s + ") , числа совпали! ты неудачник!");
+       tkick(proc, uin, kick, 0, "Проиграл в Русскую Рулетку");
+       } else {
+       proc.mq.add(uin, "Русская рулетка: а ты везунчик ;-)!");
+       srv.cq.addMsg("Русская рулетка: числа не совпали!\nПользователь " + uss.localnick + "|" + uss.id + "|" + " везунчик ;-)" +
+       " выигрывает " + psp.getIntProperty("russian.roulette.ball") + " бал(ов)", "", uss.room);
+       uss.ball += psp.getIntProperty("russian.roulette.ball");
+       srv.us.updateUser(uss);
+       }
+       } catch (Exception ex) {
+       ex.printStackTrace();
+       }
+       }
+
+       /**
+        * Зарегистрировать пользователя
+        * @param proc
+        * @param uin
+        * @param v
+        */
+
+       public void RegUser(IcqProtocol proc, String uin, Vector v){
+       if(!isChat(proc,uin) && !psp.testAdmin(uin)) return;
+       if (!auth(proc, uin, "reg_user")) return;
+       try{
+       String user = (String)v.get(0);
+       String nick = (String)v.get(1);
+       Users uss = srv.us.getUser(user);
+       if(uss.id!=0){
+       proc.mq.add(uin, "Юзер уже зареган в чате: "+uss.localnick+ "|" + uss.id + "|");
+       return;
+       }
+       uss.state=UserWork.STATE_NO_CHAT;
+       uss.basesn = proc.baseUin;
+       uss.localnick = nick;
+       uss.sn = user;
+       int id = srv.us.addUser(uss);
+       Log.getLogger(srv.getName()).talk(uin + " - Юзера насильно зарегали: " + user);
+       srv.us.db.log(id,user,"REG",nick,uss.room);
+       srv.us.db.event(id, user, "REG", 0, "", nick);
+       proc.mq.add(user, "Теперь Вы пользователь нашего чата. Вход по команде !чат");
+       proc.mq.add(uin, "Вы успешно зарегистрировали юзера");
+       srv.cq.addMsg("Зарегистрировали пользователя " + uss.localnick + "|" + uss.id + "|", "", 0);
+       } catch (Exception ex) {
+       ex.printStackTrace();
+       }
+       }
+
+       /**
+        * Игра казино
+        * @author HellFaust
+        * @param proc
+        * @param uin
+        */
+
+       public void commandCasino(IcqProtocol proc, String uin){
+       if(!isChat(proc,uin)) return;
+       try{
+       Users uss = srv.us.getUser(uin);
+       if(uss.room != psp.getIntProperty("casino.room")){
+       proc.mq.add(uin,"Играть в казино можно только в " + psp.getIntProperty("casino.room") + " комнате");
+       return;
+       }
+       if (uss.ball < psp.getIntProperty("casino.price")){
+       proc.mq.add(uin,"Недостаточно баллов для игры. Необходимо " + psp.getIntProperty("casino.price") + ", а у Вас имеется " + uss.ball);
+       return;
+       }
+       int number1 = (int) ((Math.random() * psp.getIntProperty("casino.amount")));
+       int number2 = (int) ((Math.random() * psp.getIntProperty("casino.amount")));
+       int number3 = (int) ((Math.random() * psp.getIntProperty("casino.amount")));
+       int payment = uss.ball - psp.getIntProperty("casino.price");
+       srv.cq.addMsg(uss.localnick + " потянул рычаг... Табло вращается... Вращается... Вращается... И выпадает комбинация -=" + number1 + "=" + number2 + "=" +  number3 + "=-", uss.sn, uss.room);
+       proc.mq.add(uin,"Вы потянули рычаг... И выпадает комбинация -=" + number1 + "=" + number2 + "=" +  number3 + "=-");
+       if(number1 != number2 && number1 != number3 && number2 != number3){
+       uss.ball = payment;
+       srv.cq.addMsg("Ни одного совподения... " + uss.localnick + " - неудачник!!!", uss.sn, uss.room);
+       proc.mq.add(uin,"Ни одного совподения... Возможно в следующий раз повезет. За игру у Вас снято " + psp.getIntProperty("casino.price") + " балла(ов)");
+       }
+       if(number1 == number2 && number3 != number2){
+       int win2 = payment + psp.getIntProperty("casino.win2");
+       uss.ball = win2;
+       srv.cq.addMsg("Два числа совпали... И " + uss.localnick + " выигрывает " + psp.getIntProperty("casino.win2") + " балла(ов)", uss.sn, uss.room);
+       proc.mq.add(uin,"Два числа совпали... Вы выиграли " + psp.getIntProperty("casino.win2") + " балла(ов). За игру у Вас снято " +  psp.getIntProperty("casino.price") + " балла(ов)");
+       }
+       if(number2 == number3 && number1 != number2){
+       int win2 = payment + psp.getIntProperty("casino.win2");
+       uss.ball = win2;
+       srv.cq.addMsg("Два числа совпали... И " + uss.localnick + " выигрывает " + psp.getIntProperty("casino.win2") + " балла(ов)", uss.sn, uss.room);
+       proc.mq.add(uin,"Два числа совпали... Вы выиграли " + psp.getIntProperty("casino.win2") + " балла(ов). За игру у Вас снято " +  psp.getIntProperty("casino.price") + " балла(ов)");
+       }
+       if(number1 == number3 && number1 != number2){
+       int win2 = payment + psp.getIntProperty("casino.win2");
+       uss.ball = win2;
+       srv.cq.addMsg("Два числа совпали... И " + uss.localnick + " выигрывает " + psp.getIntProperty("casino.win2") + " балла(ов)", uss.sn, uss.room);
+       proc.mq.add(uin,"Два числа совпали... Вы выиграли " + psp.getIntProperty("casino.win2") + " балла(ов). За игру у Вас снято " +  psp.getIntProperty("casino.price") + " балла(ов)");
+       }
+       if(number1 == number2 && number3 == number2){
+       int win3 = payment + psp.getIntProperty("casino.win3");
+       uss.ball = win3;
+       srv.cq.addMsg("Все 3 числа совпали... И " + uss.localnick + " выигрывает " + psp.getIntProperty("casino.win3") + " балла(ов)... Какой везунчик!!!", uss.sn, uss.room);
+       proc.mq.add(uin,"Все 3 числа совпали... Вы выиграли " + psp.getIntProperty("casino.win3") + " балла(ов). За игру у Вас снято " + psp.getIntProperty("casino.price") + " балла(ов)");
+       }
+       uss.basesn = proc.baseUin;
+       srv.us.updateUser(uss);
+       } catch (Exception ex) {
+       ex.printStackTrace();
        }
        }
 

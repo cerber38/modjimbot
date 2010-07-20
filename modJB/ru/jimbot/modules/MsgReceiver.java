@@ -48,8 +48,8 @@ public class MsgReceiver implements ProtocolListener {
         if( !iq.testFlood( sendSN ) )
         {
 
-        iprot.sendMsg( sendSN, MainProps.VERSION + "\n(c) Spec, 2006-2009\n" +
-        "Версия icq библиотеки: " + OscarInterface.getVersion() +
+        iprot.sendMsg( sendSN, MainProps.VERSION +
+        "\nВерсия icq библиотеки: " + OscarInterface.getVersion() +
         "\nПоддержка проекта: http://jimbot.ru" +
         "\nПоддержка мода - www.toch72.ru"  +
         "\nХостинг чатов:" +

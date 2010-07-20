@@ -76,10 +76,11 @@ public class ChatServer extends AbstractServer{
         inq.start();
         cq.start();
         isRun = true;
-        if(ChatProps.getInstance(this.getName()).getBooleanProperty("vic.on.off")){
-        Log.getLogger(getName()).talk("I start quiz for service - \"" + this.getName() + "\"");
-        ((ChatCommandProc)this.cmd).Quiz.start();
-        }
+        ((ChatCommandProc)this.cmd).radm.start();
+        if(ChatProps.getInstance(this.getName()).getBooleanProperty("vic.on.off"))
+        ((ChatCommandProc)this.cmd).Quiz.start();       
+        if(ChatProps.getInstance(this.getName()).getBooleanProperty("auto_status.on.off"))
+        ((ChatCommandProc)this.cmd).xstatus.start();
     }
     
     public void stop() {
@@ -90,9 +91,9 @@ public class ChatServer extends AbstractServer{
         cq.stop();   	
         if(!con.server.equals("")) con.uins.stop();
         /*Убьем остальные потоки*/
-        if(((ChatCommandProc)this.cmd).Quiz != null) ((ChatCommandProc)this.cmd).Quiz.stop();
-        if(((ChatCommandProc)this.cmd).radm != null) ((ChatCommandProc)this.cmd).radm.stop();
-        if(((ChatCommandProc)this.cmd).xstatus != null) ((ChatCommandProc)this.cmd).xstatus.stop();
+        if(((ChatCommandProc)this.cmd).Quiz.isStart()) ((ChatCommandProc)this.cmd).Quiz.stop();
+        ((ChatCommandProc)this.cmd).radm.stop();
+        if(((ChatCommandProc)this.cmd).xstatus.isStart()) ((ChatCommandProc)this.cmd).xstatus.stop();
         WorkScript.getInstance(getName()).startScript("stop", "", this);
     }
 
@@ -102,9 +103,9 @@ public class ChatServer extends AbstractServer{
         cq.stop();   	
         if(!con.server.equals("")) con.uins.stop();
         /*Убьем остальные потоки*/
-        if(((ChatCommandProc)this.cmd).Quiz != null) ((ChatCommandProc)this.cmd).Quiz.stop();
-        if(((ChatCommandProc)this.cmd).radm != null) ((ChatCommandProc)this.cmd).radm.stop();
-        if(((ChatCommandProc)this.cmd).xstatus != null) ((ChatCommandProc)this.cmd).xstatus.stop();
+        if(((ChatCommandProc)this.cmd).Quiz.isStart()) ((ChatCommandProc)this.cmd).Quiz.stop();
+        ((ChatCommandProc)this.cmd).radm.stop();
+        if(((ChatCommandProc)this.cmd).xstatus.isStart()) ((ChatCommandProc)this.cmd).xstatus.stop();
         Log.getLogger(this.getName()).info("Остановка сервиса - \"" + this.getName() + "\"");
     }
     
