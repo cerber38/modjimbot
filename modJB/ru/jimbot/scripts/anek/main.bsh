@@ -1,0 +1,201 @@
+/**
+* Скрипт выполняемый парсером команд анекдотного бота
+*/
+import ru.jimbot.*;
+import ru.jimbot.modules.*;
+import ru.jimbot.modules.CommandParser;
+import ru.jimbot.util.*;
+import ru.jimbot.db.*;
+import ru.jimbot.modules.anek.AnekProps;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Iterator;
+import ru.jimbot.protocol.IcqProtocol;
+import java.util.Vector;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.*;
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.util.Date;
+import java.util.TimeZone;
+import java.util.HashMap;
+
+/**
+ * При вызове скрипта определены следующие переменные:
+ * IcqProtocol proc
+ * String uin
+ * String msg
+ * AnekCommandProc cp
+ */
+//Список команд бота (при первом запуске)
+if(cp.parser==null){
+    cp.commands.put("1", new Cmd("1","",1));
+    cp.commands.put("!help", new Cmd("!help","",2));
+    cp.commands.put("!stat", new Cmd("!stat","",3));
+    cp.commands.put("!statads", new Cmd("!statads","",4));
+    cp.commands.put("!add", new Cmd("!add","$s",6));
+    cp.commands.put("!anek", new Cmd("!anek","$n",7));
+    cp.commands.put("!refresh", new Cmd("!refresh","",8));
+    cp.commands.put("!free", new Cmd("!free","",9));
+    cp.parser = new CommandParser(cp.commands);
+}
+
+/**
+ * Определение функций
+ */
+
+/**
+ * Добавление анекдота
+ */
+private void commandAdd(IcqProtocol proc, String uin, Vector v){
+    String s =(String)v.get(0); 	
+    if(s.equals("")) {
+    		proc.mq.add(uin,"Пустой анекдот.");
+    		return;
+    	}
+    if(s.length()<20) return;
+    if(s.length()>500) return;
+    	
+    	cp.srv.an.addTempAnek((String)v.get(0),uin);
+    	Log.getLogger(cp.srv.getName()).talk("Add anek <" + uin + ">: " + (String)v.get(0));
+        proc.mq.add(uin,"Анекдот сохранен. После рассмотрения администрацией он будет добавлен в базу.");
+        cp.state_add++;
+    }
+
+public void commandExec(IcqProtocol proc, String uin, Vector v){
+    if(!AnekProps.testAdmin(uin)){
+        proc.mq.add(uin,"Вы не имеете доступа к данной команде.");
+        return;
+    }
+    try{
+        String s = (String)v.get(0);
+        String s1 = WorkScript.startCommandScript(s, proc, srv, uin, (String)v.get(1));
+        if(!s1.equals(""))
+            proc.mq.add(uin,"Ошибка при выполнении: " + s1);
+    }catch(Exception ex){
+        ex.printStackTrace();
+        proc.mq.add(uin,ex.getMessage());
+    }
+}
+
+/**
+ * Определение времени запуска бота
+ */
+private long getTimeStart(){
+    long t = 0;
+    try{
+        File f = new File("./state");
+        t = f.lastModified();
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
+    return t;
+}
+
+private long getUpTime(){
+    return System.currentTimeMillis()-getTimeStart();
+}
+
+private long getHourStat(){
+    if(getUpTime()>1000*60*60){
+        return cp.state/(getUpTime()/3600000);
+    }
+    return 0;
+}
+
+private long getDayStat(){
+    if(getUpTime()>1000*60*60*24){
+        return cp.state/(getUpTime()/86400000);
+    }
+    return 0;
+}
+
+private String getTime(long t){    
+    Date dt = new Date(t);
+    DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM);
+    df.setTimeZone(TimeZone.getTimeZone("GMT"));
+    return (t/86400000) + " дней " + df.format(dt);
+}
+
+/**
+ * Основная процедура
+ */
+try {
+    msg = msg.trim();
+    Log.getLogger(cp.srv.getName()).debug("ANEK: " + uin + ">>" + msg);
+    if(msg.length()==0){
+        Log.getLogger(cp.srv.getName()).error("Пустое сообщение в парсере команд: " + uin + ">" + mmsg);
+        return;
+    }
+    cp.addState(uin);
+    
+    //Обработка команд
+    int tp = cp.parser.parseCommand(msg);
+    int tst=0;
+    if(tp<0)
+        tst=0;
+    else
+        tst = tp;
+    switch (tst){
+    case 1:
+        cp.state++;
+        cp.stateInc(uin);
+        proc.mq.add(uin,cp.srv.an.getAnek());
+        break;
+    case 2:
+        proc.mq.add(uin,"Вас приветствует jImBot!\nДля получения случайного анекдота пошлите \"1\"" + 
+                "\nДля получения конкретного анека пошли !anek и номер"+
+                "\nДля добавления анекдота используй команду !add" +
+                "\nДля просмотра статистики бота пошлите \"!stat\"" +
+                "\nКоманда !free укажет самый свободный УИН" +
+                "\n!about - информация о программе" +
+                "\nДля получения помоши пошлите \"!help\"\n" +
+                "Не посылайте сообщения чаще,  чем раз в 3с.");
+        if(ru.jimbot.modules.anek.AnekProps.getInstance(cp.srv.getName()).testAdmin(uin)){
+            proc.mq.add(uin,"Дополнительный админские команды:\n" +
+            		"!statads - статистика показа рекламы\n" +
+                    "!exec <script> <args> - запуск скрипта\n" +
+                    "!refresh - обновить кеш после изменений в БД");
+        }
+        break;
+    case 3:
+        proc.mq.add(uin,"Всего в базе анекдотов: " + cp.srv.an.maxAnek + 
+                "\nОтправлено анекдотов: " + cp.state +
+                "\nДобавлено анекдотов: " + cp.state_add +
+                "\nУникальных UIN: " + cp.uq.size() +
+                "\nБот запущен: " + new Date(getTimeStart()) +
+                "\nВремя работы: " + getTime(getUpTime()) +
+                "\nВ среднем анекдотов в час: " + getHourStat() +
+                "\nВ среднем анекдотов в сутки: " + getDayStat() +
+                "\nПрочитано вами анекдотов: " + cp.uq.get(uin).cnt);
+        break;
+    case 4:
+    	proc.mq.add(uin,cp.srv.an.adsStat());
+        break;
+    case 5:
+        commandExec(proc, uin, cp.parser.parseArgs(msg));
+        break;
+    case 6:
+        commandAdd(proc, uin, cp.parser.parseArgs(msg));
+        break;
+    case 7:
+        cp.state++;
+        cp.stateInc(uin);
+        proc.mq.add(uin,cp.srv.an.getAnek((Integer)cp.parser.parseArgs(msg).get(0)));
+        break;
+    case 8:
+    	cp.srv.an.refreshData();
+    	proc.mq.add(uin,"Данные в памяти обновлены");
+    	break;
+    case 9:
+    	IcqProtocol u = cp.getFreeUin();
+    	proc.mq.add(uin,"Самый свободный уин бота: " + u.baseUin);
+    	u.mq.add(uin,"Привет! Я самый свободный УИН :)");
+    	break;
+    default:
+        Log.getLogger(cp.srv.getName()).info("ANEK: " + uin + ">>" + msg);
+        proc.mq.add(uin,"Неизвестная команда, для помощи используйте !help");                
+    }            
+} catch (Exception ex) {
+    ex.printStackTrace();
+}

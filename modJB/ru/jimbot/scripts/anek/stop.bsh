@@ -1,0 +1,18 @@
+/**
+* Данный скрипт запускается при остановке бота. Здесь можно указать команды закрытия 
+* внешних подключений или освобождения ресурсов
+**/
+
+/**
+ * При вызове скрипта определены следующие переменные:
+ * AbstractServer srv
+ */
+ 
+ // Для анекдотного бота ничего делать не требуется
+ 
+import ru.jimbot.modules.AbstractServer;
+import ru.jimbot.util.*;
+import ru.jimbot.modules.anek.AnekServer;
+ 
+Log.getLogger(srv.getName()).info("Остановка анекдотного бота...");
+outText="Ok";
