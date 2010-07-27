@@ -244,8 +244,7 @@ public class ChatProps implements AbstractProps {
         setIntProperty("casino.amount", 9);
         setIntProperty("casino.win2", 25);
         setIntProperty("casino.win3", 50);
-        setBooleanProperty("advertisement.on.off", true);
-        setBooleanProperty("log.service", true);
+        setBooleanProperty("advertisement.on.off", true);       
     }
 
     public UserPreference[] getUserPreference(){
@@ -338,8 +337,7 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.INTEGER_TYPE,"minus.ball.mat","На сколько понижать рейтинг при мате",getIntProperty("minus.ball.mat"),""),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"minus.ball.kick.on.off","Включить/Выключить понижение рейтинга при кике",getBooleanProperty("minus.ball.kick.on.off"),""),
         new UserPreference(UserPreference.INTEGER_TYPE,"minus.ball.kick","На сколько понижать рейтинг при кике",getIntProperty("minus.ball.kick"),""),
-        new UserPreference(UserPreference.BOOLEAN_TYPE,"advertisement.on.off","Включить/Выключить рекламу",getBooleanProperty("advertisement.on.off"),""),
-        new UserPreference(UserPreference.BOOLEAN_TYPE,"log.service","Включить/Выключить посервисное логирирование",getBooleanProperty("log.service"),""),
+        new UserPreference(UserPreference.BOOLEAN_TYPE,"advertisement.on.off","Включить/Выключить рекламу",getBooleanProperty("advertisement.on.off"),""),       
         //банрум
         new UserPreference(UserPreference.CATEGORY_TYPE,"banroom", "Настройки закрытия в комнате", "",""),
         new UserPreference(UserPreference.INTEGER_TYPE,"room.tyrma","Комната Тюрьма в чате",getIntProperty("room.tyrma"),""),

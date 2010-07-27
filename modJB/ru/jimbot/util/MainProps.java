@@ -86,11 +86,13 @@ public class MainProps {
         setStringProperty("srv.serviceName0","AnekBot");
         setStringProperty("srv.serviceType0","anek");
         setBooleanProperty("main.checkNewVer", true);
+        setBooleanProperty("log.service", true);
     }
     
     public static UserPreference[] getUserPreference(){
         UserPreference[] p = {
             new UserPreference(UserPreference.CATEGORY_TYPE,"main", "Основные настройки","",""),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"log.service","Включить/Выключить посервисное логирирование",getBooleanProperty("log.service"),""),
             new UserPreference(UserPreference.BOOLEAN_TYPE,"main.checkNewVer","Уведомлять о новых версиях",getBooleanProperty("main.checkNewVer"),""),
             new UserPreference(UserPreference.BOOLEAN_TYPE,"main.autoStart","Автозапуск при загрузке",getBooleanProperty("main.autoStart"),""),
             new UserPreference(UserPreference.BOOLEAN_TYPE,"main.StartHTTP","Запускать HTTP сервер",getBooleanProperty("main.StartHTTP"),""),

@@ -92,7 +92,7 @@ public class Log implements Serializable {
     private Log() {}
 
     public static Log getLogger(String serviceName) {
-        if(!ChatProps.getInstance(serviceName).getBooleanProperty("log.service")) return getDefault();
+        if(!MainProps.getBooleanProperty("log.service")) return getDefault();
         if(loggers.containsKey(serviceName)) return loggers.get(serviceName);
         Log l = new Log();
         l.init(serviceName);
@@ -113,7 +113,7 @@ public class Log implements Serializable {
      */
     
     public void init(String folder) {
-        if(folder.equals("") || !ChatProps.getInstance(folder).getBooleanProperty("log.service")){
+        if(folder.equals("") || !MainProps.getBooleanProperty("log.service")){
             PropertyConfigurator.configure("lib/log4j.properties");
             system = Logger.getRootLogger();
             err = Logger.getLogger("error");
