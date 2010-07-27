@@ -332,38 +332,26 @@ public class RobAdmin implements Runnable {
    return s[getRND(s.length)];
    }
 
-    public void close(String uin)
-	{
+    public void close(String uin){
     Users u = srv.us.getUser(uin);
     int K = srv.getProps().getIntProperty("room.tyrma");
-   	// Сменим ник
     if(((ChatCommandProc)srv.cmd).testClosed(u.sn) == 0){
-	String nick = u.localnick + "(Зек)";
+    String nick = u.localnick + "(Зек)";
     u.localnick = nick;
     srv.us.db.event(u.id, uin, "REG", 0, "", nick);
     }
-    // Время
-	int time = (int) (5+(Math.random()*55));
+    int time = (int) (5+(Math.random()*55));
     long t = System.currentTimeMillis()+(time*60000);
-	u.lastclosed = t;
-    // Оповести чат
-	say(u.localnick + getBanroom_say() + "|" + srv.us.getRoom(K).getName() +
-	"|, на " + time + " минут, " + getBanroom_say1(), u.room);
-	// Комната
+    say(u.localnick + getBanroom_say() + "|" + srv.us.getRoom(K).getName() + "|, на " + time + " минут, " + getBanroom_say1(), u.room);
+    u.lastclosed = t;
     u.room = K;
     srv.us.updateUser(u);
     srv.cq.changeUserRoom(u.sn, K);
-    // Оповещаем целевую комнату
-    say("У вас пополнение, неудачник:  " + u.localnick +
-	" он(а) закрыт(а) на " + time + " минут", K);
-    // Оповещаем юзера
-    srv.getIcqProcess(srv.us.getUser(uin).basesn).mq.add(srv.us.getUser(uin).sn,"Ты закрыт(а) в комнату, на "
-    + time + " минут, " + getBanroom_say2());
-    // Лишаем юзера прав
+    say("У вас пополнение, неудачник:  " + u.localnick + " он(а) закрыт(а) на " + time + " минут", K);
+    srv.getIcqProcess(srv.us.getUser(uin).basesn).mq.add(srv.us.getUser(uin).sn,"Ты закрыт(а) в комнату, на " + time + " минут, " + getBanroom_say2());
     srv.us.revokeUser(srv.us.getUser(uin).id, "room");
-	//srv.us.revokeUser(srv.us.getUser(uin).id, "reg");
     srv.us.revokeUser(srv.us.getUser(uin).id, "psmg");
-	}
+    }
 
     public String GetAdmin(int id)
     {

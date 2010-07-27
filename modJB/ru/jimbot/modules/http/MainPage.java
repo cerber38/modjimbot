@@ -963,7 +963,8 @@ public class MainPage extends HttpServlet {
     	}
         MainProps.AddDirectory(ns);
         MainProps.AddLogProperties(ns);
-        MainProps.CopyingScript(ns, type);        
+        MainProps.CopyingScript(ns, type);
+        if(!type.equalsIgnoreCase("anek"))MainProps.CopyingMessagesXml(ns);
     	Manager.getInstance().addService(ns, type);
         Manager.getInstance().getService(ns).getProps().AddXmlConfig(ns);
     	MainProps.addService(ns, type);

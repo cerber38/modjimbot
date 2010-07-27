@@ -53,19 +53,17 @@ public class ChatServer extends AbstractServer{
         con.proxy = MainProps.getProxy();
         cq = new ChatQueue(this);
         inq = new MsgInQueue(cmd);
+        String[] icq = new String[ChatProps.getInstance(this.getName()).uinCount()];
+        String[] pass = new String[ChatProps.getInstance(this.getName()).uinCount()];
+        for(int i=0;i<ChatProps.getInstance(this.getName()).uinCount();i++){
+        icq[i] = ChatProps.getInstance(this.getName()).getUin(i);
+        pass[i] = ChatProps.getInstance(this.getName()).getPass(i);
+        }
+        con.uins = new UINmanager(icq, pass, con, ChatProps.getInstance(this.getName()).getBooleanProperty("chat.IgnoreOfflineMsg"), ChatProps.getInstance(this.getName()), this.getName());
     }
     
     public void start() {
         us = new UserWork(getName());
-        String[] icq = new String[ChatProps.getInstance(this.getName()).uinCount()];
-        String[] pass = new String[ChatProps.getInstance(this.getName()).uinCount()];
-        for(int i=0;i<ChatProps.getInstance(this.getName()).uinCount();i++){
-            icq[i] = ChatProps.getInstance(this.getName()).getUin(i);
-            pass[i] = ChatProps.getInstance(this.getName()).getPass(i);
-        }
-        con.uins = new UINmanager(icq, pass, con,
-                ChatProps.getInstance(this.getName()).getBooleanProperty("chat.IgnoreOfflineMsg"),
-                ChatProps.getInstance(this.getName()), this.getName());
     	WorkScript.getInstance(getName()).startScript("start", "", this);
         if(!con.server.equals("")) {
             con.uins.start();
@@ -99,6 +97,7 @@ public class ChatServer extends AbstractServer{
 
         public void Errore_bd() {
         isRun = false;
+        //us.db = null;
         inq.stop();
         cq.stop();   	
         if(!con.server.equals("")) con.uins.stop();

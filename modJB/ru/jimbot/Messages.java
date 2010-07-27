@@ -21,7 +21,6 @@ package ru.jimbot;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -122,7 +121,8 @@ private Properties props = null;
             msg = msg.replace("%ROOM_ID%", Integer.toString(room));// Ид комнаты в которую вошли
             msg = msg.replace("%ROOM_NAME%", srv.us.getRoom(room).getName());// Название комнаты в которую вошли
             msg = msg.replace("%ROOM_TOPIC%", (srv.us.getRoom(room).getTopic().equals("") ? "" : ("\nТема: " + srv.us.getRoom(room).getTopic())));// Тема комнаты в которую вошли
-            msg = msg.replace("%ROOM_USERS%", Integer.toString(((ChatCommandProc)srv.cmd).AllUsersRoom(room)));// Количество пользователей в комнате в которую вошли
+            Integer cnt_room = (((ChatCommandProc)srv.cmd).AllUsersRoom(room) == -1 ? 0 : (((ChatCommandProc)srv.cmd).AllUsersRoom(room)));
+            msg = msg.replace("%ROOM_USERS%", Integer.toString(cnt_room));// Количество пользователей в комнате в которую вошли
             msg = msg.replace("%CHAT_NAME%", ChatProps.getInstance(ServiceName).getStringProperty("chat.name"));// Название чата
             msg = msg.replace("%ROOM_PRISON_ID%", Integer.toString(ChatProps.getInstance(ServiceName).getIntProperty("room.tyrma")));// Ид комнаты тюрьмы
             msg = msg.replace("%ROOM_PRISON_NAME%", srv.us.getRoom(ChatProps.getInstance(ServiceName).getIntProperty("room.tyrma")).getName());// Название комнаты тюрьмы

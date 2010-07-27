@@ -22,27 +22,23 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import org.apache.log4j.*;
+import ru.jimbot.modules.chat.ChatProps;
 
 /**
  *  <p>Logger wrapper class.<br>
  *  Provides static methods to the Log4J logging methods.
  *  This is a convenience class only and can not be instantiated.
  *
- *  @author   Takis Diakoumis, Prolubnikov Dmitry
+ * @author   Takis Diakoumis, Prolubnikov Dmitry, fraer72
  * @version  $Revision: 1.1 $
  * @date     $Date: 2006/12/15 17:34:39 $
  */
 public class Log implements Serializable {
-    /** The Log4J Logger object */
-	protected Logger system, con, err, http, talk, flood;
+    protected Logger system, con, err, http, talk, flood;
     private static Log defaultLogger;
     private static HashMap<String, Log> loggers = new HashMap<String, Log>();
-    /** the log pattern string */
     public static final String PATTERN = "[%d{dd.MM.yy HH:mm:ss}] %m%n";
-
-    /** the max number of log files rolled over */
     public static final int MAX_BACKUP_INDEX = 5;
-
     public static final String Log4jProperties = "" +
     "log4j.category.$SERVICE.system=info, $SERVICE.system\n" +
     "log4j.category.$SERVICE.error=error, $SERVICE.error\n" +
@@ -93,13 +89,12 @@ public class Log implements Serializable {
     "log4j.appender.telnet.layout=org.apache.log4j.SimpleLayout\n" +
     "log4j.appender.telnet.Port=5050";
 
-    /** <p><code>private<code> constructor to prevent instantiation. */
     private Log() {}
 
     public static Log getLogger(String serviceName) {
+        if(!ChatProps.getInstance(serviceName).getBooleanProperty("log.service")) return getDefault();
         if(loggers.containsKey(serviceName)) return loggers.get(serviceName);
         Log l = new Log();
-//        l.init("services/"+serviceName + "/");
         l.init(serviceName);
         loggers.put(serviceName, l);
         return l;
@@ -115,10 +110,10 @@ public class Log implements Serializable {
 
     /**
      * Initialises the logger instance with the specified level.
-     *
      */
+    
     public void init(String folder) {
-        if(folder.equals("")){
+        if(folder.equals("") || !ChatProps.getInstance(folder).getBooleanProperty("log.service")){
             PropertyConfigurator.configure("lib/log4j.properties");
             system = Logger.getRootLogger();
             err = Logger.getLogger("error");
@@ -136,44 +131,9 @@ public class Log implements Serializable {
             http.setAdditivity(false);
         }
 
-//    	system = folder.equals("") ? Logger.getRootLogger() : Logger.getLogger("system"+folder);
-////    	con = Logger.getLogger("con");
-//    	err = Logger.getLogger("error"+folder);
-//    	http = Logger.getLogger("http"+folder);
-//    	talk = Logger.getLogger("talk"+folder);
-//    	flood = Logger.getLogger("flood"+folder);
-//        http.setAdditivity(false);
-//        if(!folder.equals("")){
-//            FileAppender t = (FileAppender)Logger.getRootLogger().getAppender("system");
-//            t.setName("system" + folder);
-//            t.setFile(folder + "log/system.log");
-//            system.removeAllAppenders();
-//            system.addAppender(t);
-//            DailyRollingFileAppender t1 = (DailyRollingFileAppender)Logger.getLogger("talk").getAppender("talk");
-//            t1.setName("talk" + folder);
-//            t1.setFile(folder + "log/talk.log");
-//            talk.removeAllAppenders();
-//            talk.addAppender(t1);
-//        }
-//        ((FileAppender)system.getAppender("system")).setFile(folder + "log/system.log");
-//        ((DailyRollingFileAppender)talk.getAppender("talk")).setFile(folder + "log/talk.log");
-//        ((FileAppender)err.getAppender("error")).setFile(folder + "log/error.log");
-//        ((FileAppender)http.getAppender("http")).setFile(folder + "log/http.log");
-//        ((FileAppender)flood.getAppender("flood")).setFile(folder + "log/flood.log");
 
     }
 
-    /**
-     * Adds the specified appender to the logger.
-     *
-     * @param appender - the appender to be added
-     */
-//    public static void addAppender(Appender appender) {
-//        if (logger == null) {
-//            throw new RuntimeException("Logger not initialised.");
-//        }
-//        logger.addAppender(appender);
-//    }
 
     /**
      * Logs a message at log level INFO.

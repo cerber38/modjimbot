@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="ChatCommandProc.parse.0">Если ты не бот, то ответь на пример: {0} =?
+Ответ напиши числом, время на раздумье 1 минута.
+Перед ответом учтите общую паузу для сообщений,  {1} сек.
+</entry>
+<entry key="ChatCommandProc.parse.1">Добро пожаловать в {0} 
+Чтобы зарегистрироваться используйте команду !рег &lt;ник&gt;
+Для помощи пошлите команду !помощь
+Что бы отправить сообщение администратору чата пошлите команду !админу
+&lt;сообщение&gt;
+Не посылайте одинаковых сообщений и сообщения чаще {1} сек.</entry>
+<entry key="ChatCommandProc.parse.2">Ошибка выполнения команды</entry>
+<entry key="ChatCommandProc.parse.3">Неверная команда. Сообщение проигнорировано.</entry>
+<entry key="ChatCommandProc.parse.4">Для входа в {0} необходимо зарегистрироваться командой !рег . 
+Для помощи пошлите команду !помощь
+Что бы отправить сообщение администратору чата пошлите команду !админу &lt;сообщение&gt;
+Не посылайте одинаковых сообщений и сообщения чаще {1} сек.</entry>
+<entry key="ChatCommandProc.parse.5">Для входа в {0} используйте команду !чат. Для помощи пошлите команду !помощь
+Не посылайте ваши сообщения слишком часто.</entry>
+<entry key="ChatCommandProc.err">Ошибка: {0}</entry>
+<entry key="ChatCommandProc.err.1">Ошибка в команде</entry>
+<entry key="ChatCommandProc.commandA.0">Список пользователей</entry>
+<entry key="ChatCommandProc.commandA.1">id|Ник|Рейтинг|Статус</entry>
+<entry key="ChatCommandProc.commandGo.0">Ошибочный номер</entry>
+<entry key="ChatCommandProc.commandGo.1">Успешно завершено. Сообщения теперь будут приходить с номера {0}</entry>
+<entry key="ChatCommandProc.commandInfo.0">Пользователь не зарегистрировался</entry>
+<entry key="ChatCommandProc.commandInfo.1">Данные о пользователе - </entry>
+<entry key="ChatCommandProc.commandInfo.2">Дата регистрации - {0}</entry>
+<entry key="ChatCommandProc.commandInfo.3">Uin - {0}</entry>
+<entry key="ChatCommandProc.commandInfo.4">Id - {0}</entry>
+<entry key="ChatCommandProc.commandInfo.5">Группа - {0}</entry>
+<entry key="ChatCommandProc.commandInfo.6">Рейтинг - {0}</entry>
+<entry key="ChatCommandProc.commandInfo.7">Правильных ответов в викторине - {0}</entry>
+<entry key="ChatCommandProc.commandInfo.8">Пользователь в бане :)</entry>
+<entry key="ChatCommandProc.commandInfo.9">Пользователь не в чате</entry>
+<entry key="ChatCommandProc.commandInfo.10">Пользователь в чате, в {0} комнате</entry>
+<entry key="ChatCommandProc.commandInfo.11">Пользователь закрыт в Тюрьме, осталось сидеть {0} минут</entry>
+<entry key="ChatCommandProc.commandInfo.12">Пользователь в кике, осталось сидеть {0} минут</entry>
+<entry key="ChatCommandProc.commandInfo.13">Ошибка запросы инфы: {0}</entry>
+<entry key="ChatCommandProc.commandKick.0">Вы не можете изменить время кика</entry>
+<entry key="ChatCommandProc.commandKick.1">Вы не можете кикнуть пользователя, он владеет иммунитетом</entry>
+<entry key="ChatCommandProc.commandKick.2">Вы не можете изменить время кика</entry>
+<entry key="ChatCommandProc.commandKick.3">Юзер выпнут на: {0}</entry>
+<entry key="ChatCommandProc.commandKick.4">{0}|{1}| был выпнут из чата на {2} минут по причине:{3},пользователем {4}
+|{5}|</entry>
+<entry key="ChatCommandProc.commandKick.5">Необходимо добавить причину кика</entry>
+<entry key="ChatCommandProc.commandSetgroup.0">Пользователь не найден</entry>
+<entry key="ChatCommandProc.commandSetgroup.1">Нет такой группы пользователей</entry>
+<entry key="ChatCommandProc.commandSetgroup.2">Тебе назначена группа: {0}</entry>
+<entry key="ChatCommandProc.commandSetgroup.3">Успешно завершено</entry>
+<entry key="ChatCommandProc.commandSetgroup.4">Произошла ошибка</entry>
+<entry key="ChatCommandProc.commandGrant.0">Пользователь не найден</entry>
+<entry key="ChatCommandProc.commandGrant.1">Нет такого объекта полномочий</entry>
+<entry key="ChatCommandProc.commandGrant.2">Тебе добавлено полномочие: {0}</entry>
+<entry key="ChatCommandProc.commandGrant.3">Успешно завершено</entry>
+<entry key="ChatCommandProc.commandGrant.4">Произошла ошибка</entry>
+<entry key="ChatCommandProc.commandRevoke.0">Пользователь не найден</entry>
+<entry key="ChatCommandProc.commandRevoke.1">Нет такого объекта полномочий</entry>
+<entry key="ChatCommandProc.commandRevoke.2">Необходимо добавить причину лишения полномочия</entry>
+<entry key="ChatCommandProc.commandRevoke.3">У тебя лишено полномочие: {0} по причине: {1}</entry>
+<entry key="ChatCommandProc.commandRevoke.4">Успешно завершено</entry>
+<entry key="ChatCommandProc.commandRevoke.5">Произошла ошибка</entry>
+<entry key="ChatCommandProc.commandBan.0">Нельзя отправить в баню самого себя :)</entry>
+<entry key="ChatCommandProc.commandBan.1">Необходимо добавить причину бана</entry>
+<entry key="ChatCommandProc.commandBan.2">Ошибка в команде</entry>
+<entry key="ChatCommandProc.commandBan.3">Нельзя отправить в баню самого себя :)</entry>
+<entry key="ChatCommandProc.commandBan.4">Вы не можете забанить пользователя, он владеет иммунитетом</entry>
+<entry key="ChatCommandProc.commandBan.5">Необходимо добавить причину бана</entry>
+<entry key="ChatCommandProc.commandBan.6">Пользователь {0} успешно отправлен в баню</entry>
+<entry key="ChatCommandProc.commandBan.7">{0}|{1}| был забанен, причина: {2}, пользователем: {3}|{4}|</entry>
+<entry key="ChatCommandProc.commandUban.0">Ошибка в команде</entry>
+<entry key="ChatCommandProc.commandUban.1">"Пользователь {0} был выпущен из бани</entry>
+<entry key="ChatCommandProc.commandReg.0">Ошибка регистрации, пустой ник</entry>
+<entry key="ChatCommandProc.commandReg.1">Предупреждение! Ваш ник слишком длинный и будет обрезан.</entry>
+<entry key="ChatCommandProc.commandReg.2">Ошибочный ник, попытайтесь еще раз</entry>
+<entry key="ChatCommandProc.commandReg.3">Такой ник уже существует. Попробуйте другой ник</entry>
+<entry key="ChatCommandProc.commandReg.4">Предупреждение! Ваш ник слишком длинный и будет обрезан.</entry>
+<entry key="ChatCommandProc.commandReg.5">Вы не можете так часто менять ник.</entry>
+<entry key="ChatCommandProc.commandReg.6">Ник не изменен. Для входа в {0} используйте команду !чат</entry>
+<entry key="ChatCommandProc.commandReg.7">Ник не изменен.</entry>
+<entry key="ChatCommandProc.commandReg.8">Обновление завершено.</entry>
+<entry key="ChatCommandProc.commandReg.9">{0} сменил ник на {1}</entry>
+<entry key="ChatCommandProc.commandReg.10">Ошибочный ник, попытайтесь еще раз</entry>
+<entry key="ChatCommandProc.commandReg.11">Регистрация завершена!</entry>
+<entry key="ChatCommandProc.commandReg.12">Заполните не большую информацию о себе:</entry>
+<entry key="ChatCommandProc.commandA.2">Комната: {0} - {1}</entry>
+<entry key="ChatCommandProc.commandA.3">Тема: {0}</entry>
+<entry key="ChatCommandProc.commandA.4">Всего пользователей в комнате: {0}</entry>
+<entry key="ChatCommandProc.commandA.5">Зарегистрировано: {0}</entry>
+<entry key="ChatCommandProc.commandA.6">Викторина работает с {0} и до {1} часов.</entry>
+<entry key="ChatCommandProc.commandAA.0">Список пользователей в чате</entry>
+<entry key="ChatCommandProc.commandAA.1">Ид[Ник][Комната][Рейтинг]Статус</entry>
+<entry key="ChatCommandProc.commandAA.2">Всего пользователей в чате: {0}</entry>
+<entry key="ChatCommandProc.commandAA.3">Всего зашло пользователей за сутки в чат: {0}</entry>
+<entry key="ChatCommandProc.commandP.0">Сообщение отсутствует</entry>
+<entry key="ChatCommandProc.commandP.1">Такого пользователя не существует</entry>
+<entry key="ChatCommandProc.commandP.2">Пользователь не в сети</entry>
+<entry key="ChatCommandProc.commandP.3">Слишком длинное сообщение было обрезано: {0}</entry>
+<entry key="ChatCommandProc.commandP.4">{0}|{1}|~|{2}| отправил личное сообщение пользователю {3}|{4}| : {5}</entry>
+<entry key="ChatCommandProc.commandP.5">Личное сообщение от {0}|{1}| : {2}</entry>
+<entry key="ChatCommandProc.commandP.6">Сообщение отправлено</entry>
+<entry key="ChatCommandProc.commandP.7">Ошибка отправки сообщения</entry>
+<entry key="ChatCommandProc.commandPP.0">Не найдено входящих сообщений, отправлять некому</entry>
+<entry key="ChatCommandProc.commandSettheme.0">{0} установил тему комнаты: {1}</entry>
+<entry key="ChatCommandProc.commandGetinfo.0">Запрос инфо UIN= {0}</entry>
+<entry key="ChatCommandProc.commandGetinfo.1">Запрос инфо неудачен</entry>
+<entry key="ChatCommandProc.commandRoom.0">%NICK% ты не можешь войти в тюрьму!</entry>
+<entry key="ChatCommandProc.commandRoom.1">%NICK% ты уже сидишь в этой комнате!</entry>
+<entry key="ChatCommandProc.commandRoom.2">%NICK% пароль введен не верно, попробуйте еще раз.</entry>
+<entry key="ChatCommandProc.commandRoom.3">%NICK% введите пароль.... (команда !к id пароль).</entry>
+<entry key="ChatCommandProc.commandRoom.4">%NICK% эта %ROOM_NAME% ты не можешь войти в неё!</entry>
+<entry key="ChatCommandProc.commandRoom.5">|%ID%|%NICK% ушел(ушла) в комнату %ROOM_NAME%</entry>
+<entry key="ChatCommandProc.commandRoom.6">|%ID%|%NICK% вошел(вошла) в комнату %ROOM_NAME%</entry>
+<entry key="ChatCommandProc.commandRoom.7">Ты перешел(а) в комнату %ROOM_ID% ~ %ROOM_NAME%%ROOM_TOPIC%
+Пользователей в комнате |%ROOM_USERS%|</entry>
+<entry key="ChatCommandProc.commandRoom.8">%NICK% такой комнаты не существует! Некуда переходить.</entry>
+<entry key="ChatCommandProc.commandRoom.9">%NICK% викторина работает с %VIC_GAME_TIME_0% и до %VIC_GAME_TIME_1% часов.</entry>
+<entry key="ChatCommandProc.commandRoom.10">%NICK% в викторину могут играть максимум %VIC_USERS_COUNT% человек.</entry>
+<entry key="ChatCommandProc.commandAdm.0">Пустое сообщение</entry>
+<entry key="ChatCommandProc.commandAdm.1">Сообщение сохранено</entry>
+<entry key="ChatCommandProc.commandAdm.2">Ошибка добавления</entry>
+<entry key="ChatCommandProc.commandLRoom.0">Список комнат в чате:</entry>
+<entry key="ChatCommandProc.commandCrRoom.0">Такая комната уже существует!</entry>
+<entry key="ChatCommandProc.commandCrRoom.1">Комната {0} успешно создана!</entry>
+<entry key="ChatCommandProc.commandChRoom.0">Такая комната уже существует!</entry>
+<entry key="ChatCommandProc.commandChRoom.1">Комната {0} успешно изменена!</entry>
+<entry key="ChatCommandProc.listKickUsers.0">Список активных киков:</entry>
+<entry key="ChatCommandProc.listKickUsers.1">юзер; время; осталось сидеть; кто пнул; причина</entry>
+<entry key="ChatCommandProc.testState.0">Предупреждение! Вы слишком долго молчите и будете удалены из чата</entry>
+<entry key="ChatCommandProc.auth.0">{0} вы не имеете доступа к данной команде.</entry>
+<entry key="ChatCommandProc.commandgoChat.0">Прежде чем войти в %CHAT_NAME%, необходимо зарегистрироваться.</entry>
+<entry key="ChatCommandProc.commandgoChat.1">%NICK% введите номер комнаты, в которую хотите зайти.</entry>
+<entry key="ChatCommandProc.commandgoChat.2">%NICK% ты не можешь войти в эту комнату, выберете другую комнату.</entry>
+<entry key="ChatCommandProc.commandgoChat.3">%NICK% вы можете войти только в Комнату |-%ROOM_PRISON_ID%-%ROOM_PRISON_NAME%|</entry>
+<entry key="ChatCommandProc.commandgoChat.4">%NICK%эта %ROOM_NAME% ты не можешь войти в неё!</entry>
+<entry key="ChatCommandProc.commandgoChat.5">%NICK% эта комната под паролем, выберете другую комнату.</entry>
+<entry key="ChatCommandProc.commandgoChat.6">%NICK% комнаты %ROOM_ID% не существует.</entry>
+<entry key="ChatCommandProc.commandgoChat.7">Для входа в %CHAT_NAME% выберете комнату(только цифру)</entry>
+<entry key="ChatCommandProc.commandgoChat.8">!помощь - помощь чата</entry>
+<entry key="ChatCommandProc.commandgoChat.9">Чтобы бот видел ваш статус - авторизуйте его</entry>
+<entry key="ChatCommandProc.commandgoChat.10">%NICK% вошел(а) в чат *HI*</entry>
+<entry key="ChatCommandProc.commandgoChat.11">%NICK% вы вошли в чат</entry>
+<entry key="ChatCommandProc.commandgoChat.12">Данный номер слишком загружен, вы будете автоматически переведены на ближайший свободный номер.</entry>
+<entry key="ChatCommandProc.commandgoChat.13">Сообщения теперь будут приходить с номера %NEW_CHAT_UIN%</entry>
+<entry key="ChatCommandProc.commandgoChat.14">%NICK% викторина работает с %VIC_GAME_TIME_0% и до %VIC_GAME_TIME_1% часов. Выберете другую комнату.</entry>
+<entry key="ChatCommandProc.commandRoom.15">%NICK% в викторину могут играть максимум %VIC_USERS_COUNT% человек. Выберете другую комнату.</entry>
+<entry key="ChatCommandProc.commandgoChat.16">%NICK% вы вошли в чат невидимым</entry>
+<entry key="ChatCommandProc.commandexitChat.0">%NICK%  ушел(ушла) из чата</entry>
+<entry key="ChatCommandProc.commandexitChat.1">Приходите еще *BYE*</entry>
+<entry key="ChatCommandProc.tkick.0">Пинок на {0}  минут, {1}{2}</entry>
+<entry key="ChatCommandProc.tkick.1">, Причина: {0} </entry>
+<entry key="ChatCommandProc.tkick.2">Пинок на {0} минут</entry>
+<entry key="ChatCommandProc.kick.0">Вы были удалены из чата, попытайтесь зайти позже</entry>
+<entry key="ChatCommandProc.ban.0">Вы были забанены администратором чата. Теперь вы не сможете принимать и отправлять сообщения.</entry>
+<entry key="ChatCommandProc.ban.1">Причина: {0} </entry>
+<entry key="ChatCommandProc.uban.0">Ты был выпущен из бани</entry>
+<entry key="ChatCommandProc.tempExitChat.0">{0} ушел из чата (оффлайн)</entry>
+<entry key="ChatCommandProc.isChat.0">Чтобы использовать команду вы должны зайти в чат</entry>
+<entry key="ChatCommandProc.parseFloodNotice.0">Сообщение проигнорировано. Не посылайте сообщения слишком часто.</entry>
+<entry key="UserWork.getUserNicks.0">Последние ники пользователя: </entry>
+<entry key="UserWork.getUserInvites.0">Приглашения пользователя: </entry>
+<entry key="UserWork.inviteList.0">Кого приглашал: </entry>
+<entry key="UserWork.getKickHist.0">20 последних киков:</entry>
+<entry key="UserWork.getBanHist.0">20 последних банов:</entry>
+<entry key="UserWork.getUinStat.0">Число пользователей на разных номерах чата:</entry>
+<entry key="UserWork.getUserAuthInfo.0">Полномочия пользователя ID={0}
+Группа: {1}
+Доступные объекты: </entry>
+<entry key="Advertisement.0">Реклама: {0}</entry>
+</properties>
+

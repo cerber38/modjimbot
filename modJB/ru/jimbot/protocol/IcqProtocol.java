@@ -139,8 +139,7 @@ e.printStackTrace();
 }
 
 
-public boolean isNoAuthUin(String uin)
-{
+public boolean isNoAuthUin(String uin){
 return props.getBooleanProperty("chat.isAuthRequest");
 }
 

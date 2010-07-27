@@ -368,5 +368,83 @@ public class DBChat extends DBAdaptor{
         catch (Exception ex) {ex.printStackTrace();}
         }
 
+        /**
+         * Добавим рекламу в бд
+         * @param id
+         * @param text
+         */
+
+        public void setAdvertisement(int id, String text) {
+        try {
+        PreparedStatement pst = (PreparedStatement) getDb().prepareStatement("insert into advertisement values(?, ?)");
+        pst.setInt(1,id);
+        pst.setString(2,text);
+        pst.execute();
+        pst.close();
+        }catch (Exception ex) {
+        ex.printStackTrace();
+        }
+        }
+
+        /**
+         * Вывод рандомной рекламы
+         * @return
+         */
+
+        public String getAdvertisement() {
+        try {
+        PreparedStatement pst =  (PreparedStatement) getDb().prepareStatement("select text from advertisement ORDER BY RAND( ) LIMIT 0 , 1");
+        ResultSet rs = pst.executeQuery();
+        if(rs.next()) return rs.getString(1);
+        rs.close();
+        pst.close();
+        } catch (Exception ex){
+        ex.printStackTrace();
+        }
+        return "";
+        }
+
+        /**
+         * Удалить рекламу из бд
+         * @param id
+         */
+
+        public void delAdvertisement(int id){
+        executeQuery("delete from advertisement WHERE id=" + id);
+        }
+
+        /**
+         * Есть такая реклама?
+         * @param id
+         * @return
+         */
+
+        public int isAdvertisement(int id){
+        String q = "SELECT count(*) FROM `advertisement` WHERE id="+id;
+        Vector<String[]> v = getValues(q);
+        return Integer.parseInt(v.get(0)[0]);
+        }
+
+        /**
+         * Вывод листинга всех реклам в БД
+         * @return
+         */
+
+        public String listAdvertisement(){
+        String s = "id | text\n";
+        try{
+        PreparedStatement pst = (PreparedStatement) getDb().prepareStatement("SELECT id, text FROM advertisement");
+        ResultSet rs = pst.executeQuery();
+        while(rs.next()){
+        s += rs.getString(1) + " | " + rs.getString(2) + "\n";
+        }
+        rs.close();
+        pst.close();
+        }catch(Exception ex){
+        ex.printStackTrace();
+        }
+        return s;
+        }
+
 
 }

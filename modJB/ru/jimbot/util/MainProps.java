@@ -43,7 +43,7 @@ import ru.jimbot.table.UserPreference;
  * @author Prolubnikov Dmitry
  */
 public class MainProps {
-    public static final String VERSION = "jImBot v.0.4.0 (с)Spec (06/07/2009)\nBy modifying - fraer72\nVersion update - pre-release 1 (20/07/2010)";
+    public static final String VERSION = "jImBot v.0.4.0 (с)Spec (06/07/2009)\nBy modifying - fraer72\nVersion update - pre-release 2 (28/07/2010)";
     public static final int VER_INT = 18;
     private static int ver_no = 0;
     public static final int testtime = 30000;
@@ -398,6 +398,10 @@ public class MainProps {
     File NEW = new File(Directory);
     if(!NEW.exists())
     NEW.mkdirs();
+    String Directory_m = "./services/" + name + "/msg/";
+    File NEW2 = new File(Directory_m);
+    if(!NEW2.exists())
+    NEW2.mkdirs();
     }
 
  
@@ -438,6 +442,25 @@ public class MainProps {
     Log.getDefault().error("Errore copyring script - " + ex.getMessage());
     }
   }
+
+  public static synchronized void CopyingMessagesXml(String name){
+  try{
+     InputStream stream = MainProps.class.getClassLoader().getResourceAsStream("ru/jimbot/msg/messages.xml");
+     BufferedInputStream in = new BufferedInputStream(stream);
+     BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream("./services/" + name+  "/msg/messages.xml"));
+     int len = 0, b = 0;
+     while ((b = in.read()) != -1) {
+     out.write(b);
+     len += b;
+     }
+     in.close();
+     out.flush();
+     out.close();
+      } catch (Exception ex){
+    Log.getDefault().error("Errore copyring messages - " + ex.getMessage());
+    }
+  }
+
 
     public static void delService(String name) {
     	// Сдвигаем элементы после удаленного на его место

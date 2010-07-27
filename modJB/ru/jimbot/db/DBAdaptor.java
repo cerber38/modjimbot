@@ -79,7 +79,7 @@ public abstract class DBAdaptor {
     public abstract void createDB();
     
     public boolean open(String host, String name, String user, String pass) {
-        boolean f=false;
+        //boolean f=false;
         this.host = host; this.name = name; this.user = user; this.pass = pass;
         try {
             if (db != null) {
@@ -100,15 +100,14 @@ public abstract class DBAdaptor {
                 info.setProperty("characterEncoding","utf8");
                 db = DriverManager.getConnection("jdbc:mysql://" + host + "/" + name, info);
             } catch (Exception ex) {
-                /*ex.printStackTrace();*/
-                Manager.getInstance().getService(serviceName).Errore_bd();
-                f = false;
+                Manager.getInstance().getService(serviceName).Errore_bd();                
                 lastConnect = System.currentTimeMillis();
                 Log.getLogger(serviceName).error("Не удалось подключится к базе данных," +
                 " по причине - \n" + ex.getMessage().toString() +
-                "\nСервис \"" + serviceName + "\" будет остановлен");              
+                "\nСервис \"" + serviceName + "\" будет остановлен");
+                return false;
             }
-        return f;
+        return false;
     }    
     
     public void executeQuery(String qry) {
