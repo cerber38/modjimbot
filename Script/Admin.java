@@ -106,40 +106,25 @@ import java.sql.*;
     }
 	
     /*ИНФОРМАТОР*/
-    public int n_inf()
-    {
-    long i = adm.srv.us.db.getLastIndex("inforob");
-    String o = "" + i;
-    int p = Integer.valueOf(o);
-    int i1 = adm.getRND(p);
-    return i1;
-    }
 
-    public String GetInfo(int id)
-    {
-    String s = "";
+    public String getInfo(){
     try {
-    PreparedStatement pst = adm.srv.us.db.getDb().prepareStatement("select * from inforob where id=" + id);
+    PreparedStatement pst = adm.srv.us.db.getDb().prepareStatement("select * from inforob ORDER BY RAND( ) LIMIT 0 , 1");
     ResultSet rs = pst.executeQuery();
-    if(rs.next())
-    {
-    s = rs.getString(2);
-    }
+    if(rs.next()) return rs.getString(2);
     rs.close();
     pst.close();
     } catch (Exception ex) {}
-    return s;
+    return "";
     }
 
 	if(adm.srv.getProps().getBooleanProperty("adm.Informer")){
     Object times = Manager.getInstance().getData("times");
-    if (times == null || times < System.currentTimeMillis())
-    {
+    if (times == null || times < System.currentTimeMillis()){
     Manager.getInstance().setData("times", System.currentTimeMillis() + adm.srv.getProps().getIntProperty("adm.Informer.time") *60000);// Интервал вывода информации
     Set rid = new HashSet();
     Enumeration e = adm.srv.cq.uq.keys();
-    while(e.hasMoreElements())
-    {
+    while(e.hasMoreElements()){
     String i = e.nextElement();
     Users us = adm.srv.us.getUser(i);
     if(us.state==adm.srv.us.STATE_CHAT)
@@ -147,7 +132,7 @@ import java.sql.*;
     }
     for (int i:rid)
     {
-    adm.say(GetInfo(n_inf()), i); // Оповещение будет во все комнаты
+    adm.say(getInfo(), i); // Оповещение будет во все комнаты
     }
     }
     }	
@@ -161,8 +146,8 @@ import java.sql.*;
     int i=0;
 	//ПОНИЖЕНИЕ РЕЙТИНГА ЗА МАТ
 	if(adm.srv.getProps().getBooleanProperty("minus.ball.mat.on.off"))
-	adm.srv.us.getUser(uin).ball -= adm.srv.getProps().getIntProperty("minus.ball.mat");
-	adm.srv.us.updateUser(adm.srv.us.getUser(uin));
+	adm.srv.us.getUser(ms.uin).ball -= adm.srv.getProps().getIntProperty("minus.ball.mat");
+	adm.srv.us.updateUser(adm.srv.us.getUser(ms.uin));
 	// ОПОВЕЩЕНИЕ(ПРЕДУПРЕЖДЕНИЕ) ЗА МАТ
 	boolean test = true; // ВКЛЮЧИТЬ/ВЫКЛЮЧИТЬ
 	String nick_m = adm.srv.us.getUser(ms.uin).localnick;
@@ -297,4 +282,3 @@ import java.sql.*;
     }
     }
     return;
-
