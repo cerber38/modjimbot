@@ -47,7 +47,6 @@ public class RobAdmin implements Runnable {
     int sleepAmount = 1000;
     long cTime=System.currentTimeMillis(); //Время последнего сообщения, для определения паузы
     long stTime = 0; //Время последнего вывода статистики
-    //public ChatServer srv;
     public ConcurrentLinkedQueue <MsgElement> mq;
     public ConcurrentHashMap <String,Integer> uins;
     ConcurrentHashMap <String,Integer> test1, test2;
@@ -59,12 +58,6 @@ public class RobAdmin implements Runnable {
     int a = 0;
     long times = System.currentTimeMillis();
     long TimesDelLog = System.currentTimeMillis();
-
-    public ConcurrentHashMap <String,Integer> level;
-    public ConcurrentHashMap <String,Integer> level_0;
-    public ConcurrentHashMap <String,Integer> level_1;
-    public ConcurrentHashMap <String,Integer> level_2;
-    public ConcurrentHashMap <String,Integer> level_3;
    
     /** Creates a new instance of RobAdmin */
     public RobAdmin(ChatServer s) {
@@ -72,11 +65,6 @@ public class RobAdmin implements Runnable {
         mq = new ConcurrentLinkedQueue();
         uins = new ConcurrentHashMap();
         uins.put("0",0);
-        level = new ConcurrentHashMap();
-        level_0 = new ConcurrentHashMap();
-        level_1 = new ConcurrentHashMap();
-        level_2 = new ConcurrentHashMap();
-        level_3 = new ConcurrentHashMap();
         test1 = new ConcurrentHashMap();
         test2 = new ConcurrentHashMap();
     }
@@ -212,12 +200,13 @@ public class RobAdmin implements Runnable {
             return;
         }
         stTime = System.currentTimeMillis();
-        String s = "Чат запущен - " + new Date(Time.getTimeStart());
+        String s = ChatProps.getInstance(srv.getName()).getStringProperty("chat.name") + " запущен - " + new Date(Time.getTimeStart());
         s += "\nВремя работы - " + Time.getTime(Time.getUpTime());
         s += "\nЗа последние сутки:";
         s += "\nВсего зашло в чат - " + srv.us.statUsersCount();
         s += "\nОтправлено сообщений - " + srv.us.statMsgCount();
         s += "\nЗакрыто в тюрьме юзеров - " + srv.us.statBanroomCount();
+        s += "\nВыписано предупреждений - " + srv.us.statNoticesCount();
         s += "\nКикнутых юзеров - " + srv.us.statKickUsersCount();
         s += "\nВсего киков - " + srv.us.statKickCount();
         s += "\nЗабанено юзеров - " + srv.us.statBanUsersCount();

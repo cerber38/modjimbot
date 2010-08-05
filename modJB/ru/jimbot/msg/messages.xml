@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
 <entry key="ChatCommandProc.parse.0">Если ты не бот, то ответь на пример: {0} =?
@@ -39,6 +39,7 @@
 <entry key="ChatCommandProc.commandInfo.11">Пользователь закрыт в Тюрьме, осталось сидеть {0} минут</entry>
 <entry key="ChatCommandProc.commandInfo.12">Пользователь в кике, осталось сидеть {0} минут</entry>
 <entry key="ChatCommandProc.commandInfo.13">Ошибка запросы инфы: {0}</entry>
+<entry key="ChatCommandProc.commandInfo.14">Предупреждений - {0}, лимит {1}</entry>
 <entry key="ChatCommandProc.commandKick.0">Вы не можете изменить время кика</entry>
 <entry key="ChatCommandProc.commandKick.1">Вы не можете кикнуть пользователя, он владеет иммунитетом</entry>
 <entry key="ChatCommandProc.commandKick.2">Вы не можете изменить время кика</entry>
@@ -71,7 +72,7 @@
 <entry key="ChatCommandProc.commandBan.6">Пользователь {0} успешно отправлен в баню</entry>
 <entry key="ChatCommandProc.commandBan.7">{0}|{1}| был забанен, причина: {2}, пользователем: {3}|{4}|</entry>
 <entry key="ChatCommandProc.commandUban.0">Ошибка в команде</entry>
-<entry key="ChatCommandProc.commandUban.1">"Пользователь {0} был выпущен из бани</entry>
+<entry key="ChatCommandProc.commandUban.1">Пользователь {0} был выпущен из бани</entry>
 <entry key="ChatCommandProc.commandReg.0">Ошибка регистрации, пустой ник</entry>
 <entry key="ChatCommandProc.commandReg.1">Предупреждение! Ваш ник слишком длинный и будет обрезан.</entry>
 <entry key="ChatCommandProc.commandReg.2">Ошибочный ник, попытайтесь еще раз</entry>
@@ -85,6 +86,8 @@
 <entry key="ChatCommandProc.commandReg.10">Ошибочный ник, попытайтесь еще раз</entry>
 <entry key="ChatCommandProc.commandReg.11">Регистрация завершена!</entry>
 <entry key="ChatCommandProc.commandReg.12">Заполните не большую информацию о себе:</entry>
+<entry key="ChatCommandProc.commandReg.13">Зарегистрировался новый пользователь - |{0}|{1}</entry>
+<entry key="ChatCommandProc.commandReg.14">{0} информация успешно заполнена, для входа в {1} пошлите команду !чат</entry>
 <entry key="ChatCommandProc.commandA.2">Комната: {0} - {1}</entry>
 <entry key="ChatCommandProc.commandA.3">Тема: {0}</entry>
 <entry key="ChatCommandProc.commandA.4">Всего пользователей в комнате: {0}</entry>

@@ -43,7 +43,7 @@ import ru.jimbot.table.UserPreference;
  * @author Prolubnikov Dmitry
  */
 public class MainProps {
-    public static final String VERSION = "jImBot v.0.4.0 (с)Spec (06/07/2009)\nBy modifying - fraer72\nVersion update - pre-release 2 (28/07/2010)";
+    public static final String VERSION = "jImBot v.0.4.0 (c)Spec (06/07/2009)\nBy modifying - fraer72\nVersion update - pre-release 3 (5/08/2010)";
     public static final int VER_INT = 18;
     private static int ver_no = 0;
     public static final int testtime = 30000;
@@ -612,7 +612,7 @@ public class MainProps {
         }
         return s;
     }
-
+    
 
     /**
      * Проверка на новую версию
@@ -687,7 +687,7 @@ Log.getDefault().error( "Ошибка создания файла: " , ex );
             e.printStackTrace();
         }
     }
-    
+
     public static void registerProperties(Properties _appProps) {
         appProps = _appProps;
     }

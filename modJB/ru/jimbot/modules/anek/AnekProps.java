@@ -120,12 +120,6 @@ public class AnekProps implements AbstractProps {
         return p;
     }
 
-    public UserPreference[] PravaUserPreference(){
-        UserPreference[] p = {
-
-        };
-        return p;
-    }
 
     public UserPreference[] getUINPreference(){
         UserPreference[] p = new UserPreference[uinCount()*2+1];
@@ -313,6 +307,5 @@ public class AnekProps implements AbstractProps {
             Log.getDefault().error("Error saving preferences: ");
         }
     }
-
 
 }

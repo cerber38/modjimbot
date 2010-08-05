@@ -104,7 +104,7 @@ th=null;
             setTypeAll();
             Log.getLogger(srv.getName()).talk("Change auto x-status dump");
             testType = true;
-        }        
+        }
        if((System.currentTimeMillis() - time)>ChatProps.getInstance(srv.getName()).getIntProperty( "auto_status.time")*60000){
            if(getCountStatus() == 0){
             time = System.currentTimeMillis();

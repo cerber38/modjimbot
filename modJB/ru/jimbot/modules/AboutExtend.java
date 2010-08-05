@@ -15,10 +15,12 @@ private String uin;// uin пользователя
 private long vremia;// время на заполнение
 private int order = 0;// номер вопроса
 private boolean answer = false;// вопрос задан? ждем ответа?
+private boolean commandReg = false;// после регистрации?
 
-	public AboutExtend(String uin, long expire) {
+	public AboutExtend(String uin, long expire, boolean commandReg) {
 	vremia = System.currentTimeMillis() + expire;
 	this.uin = uin;
+        this.commandReg = commandReg;
 	}
 
         public boolean isExpire() {
@@ -43,6 +45,10 @@ private boolean answer = false;// вопрос задан? ждем ответа
 
         public void setAnswer(boolean answer){
         this.answer = answer;
+        }
+
+        public boolean getCommand(){
+        return commandReg;
         }
 
 }

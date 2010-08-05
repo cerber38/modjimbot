@@ -327,7 +327,7 @@ public class MainPage extends HttpServlet {
         con.print("<hr><br><br>");
         con.print("</FONT></BODY></HTML>");
     }
-    
+
     /**
      * Остановка бота
      * @param con
@@ -1396,15 +1396,21 @@ public class MainPage extends HttpServlet {
                 "<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
                 "<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" + ns + "\">" +
                 "<INPUT TYPE=hidden NAME=\"us\" VALUE=\"" +us + "\">" +
-                "Имя группы: <INPUT TYPE=text NAME=\"gr\" size=\"20\"> " +
+                "Имя группы: <INPUT TYPE=text NAME=\"gr\" size=\"20\"> <br>" +
+                "Символ группы: <INPUT TYPE=text NAME=\"gr_s\" size=\"20\"> <br>" +
                 "<INPUT TYPE=submit VALUE=\"Создать новую группу\"></FORM>");
         String s = "<TABLE>";
         String[] gr = Manager.getInstance().getService(ns).getProps().getStringProperty("auth.groups").split(";");
         for(int i=0; i<gr.length; i++){
-            s += "<TR><TH ALIGN=LEFT>"+gr[i]+"</TD>";
+            String symbol = Manager.getInstance().getService(ns).getProps().getStringProperty("group.symbol_"+gr[i]);
+            symbol = symbol == null ? "" : symbol;
+            s += "<TR><TH ALIGN=LEFT>"+ symbol + "  " + gr[i]+"</TD>";
             
-            s += i==0 ? "" : "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
-                "&page=user_group_props_del&ns="+ns+"&gr=" + gr[i] + "&us=" + us + "\">(Удалить)</A></TD>";
+            s += i==0 ? "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=user_group_symboll&ns="+ns+"&gr=" + gr[i] + "&us=" + us + "\">(Изменить символ)</A> " +
+                "<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=user_group_symboll_del&ns="+ns+"&gr=" + gr[i] + "&us=" + us + "\">(Убрать символ)</A></TD> " : "<TD>" +
+                "<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=user_group_symboll&ns="+ns+"&gr=" + gr[i] + "&us=" + us + "\">(Изменить символ)</A> " +
+                "<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=user_group_symboll_del&ns="+ns+"&gr=" + gr[i] + "&us=" + us + "\">(Убрать символ)</A> " +
+                "<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=user_group_props_del&ns="+ns+"&gr=" + gr[i] + "&us=" + us + "\">(Удалить группу)</A></TD>";
             s += "</TR>";
         }
         s += "</TABLE>";
@@ -1452,6 +1458,7 @@ public class MainPage extends HttpServlet {
         Manager.getInstance().getService(ns).getProps().setStringProperty("auth.groups", 
                 Manager.getInstance().getService(ns).getProps().getStringProperty("auth.groups") + ";" + gr);
         Manager.getInstance().getService(ns).getProps().setStringProperty("auth.group_"+gr,"");
+        Manager.getInstance().getService(ns).getProps().setStringProperty("group.symbol_"+gr, con.get("gr_s"));
         Manager.getInstance().getService(ns).getProps().save();
         printOkMsg(con,"user_group_props");
     }
@@ -1594,6 +1601,98 @@ public class MainPage extends HttpServlet {
         s = s.replace(";"+gr, "");
         Manager.getInstance().getService(ns).getProps().setStringProperty("auth.groups",s);
         Manager.getInstance().getService(ns).getProps().setStringProperty("auth.group_"+gr,"");
+        Manager.getInstance().getService(ns).getProps().setStringProperty("group.symbol_"+gr,"");
+        Manager.getInstance().getService(ns).getProps().save();
+        printOkMsg(con,"user_group_props");
+    }
+
+    public void user_group_symboll(HttpConnection con) throws IOException {
+    	String uid = con.get("uid");
+        String us = con.get("us");
+        if(!checkSession(uid) & !checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
+        String ns = con.get("ns"); // Имя сервиса
+        if(!Manager.getInstance().getServiceNames().contains(ns)){
+            SrvUtil.error(con,"Отсутствует сервис с таким именем!");
+            return;
+        }
+        if(!us.equals("null") & Manager.getInstance().testServicesUser(us, ns)){
+        printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+        return;
+        }
+        String gr = con.get("gr");
+        con.print(SrvUtil.HTML_HEAD + "<TITLE> "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
+        "<H2>Панель управления ботом</H2>" +
+        "<H3>Смена символа группы " + gr + "</H3>");
+        con.print("<FORM METHOD=POST ACTION=\"" + con.getURI() +
+                "\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"user_group_symboll_in\">" +
+                "<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
+                "<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" + ns + "\">" +
+                "<INPUT TYPE=hidden NAME=\"us\" VALUE=\"" +us + "\">" +
+                "<INPUT TYPE=hidden NAME=\"gr\" VALUE=\"" +gr + "\">" +
+                "Символ группы: <INPUT TYPE=text NAME=\"gr_s\" size=\"20\"> <br>" +
+                "<INPUT TYPE=submit VALUE=\"Сменить символ\"></FORM>");
+        con.print("<FORM><P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&ns=" + ns + "&page=user_group_props\"></FORM>");
+        con.print("</FONT></BODY></HTML>");
+    }
+
+    /**
+     * Сменить символ группы
+     * @param con
+     * @throws IOException
+     */
+    public void user_group_symboll_in(HttpConnection con) throws IOException {
+    	String uid = con.get("uid");
+        String us = con.get("us");
+        if(!checkSession(uid) & !checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
+        String ns = con.get("ns"); // Имя сервиса
+        if(!Manager.getInstance().getServiceNames().contains(ns)){
+            SrvUtil.error(con,"Отсутствует сервис с таким именем!");
+            return;
+        }
+        if(!us.equals("null") & Manager.getInstance().testServicesUser(us, ns)){
+        printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+        return;
+        }
+        String gr = con.get("gr");
+        String sym = con.get("gr_s");
+        if(sym.equals("")){
+            printMsg(con,"user_group_symboll","Пустой символ!");
+            return;
+        }
+        Manager.getInstance().getService(ns).getProps().setStringProperty("group.symbol_"+gr,sym);
+        Manager.getInstance().getService(ns).getProps().save();
+        printOkMsg(con,"user_group_props");
+    }
+
+    /**
+     * Убрать символ группы
+     * @param con
+     * @throws IOException
+     */
+    public void user_group_symboll_del(HttpConnection con) throws IOException {
+    	String uid = con.get("uid");
+        String us = con.get("us");
+        if(!checkSession(uid) & !checkSession_user(uid, us)) {
+        SrvUtil.error(con,"Ошибка авторизации!");
+        return;
+        }
+        String ns = con.get("ns"); // Имя сервиса
+        if(!Manager.getInstance().getServiceNames().contains(ns)){
+            SrvUtil.error(con,"Отсутствует сервис с таким именем!");
+            return;
+        }
+        if(!us.equals("null") & Manager.getInstance().testServicesUser(us, ns)){
+        printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
+        return;
+        }
+        String gr = con.get("gr");
+        Manager.getInstance().getService(ns).getProps().setStringProperty("group.symbol_"+gr,"");
         Manager.getInstance().getService(ns).getProps().save();
         printOkMsg(con,"user_group_props");
     }

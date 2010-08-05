@@ -928,13 +928,12 @@ public class UserWork {
     }
 
          /*
-         * Бутылочка
+         * Вывод фразы для бутылочки
          */
-        public String GetButilochka(int id)
-        {
+        public String getVial(){
         String s = "";
         try {
-        PreparedStatement pst =  db.getDb().prepareStatement("select * from butilochka where id=" + id);
+        PreparedStatement pst =  db.getDb().prepareStatement("select * from butilochka ORDER BY RAND( ) LIMIT 0 , 1");
         ResultSet rs = pst.executeQuery();
         if(rs.next())
         {
@@ -1349,17 +1348,6 @@ public class UserWork {
       }
 
 
-    /**
-     * Число игр в миллионер за последние 24 часа
-     * @param id
-     * @return
-     */
-    /*public int getCountGame(int id) {
-    String q = "SELECT count(*) FROM `events` WHERE user_id="+id+" and type='MILLIONER' and (to_days( now( ) ) - to_days( time )) <1";
-    Vector<String[]> v = db.getValues(q);
-    return Integer.parseInt(v.get(0)[0]);
-    }*/
-
       /**
        * Вернет социальный статус пользователя
        * @param id
@@ -1430,5 +1418,76 @@ public class UserWork {
    uc.remove(u.sn);
    }
 
+   /**
+    * Проверка на получение зарплаты
+    * @param id
+    * @return
+    */
+
+  public int getSalary(int id) {
+  String q = "SELECT count(*) FROM `events` WHERE user_id="+id+" and type='Salary' and (to_days( now( ) ) - to_days( time )) <1";
+  Vector<String[]> v = db.getValues(q);
+  return Integer.parseInt(v.get(0)[0]);
+  }
+
+  /**
+   * Вернет символ группы
+   * @param group
+   * @return
+   */
+
+  public String getSymbol(String group){
+  String symbol = ChatProps.getInstance(serviceName).getStringProperty("group.symbol_" + group);
+  if(symbol == null) return "";
+  else
+      return symbol;
+  }
+
+        /**
+         * История предупреждений пользователя
+         * @param user_id - юзер
+         * @return
+         */
+
+        public String noticesUser(int user_id){
+        String s = "10 предупреждений пользователя - " + getUser(user_id).localnick + "\nМодератор | Причина\n";
+        try{
+        PreparedStatement pst = (PreparedStatement) db.getDb().prepareStatement("SELECT moder_id, notice_text FROM notice where user_id=" + user_id);
+        ResultSet rs = pst.executeQuery();
+        for(int i=1;i<11;i++){
+        if(rs.next()){
+        s += i + ") " + "|" + rs.getInt(1) + "|" + getUser(rs.getInt(1)).localnick + " ~ " + rs.getString(2) + "\n";
+        }
+        }
+        rs.close();
+        pst.close();
+        }catch(Exception ex){
+        ex.printStackTrace();
+        }
+        return s;
+        }
+
+        /**
+         * Количество закрываний за сутки
+         * @return
+         */
+        public int statNoticesCount(){
+        long last = System.currentTimeMillis() - 1000*3600*24;
+        int r = 0;
+        try{
+        PreparedStatement pst = db.getDb().prepareStatement("select count(*) from log t where type = 'Notices' and time>=?");
+        pst.setTimestamp(1,new Timestamp(last));
+        ResultSet rs = pst.executeQuery();
+        if(!rs.next())
+        r = 0;
+        else
+        r = rs.getInt(1);
+        rs.close();
+        pst.close();
+        }catch (Exception ex){
+        ex.printStackTrace();
+        }
+        return r;
+        }
 
 }

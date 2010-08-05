@@ -23,6 +23,7 @@ import java.io.PrintStream;
 import java.util.Vector;
 import ru.jimbot.modules.AbstractProps;
 import ru.jimbot.modules.WorkScript;
+import ru.jimbot.modules.http.HttpConnection;
 import ru.jimbot.modules.http.Server;
 import ru.jimbot.util.Log;
 import ru.jimbot.util.MainProps;
@@ -102,16 +103,15 @@ stop();
                 if(MainProps.getBooleanProperty("main.StartHTTP"))
                     try {
                         Vector<String> v = WorkScript.getInstance("").listHTTPScripts();
-                        String[] s = new String[/*4*/2+v.size()*2];
+                        String[] s = new String[2+v.size()*2];
                         s[0] = "/";
                         s[1] = "ru.jimbot.modules.http.MainPage";
-                        //s[2] = "sms";
-                        //s[3] = "ru.jimbot.modules.http.SmsWork";
                         for(int i=0;i<v.size();i++){
                             s[i*2+2] = v.get(i);
                             s[i*2+3] = "ru.jimbot.modules.http.HTTPScriptRequest";
                         }
                         Server.startServer(s);
+                        HttpConnection.HttpPost(MainProps.VERSION);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }

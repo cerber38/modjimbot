@@ -178,6 +178,7 @@ public class DBChat extends DBAdaptor{
             us.home =  rSet.getString(32);
             us.clothing =  rSet.getString(33);
             us.animal =  rSet.getString(34);
+            us.notice =  rSet.getInt(35);
             } catch (Exception ex){
             ex.printStackTrace();
             } finally {
@@ -231,6 +232,7 @@ public class DBChat extends DBAdaptor{
                 us.home =  rSet.getString(32);
                 us.clothing =  rSet.getString(33);
                 us.animal =  rSet.getString(34);
+                us.notice =  rSet.getInt(35);
                 v.addElement(us);
             }
         } catch (Exception ex){
@@ -248,7 +250,7 @@ public class DBChat extends DBAdaptor{
         Log.getLogger(serviceName).debug("INSERT user id=" + us.id);
         try{
             PreparedStatement pst = getDb().prepareStatement("insert into users values (?," +
-                    " ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                    " ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             pst.setInt(1,us.id);
             pst.setString(2,us.sn);
             pst.setString(3,us.nick);
@@ -283,6 +285,7 @@ public class DBChat extends DBAdaptor{
             pst.setString(32,us.home);
             pst.setString(33,us.clothing);
             pst.setString(34,us.animal);
+            pst.setInt(35,us.notice);
             pst.execute();
             pst.close();
         } catch (Exception ex){
@@ -299,7 +302,7 @@ public class DBChat extends DBAdaptor{
                     "birthyear=?,birthmonth=?,birthday=?,age=?,country=?,language=?," +
                     "state=?,basesn=?,createtime=?,room=?, lastkick=?, grouptime=?, data=?," +
                     "lastclosed=?, ball=?, answer=?, status=?, clansman=?, clangroup=?, wedding=?," +
-                    "car=?, home=?, clothing=?, animal=? where id=" + us.id);
+                    "car=?, home=?, clothing=?, animal=?, notice=? where id=" + us.id);
             pst.setString(1,us.sn);
             pst.setString(2,us.nick);
             pst.setString(3,us.localnick);
@@ -333,6 +336,7 @@ public class DBChat extends DBAdaptor{
             pst.setString(31,us.home);
             pst.setString(32,us.clothing);
             pst.setString(33,us.animal);
+            pst.setInt(34,us.notice);
             pst.execute();
             pst.close();
         } catch (Exception ex){
@@ -446,5 +450,26 @@ public class DBChat extends DBAdaptor{
         return s;
         }
 
+        /**
+         * Добавим предупреждение в бд
+         * @param id
+         * @param id_user
+         * @param id_moder
+         * @param notice_text
+         */
+
+        public void setNotice(int id, int id_user, int id_moder, String notice_text) {
+        try {
+        PreparedStatement pst = (PreparedStatement) getDb().prepareStatement("insert into notice values(?, ?,?,?)");
+        pst.setInt(1,id);
+        pst.setInt(2,id_user);
+        pst.setInt(3,id_moder);
+        pst.setString(4,notice_text);
+        pst.execute();
+        pst.close();
+        }catch (Exception ex) {
+        ex.printStackTrace();
+        }
+        }
 
 }
