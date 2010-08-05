@@ -16,8 +16,8 @@ import ru.jimbot.modules.chat.Users;
 import java.sql.*;
 
     // RobAdmin adm;
-    adm.NICK = "Админ:D";
-    adm.ALT_NICK="админ;admin";
+    adm.NICK = adm.srv.getProps().getStringProperty("radm.nick");
+    adm.ALT_NICK =adm.srv.getProps().getStringProperty("radm.nicks");
 
 
     
