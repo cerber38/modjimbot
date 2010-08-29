@@ -48,7 +48,7 @@ public class AnekWork {
     
     public void initDB() {
         try{
-            db = new DBAneks();
+            db = new DBAneks(serviceName);
             db.openConnection(host, name, user, pass);
             maxAnek=count();
             readAdsKey();
@@ -188,7 +188,6 @@ public class AnekWork {
     
     public String getAnek(int id) {
         String s = "";
-//    	Aneks a;
         if(id<1 || id>maxAnek) return "Нет такого анека";
         Statement stm = null;
 		ResultSet rs = null;
@@ -204,7 +203,6 @@ public class AnekWork {
         	if(rs!=null) try{rs.close();}catch(Exception e){};
         	if(stm!=null) try{stm.close();}catch(Exception e){};
         }
-//        a = (Aneks)db.getObject("select * from aneks where id=" + id);
         return "Анекдот №" + id + "\n" + s + getAds();
     }
     
@@ -213,10 +211,10 @@ public class AnekWork {
     }
     
     public String getAnek(){
-        Random r = new Random();
-//        long i = db.getLastIndex("db.aneks");
+        Random rr = new Random();
+        if(maxAnek == 1) return "В базе нет анекдотов";
         long i = (long)maxAnek;
-        int t = r.nextInt((int)(i-2)) +1;
+        int t = rr.nextInt((int)(i-2)) +1;
         return getAnek(t);
     }
     

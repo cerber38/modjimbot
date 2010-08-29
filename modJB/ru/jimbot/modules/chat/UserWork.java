@@ -38,7 +38,6 @@ public class UserWork {
     public static final int STATE_NO_REG = 0;
     public static final int STATE_NO_CHAT = 1;
     public static final int STATE_CHAT = 2;
-    public static final int STATE_OFFLINE = 3;
     public static final int STATE_BANNED = -1;
     public static final int STATE_CAPTCHA = -2;
     
@@ -1488,6 +1487,34 @@ public class UserWork {
         ex.printStackTrace();
         }
         return r;
+        }
+
+        /**
+         * Список всех админов
+         * @return
+         */
+
+        public String allAdmins(){
+        String s = "Список всех админов:\n|id|nick|group|\n";
+        try{
+        PreparedStatement pst = db.getDb().prepareStatement("SELECT user_id, val FROM `user_props` WHERE `val` IN('moder', 'admin') ORDER BY user_id") ;
+        ResultSet rs = pst.executeQuery();
+        while(rs.next()) {
+        Users us = getUser(rs.getInt(1));
+        String group = rs.getString(2);
+        if(group.equals("moder")){
+        s += "|" + us.id + "|" + us.localnick + " ~ moder\n";
+        } else if(group.equals("admin")){
+        s += "|" + us.id + "|" + us.localnick + " ~ admin\n";
+        }
+        }
+        rs.close();
+        pst.close();
+        }catch (Exception ex){
+        ex.printStackTrace();
+        return "";
+        }
+        return s;
         }
 
 }

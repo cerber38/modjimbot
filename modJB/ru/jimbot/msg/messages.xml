@@ -19,6 +19,7 @@
 Не посылайте одинаковых сообщений и сообщения чаще {1} сек.</entry>
 <entry key="ChatCommandProc.parse.5">Для входа в {0} используйте команду !чат. Для помощи пошлите команду !помощь
 Не посылайте ваши сообщения слишком часто.</entry>
+<entry key="ChatCommandProc.parse.6">Вы неправильно ответили на проверочный вопрос, попытайтесь еще раз.:)</entry>
 <entry key="ChatCommandProc.err">Ошибка: {0}</entry>
 <entry key="ChatCommandProc.err.1">Ошибка в команде</entry>
 <entry key="ChatCommandProc.commandA.0">Список пользователей</entry>
@@ -148,10 +149,11 @@
 <entry key="ChatCommandProc.commandgoChat.12">Данный номер слишком загружен, вы будете автоматически переведены на ближайший свободный номер.</entry>
 <entry key="ChatCommandProc.commandgoChat.13">Сообщения теперь будут приходить с номера %NEW_CHAT_UIN%</entry>
 <entry key="ChatCommandProc.commandgoChat.14">%NICK% викторина работает с %VIC_GAME_TIME_0% и до %VIC_GAME_TIME_1% часов. Выберете другую комнату.</entry>
-<entry key="ChatCommandProc.commandRoom.15">%NICK% в викторину могут играть максимум %VIC_USERS_COUNT% человек. Выберете другую комнату.</entry>
+<entry key="ChatCommandProc.commandgoChat.15">%NICK% в викторину могут играть максимум %VIC_USERS_COUNT% человек. Выберете другую комнату.</entry>
 <entry key="ChatCommandProc.commandgoChat.16">%NICK% вы вошли в чат невидимым</entry>
 <entry key="ChatCommandProc.commandexitChat.0">%NICK%  ушел(ушла) из чата</entry>
 <entry key="ChatCommandProc.commandexitChat.1">Приходите еще *BYE*</entry>
+<entry key="ChatCommandProc.commandexitChat.2">%NICK% вы вышли из чат невидимым</entry>
 <entry key="ChatCommandProc.tkick.0">Пинок на {0}  минут, {1}{2}</entry>
 <entry key="ChatCommandProc.tkick.1">, Причина: {0} </entry>
 <entry key="ChatCommandProc.tkick.2">Пинок на {0} минут</entry>
@@ -172,5 +174,32 @@
 Группа: {1}
 Доступные объекты: </entry>
 <entry key="Advertisement.0">Реклама: {0}</entry>
+<entry key="RobAdmin.getBanroom_say.0">закрыт(а) в комнату;пнут(а) в комнату;улетел(а) в комнату;заперт(а) в комнате;мда... go в комнату;не беси меня больше а пока поседи в</entry>
+<entry key="RobAdmin.getBanroom_say.1">меньше матом ори;не матерись;за мат;мат в чате запрещен;прочти !правила;за мат я караю строго</entry>
+<entry key="RobAdmin.getBanroom_say.2">много мата;сматерился;за мат;мат в чате запрещен;пусть читает !правила;за мат я караю строго</entry>
+<entry key="RobAdmin.close.0">(Зек)</entry>
+<entry key="RobAdmin.close.1">{0} {1} |{2}|, на {3} минут, {4}</entry>
+<entry key="RobAdmin.close.2">У вас пополнение, неудачник:  {0} он(а) закрыт(а) на {1} минут</entry>
+<entry key="RobAdmin.close.3">Ты закрыт(а) в комнату, на {0} минут, {1}</entry>
+<entry key="RobAdmin.warning.0">|{0}|{1} off mat :)</entry>
+<entry key="RobAdmin.warning.1">Достали... ща закрою!</entry>
+<entry key="RobAdmin.kick.0">|{0}|{1} был удален из чата за мат</entry>
+<entry key="RobAdmin.kick.1">За мат</entry>
+<entry key="RobAdmin.stat.0">Ну вас нафиг... нашли дурака... работай тут, считай... дайте передохнуть хоть немного.</entry>
+<entry key="RobAdmin.stat.1">{0} запущен - {1}
+Время работы - {2}
+За последние сутки:
+Всего зашло в чат - {3}
+Отправлено сообщений - {4}
+Закрыто в тюрьме юзеров - {5}
+Выписано предупреждений - {6}
+Кикнутых юзеров - {7}
+Всего киков - {8}
+Забанено юзеров - {9}
+Самые болтливые пользователи:
+{10}
+Самые рейтинговые пользователи:
+{11}</entry>
+<entry key="RobAdmin.alone.0">Здесь так тихо...;Ну и чего все замолчали?;Ну и молчите дальше, я тоже буду молчать :-\\;Алле! тут есть кто-нибудь? А-а-а-а!!! Я что тут один?!</entry>
 </properties>
 

@@ -19,7 +19,6 @@
 package ru.jimbot.modules;
 
 import ru.caffeineim.protocols.icq.integration.OscarInterface;
-import ru.jimbot.modules.chat.Users;
 import ru.jimbot.protocol.IcqProtocol;
 import ru.jimbot.protocol.ProtocolListener;
 import ru.jimbot.util.Log;
@@ -34,45 +33,31 @@ public class MsgReceiver implements ProtocolListener {
     MsgInQueue iq;
     IcqProtocol iprot;
     
-    public MsgReceiver( MsgInQueue q, IcqProtocol ip )
-    {
+    public MsgReceiver( MsgInQueue q, IcqProtocol ip ){
     iq = q;
     iprot = ip;
     ip.addListener( this );
     }
-    //@SuppressWarnings("all")
     public void getMsg( String sendSN, String recivSN, String msg, boolean isOffline ){
         String[] mmsg = msg.split(" ");
-        if( mmsg[ 0 ].equalsIgnoreCase( "!about" ) || mmsg[ 0 ].equalsIgnoreCase( "!оботе" ) )
-        {
-        if( !iq.testFlood( sendSN ) )
-        {
-
+        if( mmsg[ 0 ].equalsIgnoreCase( "!about" ) || mmsg[ 0 ].equalsIgnoreCase( "!оботе" ) ){
+        if( !iq.testFlood( sendSN ) ){
         iprot.sendMsg( sendSN, MainProps.VERSION +
         "\nВерсия icq библиотеки: " + OscarInterface.getVersion() +
         "\nПоддержка проекта: http://jimbot.ru" +
-        "\nПоддержка мода - www.toch72.ru"  +
-        "\nХостинг чатов:" +
-        "\n1) http://exstazy.ru/" +
-        "\n2) http://wortep.ru/");
+        "\nПоддержка мода - www.toch72.ru");
         Log.getLogger(iprot.serviceName).info( "CHAT COM_LOG: " + sendSN + ">> " + mmsg[ 0 ] );
         }else{
         Log.getLogger(iprot.serviceName).flood("FLOOD from " + sendSN + ">> " + msg);
         }
         return;
         }
-        System.out.print(sendSN + ">> " + msg + "\n");
     iq.addMsg( iprot, sendSN, msg, isOffline );
     }
 
 
-    public void getStatus(String sn, int status)
-    {
+    public void getStatus(String sn, int status){
     iq.addStatus(iprot,sn,String.valueOf(status));
     }    
     
-    public void getInfo(Users u, int type)
-    {
-    iq.addInfo(u, type);
-    }
 }

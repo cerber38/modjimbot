@@ -130,12 +130,15 @@ private Properties props = null;
             msg = msg.replace("%VIC_GAME_TIME_0%", time[0]);
             msg = msg.replace("%VIC_GAME_TIME_1%", time[1]);
             msg = msg.replace("%VIC_USERS_COUNT%", Integer.toString(ChatProps.getInstance(ServiceName).getIntProperty("vic.users.cnt")));
+            if(ChatProps.getInstance(ServiceName).getBooleanProperty("shop2.on.off")){
             msg = msg.replace("%CAR%", uss.car);
             msg = msg.replace("%HOME%", uss.home);
             msg = msg.replace("%CLOTHING%", uss.clothing);
             msg = msg.replace("%ANIMAL%", uss.animal);
+            }
             if(ChatProps.getInstance(ServiceName).getBooleanProperty("social.status.on.off"))
             msg = msg.replace("%SOCIAL_STATUS%", srv.us.getStatus(uss.id));
+            msg = msg.replace("%NOTICE%", Integer.toString(uss.notice));
             return msg;
         } catch (MissingResourceException e) {
             return '!' + key + '!';

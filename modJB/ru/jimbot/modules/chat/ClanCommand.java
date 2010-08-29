@@ -206,11 +206,7 @@ return s;
 public boolean Group( String uin, String group )
 {
 Users u = cmd.srv.us.getUser( uin );
-if( !u.clangroup.equals( group ) )
-{
-return false;
-}
-return true;
+return u.clangroup.equals( group );
 }
 
 
@@ -1059,6 +1055,7 @@ proc.mq.add( uin, uss.localnick + " информация о кланне не м
 return;
 }
 cmd.srv.us.getClan( uss.clansman ).setInfo( text );
+cmd.srv.us.saveClan(cmd.srv.us.getClan( uss.clansman ));
 proc.mq.add( uin, uss.localnick + " инфа успешно изменина" );
 }
 

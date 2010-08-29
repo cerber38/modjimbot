@@ -11,8 +11,8 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Vector;
 import ru.jimbot.modules.Cmd;
+import ru.jimbot.modules.CommandExtend;
 import ru.jimbot.modules.CommandParser;
-import ru.jimbot.modules.ShopExtend;
 import ru.jimbot.protocol.IcqProtocol;
 
 /**
@@ -22,7 +22,7 @@ import ru.jimbot.protocol.IcqProtocol;
 
 public class Shop {
 private HashMap<String, Cmd> commands = new HashMap<String, Cmd>();
-public HashMap<String, ShopExtend> ComShop;
+public HashMap<String, CommandExtend> ComShop;
 private CommandParser parser;
 private ChatCommandProc cmd;
 
@@ -31,7 +31,7 @@ public Shop(ChatCommandProc c)
 {
 parser = new CommandParser(commands);
 cmd = c;
-ComShop = new HashMap<String, ShopExtend>();
+ComShop = new HashMap<String, CommandExtend>();
 init();
 }
 
@@ -115,7 +115,7 @@ return f;
     if(!twoPart)
     {
     Spisok(proc, uin);
-    ComShop.put(uin, new ShopExtend(uin, mmsg, mmsg,v, 2*60000));
+    ComShop.put(uin, new CommandExtend(uin, mmsg, mmsg,v, 2*60000));
     return;
     }
     if(i == 0){Exit(proc, uin);}

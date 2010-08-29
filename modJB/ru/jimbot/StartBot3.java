@@ -21,11 +21,9 @@ package ru.jimbot;
 
 import java.io.PrintStream;
 import java.util.Vector;
-import ru.jimbot.modules.AbstractProps;
 import ru.jimbot.modules.WorkScript;
 import ru.jimbot.modules.http.HttpConnection;
 import ru.jimbot.modules.http.Server;
-import ru.jimbot.util.Log;
 import ru.jimbot.util.MainProps;
 import ru.jimbot.util.SystemErrLogger;
 
@@ -34,66 +32,14 @@ import ru.jimbot.util.SystemErrLogger;
  * @author Prolubnikov Dmitriy
  *
  */
-public class StartBot3 implements Runnable {
-private Thread th;
-int sleepAmount = 1000;
-long Time = System.currentTimeMillis();
-long Time2 = MainProps.testtime;
-private String Fucking = "You Fucking!!! Put copyrights of authors into place! Immediate!";
-public static String name = System.getProperty("os.name"); //Название операционной системы
-public static String version = System.getProperty("os.version"); //Версия операционной системы
-public static String java = System.getProperty("java.version"); //Версия JRE
-private AbstractProps props = null;
+public class StartBot3 {
+
 
 public StartBot3(){}
 
-	public void start(){
-		th = new Thread(this);
-		th.setPriority(Thread.NORM_PRIORITY);
-		th.start();
-	}
-
-private void CheckOfCopyrights(){
-try{
-boolean f = false;
-String ver = MainProps.VERSION;
-String ver2 = Monitor2.copirite;
-ver = ver.replaceAll( "\n" , " " );
-ver2 = ver2.replaceAll( "\n" , " " );
-if( ver2.trim().equalsIgnoreCase( ver.trim() ) )
-{
-f = true;
-}
-if( f )
-{
-stop();
-}
-else
-{
-stop();
-Log.getDefault().info( Fucking );
-Manager.getInstance().exit();
-}
-}
-catch ( Exception ex )
-{
-ex.printStackTrace();
-Log.getDefault().info( "Errore: " + ex );
-stop();
-}
-}
-
-
-	public synchronized void stop() {
-		th = null;
-		notify();
-	}
-
-    public AbstractProps getProps() {
-    	return props;
-    }
 
 	/**
+         * Входная точка бота
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -122,16 +68,5 @@ stop();
                  }
     }
 
-
-    	public void run() {
-		Thread me = Thread.currentThread();
-		while (th == me) {
-			CheckOfCopyrights();
-			try {
-				th.sleep(sleepAmount);
-			} catch (InterruptedException e) { break; }
-		}
-		th=null;
-	}
 
 }

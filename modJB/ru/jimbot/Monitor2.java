@@ -29,8 +29,8 @@ public class Monitor2 implements Runnable {
     int sleepAmount = 1000;
     private static final int testMaxCount = 30; // Период проверки файла - 15с
     private int count =0;
-    public static final String copirite = "jImBot v.0.4.0 (c)Spec (06/07/2009)\nBy modifying - fraer72\nVersion update - pre-release 3 (5/08/2010)";
-    
+    long TimesDelLog = System.currentTimeMillis();
+
     /** Creates a new instance of Monitor */
     public Monitor2() {
     }
@@ -59,10 +59,19 @@ public class Monitor2 implements Runnable {
         Thread me = Thread.currentThread(); 
         while (th == me) {
             testState();
+            if(Manager.isDeleteLog()) deleteLogs();
             try {
                 Thread.sleep(sleepAmount);
             } catch (InterruptedException e) { break; }             
         }
         th=null;
     }
+
+    private void deleteLogs(){
+    if((System.currentTimeMillis()-TimesDelLog)> Manager.timeDeleteLog()*60*60000){
+    Manager.getInstance().deleteLogs();
+    TimesDelLog = System.currentTimeMillis();
+    }
+    }
+
 }

@@ -35,6 +35,7 @@ import ru.jimbot.modules.MsgStatCounter;
 import ru.jimbot.modules.chat.ChatCommandProc;
 import ru.jimbot.modules.chat.ChatServer;
 import ru.jimbot.table.UserPreference;
+import ru.jimbot.util.CreateService;
 import ru.jimbot.util.Log;
 import ru.jimbot.util.MainProps;
 
@@ -157,19 +158,31 @@ public class MainPage extends HttpServlet {
      * @param p
      * @return
      */
-    private String prefToHtml(UserPreference[] p, boolean user) {
+    private String prefToHtml(UserPreference[] p, boolean isUser) {
     	String s = "<TABLE>";
     	for(int i=0;i<p.length;i++){
-    		if(p[i].getType()==UserPreference.CATEGORY_TYPE & !UserPreference.testCATEGORY(user, p[i].getKey())){
+    		if(p[i].getType()==UserPreference.CATEGORY_TYPE){
     			s += "<TR><TH ALIGN=LEFT><u>" + p[i].getDisplayedKey() + "</u></TD></TR>";
     		} else if(p[i].getType()==UserPreference.BOOLEAN_TYPE) {
+                        if(isUser & !p[i].getTestUser()){
+                        s += "<TR><TH ALIGN=LEFT>"+p[i].getDisplayedKey()+ "</TD> " +
+    			"<TD><INPUT TYPE=CHECKBOX NAME=\"" + p[i].getKey() +  "\" onclick=\"return false;\"" +
+    			"\" VALUE=\"true\" " + ((Boolean)p[i].getValue() ? "CHECKED" : "") + "></TD></TR>";
+                        } else{
     			s += "<TR><TH ALIGN=LEFT>"+p[i].getDisplayedKey()+ "</TD> " +
     			"<TD><INPUT TYPE=CHECKBOX NAME=\"" + p[i].getKey() +
     			"\" VALUE=\"true\" " + ((Boolean)p[i].getValue() ? "CHECKED" : "") + "></TD></TR>";
-    		} else if(!UserPreference.testKEY(user, p[i].getKey())) {
+                        }
+    		} else{
+                        if(isUser & !p[i].getTestUser()){
     			s += "<TR><TH ALIGN=LEFT>"+p[i].getDisplayedKey()+ "</TD> " +
-    					"<TD><div class=\"field\"><INPUT class=\"container\" size=\"70\" TYPE=text NAME=\"" + p[i].getKey() +
-    					"\" VALUE=\"" + p[i].getValue() + "\"></div></TD></TR>";
+    			"<TD><div class=\"field\"><INPUT readonly=\"readonly\" class=\"container\" size=\"70\" TYPE=text NAME=\"" + p[i].getKey() +
+    			"\" VALUE=\"" + p[i].getValue() + "\"></div></TD></TR>";
+                        }else{
+    			s += "<TR><TH ALIGN=LEFT>"+p[i].getDisplayedKey()+ "</TD> " +
+    			"<TD><div class=\"field\"><INPUT class=\"container\" size=\"70\" TYPE=text NAME=\"" + p[i].getKey() +
+    			"\" VALUE=\"" + p[i].getValue() + "\"></div></TD></TR>";
+                        }
         }
         }
     	s += "</TABLE>";
@@ -225,7 +238,7 @@ public class MainPage extends HttpServlet {
         s += "<TD> </TD>";
         }
         if(!MainProps.getType(sn[i]).equalsIgnoreCase("Anek")){
-    	s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=srvs_messages&ns="+sn[i]+"\">messages.xml</A></TD>";
+    	s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us +  "&page=srvs_messages&ns="+sn[i]+"\">messages.xml</A></TD>";
         } else {
         s += "<TD> </TD>";
         }
@@ -268,11 +281,6 @@ public class MainPage extends HttpServlet {
         con.print("<p align=\"center\"><b><FONT COLOR=\"#006400\">" + MainProps.VERSION + "</FONT></b></p>");
         con.print("<hr><H2>Панель управления ботом</H2>");
         con.print("<b>Вы вошли как администратор!<b><br><br>");
-    	if(MainProps.checkNewVersion()){
-    	    con.print("<p>На сайте <A HREF=\"http://jimbot.ru\">jimbot.ru</A> Доступна новая версия!<br>");
-    	    con.print(MainProps.getNewVerDesc().replaceAll("\n", "<BR>"));
-    	    con.print("</p>");
-    	}
     	con.print("<H3>Главное меню</H3>");
     	con.print("<A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=main_props\">" +
     			"Основные настройки</A><br>");
@@ -353,7 +361,7 @@ public class MainPage extends HttpServlet {
             SrvUtil.error(con,"Ошибка авторизации!");
             return;
         }
-        Manager.getInstance().restart();
+        Manager.restart();
         printMsgRestart(con,"main_page", "Перезапуск бота...");
     }
 
@@ -935,7 +943,7 @@ public class MainPage extends HttpServlet {
     	con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
     	con.print("</FONT></BODY></HTML>");
     }
-    
+   
     /**
      * Обработка формы создания нового сервиса
      * @param con
@@ -963,12 +971,14 @@ public class MainPage extends HttpServlet {
     	}
         MainProps.AddDirectory(ns);
         MainProps.AddLogProperties(ns);
+        MainProps.uinsAddFile(ns);
         MainProps.CopyingScript(ns, type);
         if(!type.equalsIgnoreCase("anek"))MainProps.CopyingMessagesXml(ns);
     	Manager.getInstance().addService(ns, type);
         Manager.getInstance().getService(ns).getProps().AddXmlConfig(ns);
     	MainProps.addService(ns, type);
     	MainProps.save();
+        if(MainProps.getBooleanProperty("avto.db.on.off")) CreateService.initMySQLService(ns);
     	printOkMsg(con,"main_page");
     }
     
@@ -993,6 +1003,7 @@ public class MainPage extends HttpServlet {
         	"<H3>Настройки UIN для сервиса " + ns + "</H3>");
         con.print("<P><A HREF=\"" + con.getURI() + "?uid=" + uid + "&page=srvs_props_uin_add&ns="+ns+"\">" +
         	"Добавить новый UIN</A><br>");
+        con.print("<P><INPUT TYPE=button VALUE=\"Загрузить из txt файла\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&ns=" + ns + "&page=srvs_props_uin_add_txt\"></FORM>");
         String s = "<FORM METHOD=POST ACTION=\"" + con.getURI() +
         	"\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"srvs_props_uin_in\">" +
         	"<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" +ns + "\">" +
@@ -1011,6 +1022,36 @@ public class MainPage extends HttpServlet {
         con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
         con.print("</FONT></BODY></HTML>");
 
+    }
+
+    /**
+     * Добавление уинов из txt файла
+     * @param con
+     * @throws IOException
+     */
+    public void srvs_props_uin_add_txt(HttpConnection con) throws IOException {
+    	String uid = con.get("uid");
+    	if(!checkSession(uid)) {
+    		SrvUtil.error(con,"Ошибка авторизации!");
+    		return;
+    	}
+    	String ns = con.get("ns"); // Имя сервиса
+    	if(!Manager.getInstance().getServiceNames().contains(ns)){
+    		SrvUtil.error(con,"Отсутствует сервис с таким именем!");
+    		return;
+    	}
+        if(!MainProps.isUins2(ns)) MainProps.uinsAddFile(ns);
+        if(MainProps.isUins(ns)){
+        printMsg(con, "srvs_props_uin", "Нет уинов в txt файле!");
+        return;
+        }
+        String[] uins = MainProps.loadUinList(ns);
+        for(int i=0;i<uins.length;i++){
+        String[] a = uins[i].split(";");
+    	Manager.getInstance().getService(ns).getProps().addUin(a[0], a[1]);
+        }
+        MainProps.uinsRecreate(ns);
+    	srvs_props_uin(con);
     }
     
     /**
@@ -1246,6 +1287,8 @@ public class MainPage extends HttpServlet {
         printMsg(con, "main_page_user", "У вас нет прав на данный сервис!");
         return;
         }
+        boolean user = false;
+        if(us != null) user = true;
         con.print(SrvUtil.HTML_HEAD + "<TITLE>JimBot "+MainProps.VERSION+" </TITLE></HEAD>" + SrvUtil.BODY +
         	"<H2>Панель управления ботом</H2>" +
         	"<H3>Настройки сервиса " + ns + "</H3>");
@@ -1254,7 +1297,7 @@ public class MainPage extends HttpServlet {
         	"<INPUT TYPE=hidden NAME=\"ns\" VALUE=\"" +ns + "\">" +
                 "<INPUT TYPE=hidden NAME=\"us\" VALUE=\"" +us + "\">" +
         	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
-        	prefToHtml(Manager.getInstance().getService(ns).getProps().OtherUserPreference(), false)+
+        	prefToHtml(Manager.getInstance().getService(ns).getProps().OtherUserPreference(), user)+
           	"<P><INPUT TYPE=submit VALUE=\"Сохранить\">");
         String page = us==null ? "main_page" : "main_page_user";
         con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" + page + "\"></FORM>");
@@ -1359,10 +1402,12 @@ public class MainPage extends HttpServlet {
     con.print("<P>%VIC_GAME_TIME_1% - время конца игры в викторине.</P>");
     con.print("<P>%VIC_USERS_COUNT% - максимальное количество пользователей которое может играть в викторину.</P>");
     con.print("<P>%SOCIAL_STATUS% - социальный статус.</P>");
+    con.print("<P>%NOTICE% - количество предупреждений.</P>");
     con.print("<b>exitChat:</b>");
     con.print("<P>%NICK% - ник пользователя.</P>");
     con.print("<P>%ID% - id пользователя.</P>");
-    con.print("<FORM><P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=main_page\"></FORM>");
+    String page = us==null ? "main_page" : "main_page_user";
+    con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onclick=location.href=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=" + page + "\"></FORM>");
     con.print("</FONT></BODY></HTML>");
     }
     
@@ -1839,10 +1884,6 @@ public class MainPage extends HttpServlet {
     	}
     	con.send();
     }
-
-
-
-
 
     class NoAuthorization
     {

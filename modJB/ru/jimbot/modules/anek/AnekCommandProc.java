@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-
 import ru.jimbot.modules.AbstractCommandProcessor;
 import ru.jimbot.modules.AbstractServer;
 import ru.jimbot.modules.Cmd;
@@ -35,7 +34,6 @@ import ru.jimbot.modules.CommandParser;
 import ru.jimbot.modules.WorkScript;
 import ru.jimbot.protocol.IcqProtocol;
 import ru.jimbot.util.Log;
-import ru.jimbot.util.MainProps;
 
 /**
  *
@@ -49,7 +47,6 @@ public class AnekCommandProc extends AbstractCommandProcessor {
     public HashMap<String,Cmd> commands = new HashMap<String,Cmd>();
     public CommandParser parser = null;
     private boolean firstStartMsg = false;
-//    private HashSet<String> ignore;
     
     /** Creates a new instance of AnekCommandProc */
     public AnekCommandProc(AnekServer s) {
@@ -63,11 +60,7 @@ public class AnekCommandProc extends AbstractCommandProcessor {
     	if(!firstStartMsg){
     		String[] s = srv.getProps().getAdmins();
     		for(int i=0;i<s.length;i++){
-    		    String ss = "Бот успешно запущен!\n";
-                if(MainProps.checkNewVersion())
-                    ss += "На сайте http://jimbot.ru Доступна новая версия!\n" + MainProps.getNewVerDesc();
-                else
-                    ss += "Вся информация о боте из первых рук только на сайте: http://jimbot.ru";
+    		String ss = "Сервис \"" + srv.getName() + "\" запущен - " + new Date(getTimeStart());
                 proc.mq.add(s[i], ss);
     		}
     		firstStartMsg=true;

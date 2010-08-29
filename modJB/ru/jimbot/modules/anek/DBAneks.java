@@ -33,7 +33,8 @@ import ru.jimbot.db.DBObject;
 public class DBAneks extends DBAdaptor{
     
     /** Creates a new instance of DBAneks */
-    public DBAneks() throws Exception  {
+    public DBAneks(String name) throws Exception  {
+    serviceName = name;
     }
     
     public void createDB(){

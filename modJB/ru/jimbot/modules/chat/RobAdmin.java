@@ -19,13 +19,12 @@
 package ru.jimbot.modules.chat;
 
 import com.mysql.jdbc.PreparedStatement;
-import java.io.File;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import ru.jimbot.Manager;
+import ru.jimbot.Messages;
 import ru.jimbot.modules.WorkScript;
 import ru.jimbot.protocol.IcqProtocol;
 import ru.jimbot.util.Log;
@@ -45,11 +44,10 @@ public class RobAdmin implements Runnable {
     private Thread th;
     public ChatServer srv;
     int sleepAmount = 1000;
-    long cTime=System.currentTimeMillis(); //Время последнего сообщения, для определения паузы
+    long cTime = System.currentTimeMillis(); //Время последнего сообщения, для определения паузы
     long stTime = 0; //Время последнего вывода статистики
     public ConcurrentLinkedQueue <MsgElement> mq;
     public ConcurrentHashMap <String,Integer> uins;
-    ConcurrentHashMap <String,Integer> test1, test2;
     private String[][] chg = {{"y","у"},{"Y","у"},{"k","к"},{"K","к"},{"e","е"},
                             {"E","е"},{"h","н"},{"H","н"},{"r","г"},{"3","з"},{"x","х"},{"X","х"},
                             {"b","в"},{"B","в"},{"a","а"},{"A","а"},{"p","р"},{"P","р"},{"c","с"},
@@ -57,33 +55,15 @@ public class RobAdmin implements Runnable {
     private Random r = new Random();
     int a = 0;
     long times = System.currentTimeMillis();
-    long TimesDelLog = System.currentTimeMillis();
-   
+ 
     /** Creates a new instance of RobAdmin */
     public RobAdmin(ChatServer s) {
         srv = s;
         mq = new ConcurrentLinkedQueue();
         uins = new ConcurrentHashMap();
         uins.put("0",0);
-        test1 = new ConcurrentHashMap();
-        test2 = new ConcurrentHashMap();
     }
     
-
-   
-   
-    /*
-    * Вывод случайной фразы для админ-бота
-    */
-    public int n()
-    {
-    long i = srv.us.db.getLastIndex("robadmin");
-    String o = "" + i;
-    int p = Integer.valueOf(o);
-    int i1 =  getRND(p);
-    return i1;
-    }
-
     /**
      * Добавление в очередь нового задания
      */
@@ -104,8 +84,9 @@ public class RobAdmin implements Runnable {
 
 
     
-    private void parse()
-    {WorkScript.getInstance(srv.getName()).startAdminScript(this);}
+    private void parse(){
+    WorkScript.getInstance(srv.getName()).startAdminScript(this);
+    }
     
     /**
      * Обработка событий по времени
@@ -121,10 +102,11 @@ public class RobAdmin implements Runnable {
     }
     
     public void say(String m, int room){
+        if(m.equals("")) return; // Если пустое сообщение
         cTime = System.currentTimeMillis();
         String s = NICK + ChatProps.getInstance(srv.getName()).getStringProperty("chat.delimiter") + " " + m;
         Log.getLogger(srv.getName()).info(s);
-        srv.us.db.log(0,"admin","OUT", s, room);
+        srv.us.db.log(0,NICK,"OUT", s, room);
         srv.cq.addMsg(s,"",room);
     }
     
@@ -158,15 +140,7 @@ public class RobAdmin implements Runnable {
     public boolean testName(String s){
         return test(s,ALT_NICK.split(";"));
     }
-    
-    /**
-     * Проверка на наличие приветствия
-     */
-    public boolean testHi(String s){
-        String t = "прив;прев;здоров;здрас;здрав;хай;хой;хелл;добр;даро";
-        return test(s,t.split(";"));
-    }
-    
+     
     public boolean testStat(String s){
         String t = "stat;стат";
         return test(s,t.split(";"));
@@ -196,22 +170,23 @@ public class RobAdmin implements Runnable {
         long test = ChatProps.getInstance(srv.getName()).getIntProperty("adm.getStatTimeout")*60*1000;
         
         if((System.currentTimeMillis()-stTime)<test){
-            /*say("Ну вас нафиг... нашли дурака... работай тут, считай... дайте передохнуть хоть немного.", room);*/
+            say(Messages.getInstance(srv.getName()).getString("RobAdmin.stat.0"), room);
             return;
         }
         stTime = System.currentTimeMillis();
-        String s = ChatProps.getInstance(srv.getName()).getStringProperty("chat.name") + " запущен - " + new Date(Time.getTimeStart());
-        s += "\nВремя работы - " + Time.getTime(Time.getUpTime());
-        s += "\nЗа последние сутки:";
-        s += "\nВсего зашло в чат - " + srv.us.statUsersCount();
-        s += "\nОтправлено сообщений - " + srv.us.statMsgCount();
-        s += "\nЗакрыто в тюрьме юзеров - " + srv.us.statBanroomCount();
-        s += "\nВыписано предупреждений - " + srv.us.statNoticesCount();
-        s += "\nКикнутых юзеров - " + srv.us.statKickUsersCount();
-        s += "\nВсего киков - " + srv.us.statKickCount();
-        s += "\nЗабанено юзеров - " + srv.us.statBanUsersCount();
-        s += "\nСамые болтливые пользователи:\n" + srv.us.statUsersTop();
-        s += "\nСамые рейтинговые пользователи:\n" + srv.us.BogachiUsersTop();
+        String s = Messages.getInstance(srv.getName()).getString("RobAdmin.stat.1", new Object[] {
+        ChatProps.getInstance(srv.getName()).getStringProperty("chat.name"),
+        new Date(Time.getTimeStart()),
+        Time.getTime(Time.getUpTime()),
+        srv.us.statUsersCount(),
+        srv.us.statMsgCount(),
+        srv.us.statBanroomCount(),
+        srv.us.statNoticesCount(),
+        srv.us.statKickUsersCount(),
+        srv.us.statKickCount(),
+        srv.us.statBanUsersCount(),
+        srv.us.statUsersTop(),
+        srv.us.BogachiUsersTop()}) ;
         say(s, room);
     }
     
@@ -221,6 +196,12 @@ public class RobAdmin implements Runnable {
     public boolean testTime(){
         return (System.currentTimeMillis()-cTime)>ChatProps.getInstance(srv.getName()).getIntProperty("adm.sayAloneTime")*60000;
     }
+
+    /**
+     * Вернет рандомное число
+     * @param i
+     * @return
+     */
     
     public int getRND(int i){
         return r.nextInt(i);
@@ -237,35 +218,13 @@ public class RobAdmin implements Runnable {
     }
     
     /**
-     * Приветствие
-     */
-    public String getHi(String name){
-        String[] s = {"Привет","Хай","Приветствую","Здравствуй","Здоров"};
-        return s[getRND(s.length)] + " " + name + "!";
-    }
-    
-    /**
      * Фразы про одиночество
      */
     public String getAlone(){
-        String[] s = {
-            /*"Здесь так тихо...",
-            "Ну и чего все замолчали?",
-            "Ну и молчите дальше, я тоже буду молчать :-\\",
-            "Алле! тут есть кто-нибудь? А-а-а-а!!! Я что тут один?!"*/
-        };
+        String[] s = Messages.getInstance(srv.getName()).getString("RobAdmin.alone.0").split(";");
         return s[getRND(s.length)];
     }
     
-    /**
-     * Фразы при упоминении админа
-     */
-    public String getAdmin()
-    {
-    a = n();
-    String A = GetAdmin(a);
-    return A;
-    }
     
     public void start(){
         th = new Thread(this);
@@ -283,7 +242,6 @@ public class RobAdmin implements Runnable {
         while (th == me) {
             parse();
             timeEvent();
-            if(ChatProps.getInstance(srv.getName()).getBooleanProperty("dellog.on.off")) DelLog();
             try {
                 th.sleep(sleepAmount);
             } catch (InterruptedException e) { break; }             
@@ -291,72 +249,122 @@ public class RobAdmin implements Runnable {
         th=null;
     }
 
-
-    ///////////////////////
-    //ДОПОЛНИТЕЛЬНЫЕ КОМАНДЫ
-    ////////////////////////
-
-    private void DelLog(){
-    if((System.currentTimeMillis()-TimesDelLog)> ChatProps.getInstance(srv.getName()).getIntProperty("dellog.time")*60*60000){
-        dellogs();// Тут удаление
-    TimesDelLog = System.currentTimeMillis();
-    }
-    }
-
-   public String getBanroom_say()
-   {
-   String[] s = {" закрыт(а) в комнату "," пнут(а) в комнату "," улетел(а) в комнату "," заперт(а) в комнате "," мда... go в комнату "," не беси меня больше а пока поседи в "};
+    /**
+     * Рандомная враза о закрытии
+     * @return
+     */
+    
+   public String getBanroom_say_0(){
+   String[] s = Messages.getInstance(srv.getName()).getString("RobAdmin.getBanroom_say.0").split(";");
    return s[getRND(s.length)];
    }
 
-   public String getBanroom_say2()
-   {
-   String[] s = {"меньше матом ори","не матерись","за мат","мат в чате запрещен","прочти !правила","за мат я караю строга"};
+   /**
+    * Рандомная причина
+    * @return
+    */
+
+   public String getBanroom_say_1(){
+   String[] s = Messages.getInstance(srv.getName()).getString("RobAdmin.getBanroom_say.1").split(";");
    return s[getRND(s.length)];
    }
 
-   public String getBanroom_say1()
-   {
-   String[] s = {"много мата","сматерился","за мат","мат в чате запрещен","пусть читает !правила","за мат я караю строга"};
+   /**
+    * Рандомная причина
+    * @return
+    */
+
+   public String getBanroom_say_2(){
+   String[] s = Messages.getInstance(srv.getName()).getString("RobAdmin.getBanroom_say.2").split(";");
    return s[getRND(s.length)];
    }
 
-    public void close(String uin){
+   /**
+    * Метод закрывает нарушителя в тюрьму
+    * @param uin
+    */
+
+    public void Close(String uin){
     Users u = srv.us.getUser(uin);
-    int K = srv.getProps().getIntProperty("room.tyrma");
+    int room = srv.getProps().getIntProperty("room.tyrma");
     if(((ChatCommandProc)srv.cmd).testClosed(u.sn) == 0){
-    String nick = u.localnick + "(Зек)";
+    String nick = u.localnick + Messages.getInstance(srv.getName()).getString("RobAdmin.close.0");
     u.localnick = nick;
     srv.us.db.event(u.id, uin, "REG", 0, "", nick);
     }
-    int time = (int) (5+(Math.random()*55));
+    int time = (!ChatProps.getInstance(srv.getName()).getBooleanProperty("radm.close.random") ? (ChatProps.getInstance(srv.getName()).getIntProperty("radm.close.time")) : (getRND(ChatProps.getInstance(srv.getName()).getIntProperty("radm.close.time"))));
+    if(time == 0) time = ChatProps.getInstance(srv.getName()).getIntProperty("chat.defaultKickTime");
     long t = System.currentTimeMillis()+(time*60000);
-    say(u.localnick + getBanroom_say() + "|" + srv.us.getRoom(K).getName() + "|, на " + time + " минут, " + getBanroom_say1(), u.room);
+    say(Messages.getInstance(srv.getName()).getString("RobAdmin.close.1", new Object[] {u.localnick,getBanroom_say_0(),srv.us.getRoom(room).getName(),time,getBanroom_say_1()}), u.room);
     u.lastclosed = t;
-    u.room = K;
+    u.room = room;
     srv.us.updateUser(u);
-    srv.cq.changeUserRoom(u.sn, K);
-    say("У вас пополнение, неудачник:  " + u.localnick + " он(а) закрыт(а) на " + time + " минут", K);
-    srv.getIcqProcess(srv.us.getUser(uin).basesn).mq.add(srv.us.getUser(uin).sn,"Ты закрыт(а) в комнату, на " + time + " минут, " + getBanroom_say2());
+    srv.cq.changeUserRoom(u.sn, room);
+    say(Messages.getInstance(srv.getName()).getString("RobAdmin.close.2", new Object[] {u.localnick,time}), room);
+    srv.getIcqProcess(srv.us.getUser(uin).basesn).mq.add(srv.us.getUser(uin).sn, Messages.getInstance(srv.getName()).getString("RobAdmin.close.3", new Object[] {time,getBanroom_say_2()}));
     srv.us.revokeUser(srv.us.getUser(uin).id, "room");
-    srv.us.revokeUser(srv.us.getUser(uin).id, "psmg");
     }
 
-    public String GetAdmin(int id)
-    {
+    /**
+     * Метод кикает нарушителя
+     * @param proc
+     * @param uin
+     */
+
+    public void Kick(IcqProtocol proc, String uin){
+    Users u = srv.us.getUser(uin);
+    say(Messages.getInstance(srv.getName()).getString("RobAdmin.kick.0", new Object[] {u.id,u.localnick}), u.room);
+    ((ChatCommandProc)srv.cmd).akick(proc,uin, Messages.getInstance(srv.getName()).getString("RobAdmin.kick.1"));
+    }
+    
+    /**
+     * Предупреждение о мате
+     * @param id
+     * @param nick
+     * @return
+     */
+
+    public String getWarning(Integer id, String nick){
+    return Messages.getInstance(srv.getName()).getString("RobAdmin.warning.0", new Object[] {id,nick});
+    }
+
+    /**
+     * Предупреждение о максимальном обращении
+     * @param id
+     * @param nick
+     * @return
+     */
+
+    public String getWarning(){
+    return Messages.getInstance(srv.getName()).getString("RobAdmin.warning.1");
+    }
+
+    /**
+     * Вернет случайную фразу
+     * @return
+     */
+
+    public String getAdmin(){
     String s = "";
     try {
-    PreparedStatement pst =  (PreparedStatement) srv.us.db.getDb().prepareStatement("select * from robadmin where id=" + id);
+    PreparedStatement pst =  (PreparedStatement) srv.us.db.getDb().prepareStatement("select * from robadmin ORDER BY RAND( ) LIMIT 0 , 1");
     ResultSet rs = pst.executeQuery();
-    if(rs.next())
-    {
+    if(rs.next()){
     s = rs.getString(2);
     }
     rs.close();
     pst.close();
-    } catch (Exception ex) {}
+    } catch (Exception ex) {
+    ex.printStackTrace();
+    }
     return s;
     }
+
+    /**
+     * Добавить фразу
+     * @param id
+     * @param msg
+     */
 
    public void AddAdmin(int id, String msg) {
    try {
@@ -365,41 +373,9 @@ public class RobAdmin implements Runnable {
    pst.setString(2,msg);
    pst.execute();
    pst.close();
+   }catch (Exception ex) {
+   ex.printStackTrace();
    }
-   catch (Exception ex) {ex.printStackTrace();}
    }
-
-    public void dellogs()
-    {
-    File log = new File("./log/");
-    if(!log.exists()) return;
-    if(!log.isDirectory()) return;
-    File[] all = log.listFiles();
-    if(all.length > 0)
-    for(int i = 0; i < all.length; i++)
-    {
-    if(all[i].isFile())
-    del("./log/"+all[i].getName());
-    }
-    for(String n:Manager.getInstance().getServiceNames()){
-    File logs = new File("./log/"+n+"/");
-    if(!logs.exists()) return;
-    if(!logs.isDirectory()) return;
-    File[] alls = logs.listFiles();
-    if(alls.length > 0)
-    for(int i = 0; i < alls.length; i++)
-    {
-    if(alls[i].isFile())
-    del("./log/"+n+"/"+alls[i].getName());
-    }
-    }
-    srv.us.db.executeQuery(" TRUNCATE `events` ");
-    srv.us.db.executeQuery(" TRUNCATE `log` ");
-    }
-
-    public  void del(String name) {
-    File i = new File (name);
-      if (i.exists()) i.delete();
-    }
-
+   
 }

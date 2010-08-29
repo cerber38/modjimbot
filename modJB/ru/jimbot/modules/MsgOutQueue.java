@@ -137,7 +137,7 @@ public class MsgOutQueue implements Runnable {
                 if((System.currentTimeMillis()-stopCon)>=p_restart){
                     proc.server = MainProps.getServer();
                     proc.port = MainProps.getPort();
-                    Log.getLogger(proc.serviceName).info("Попытка нового подключения... " + proc.server + ":" + proc.port);
+                    Log.getLogger(proc.serviceName).info("Попытка нового подключения на uin`не - " + proc.screenName);
                     proc.reConnect();
                     stopCon=System.currentTimeMillis();
                     p_restart = (p_restart>=PAUSE_RESTART) ? PAUSE_RESTART : p_restart*2;

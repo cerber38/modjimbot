@@ -15,7 +15,8 @@ import ru.jimbot.modules.CommandParser;
 import ru.jimbot.protocol.IcqProtocol;
 
     /**
-     * @author Юрий
+     * Магазин раличных товаров
+     * @author Юрий, fraer72
      */
 
     public class Shop2 {
@@ -112,7 +113,7 @@ private void MagAvto(IcqProtocol proc, String uin, Vector v, String mmsg) {
             proc.mq.add(uin,uss.localnick + " нет такого товара в продаже, выберите правильно.\nДля выхода выберите '0'");
             return;
         }
-        if(uss.ball < (Price("avto",i))){
+        if(i != 0 && uss.ball < (Price("avto",i))){
             proc.mq.add(uin,uss.localnick + " у вас не хватает " + ((Price("avto",i))-uss.ball) + " баллов для покупки");
             return;
         }
@@ -126,7 +127,7 @@ private void MagAvto(IcqProtocol proc, String uin, Vector v, String mmsg) {
     }
     if(i == 0){proc.mq.add(uin,uss.localnick + " вы вышли из магазина"); return;}
     uss.ball -= Price("avto",i);
-    uss.car = Tovar("avto",i);
+    uss.car = (!uss.car.equals("") & !cmd.psp.getBooleanProperty("some.on.off") ? (Tovar("avto",i)) : uss.car + ", " + Tovar("avto",i));
     cmd.srv.us.updateUser(uss);
     proc.mq.add(uin,uss.localnick + " вы купили  - '" + Tovar("avto",i) + "'\nУ Вас осталось " + uss.ball + " баллов.");
 }
@@ -147,7 +148,7 @@ private void MagDom(IcqProtocol proc, String uin, Vector v, String mmsg) {
             proc.mq.add(uin,uss.localnick + " нет такого товара в продаже, выберите правильно.\nДля выхода выберите '0'");
             return;
         }
-        if(uss.ball < (Price("dom",i))){
+        if(i != 0 && uss.ball < (Price("dom",i))){
             proc.mq.add(uin,uss.localnick + " у вас не хватает " + ((Price("dom",i))-uss.ball) + " баллов для покупки");
             return;
         }
@@ -161,7 +162,7 @@ private void MagDom(IcqProtocol proc, String uin, Vector v, String mmsg) {
     }
     if(i == 0){proc.mq.add(uin,uss.localnick + " вы вышли из магазина"); return;}
     uss.ball -= Price("dom",i);
-    uss.home = Tovar("dom",i);
+    uss.home = (!uss.home.equals("") & !cmd.psp.getBooleanProperty("some.on.off") ? (Tovar("dom",i)) : uss.home + ", " + Tovar("dom",i));
     cmd.srv.us.updateUser(uss);
     proc.mq.add(uin,uss.localnick + " вы купили  - '" + Tovar("dom",i) + "'\nУ Вас осталось " + uss.ball + " баллов.");
 }
@@ -182,7 +183,7 @@ private void MagOdej(IcqProtocol proc, String uin, Vector v, String mmsg) {
             proc.mq.add(uin,uss.localnick + " нет такого товара в продаже, выберите правильно.\nДля выхода выберите '0'");
             return;
         }
-        if(uss.ball < (Price("odejda",i))){
+        if(i != 0 && uss.ball < (Price("odejda",i))){
             proc.mq.add(uin,uss.localnick + " у вас не хватает " + ((Price("odejda",i))-uss.ball) + " баллов для покупки");
             return;
         }
@@ -196,7 +197,7 @@ private void MagOdej(IcqProtocol proc, String uin, Vector v, String mmsg) {
     }
     if(i == 0){proc.mq.add(uin,uss.localnick + " вы вышли из магазина"); return;}
     uss.ball -= Price("odejda",i);
-    uss.clothing = Tovar("odejda",i);
+    uss.clothing = (!uss.clothing.equals("") & !cmd.psp.getBooleanProperty("some.on.off") ? (Tovar("odejda",i)) : uss.clothing + ", " + Tovar("odejda",i));
     cmd.srv.us.updateUser(uss);
     proc.mq.add(uin,uss.localnick + " вы купили  - '" + Tovar("odejda",i) + "'\nУ Вас осталось " + uss.ball + " баллов.");
 }
@@ -217,7 +218,7 @@ private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
             proc.mq.add(uin,uss.localnick + " нет такого товара в продаже, выберите правильно.\nДля выхода выберите '0'");
             return;
         }
-        if(uss.ball < (Price("jivotnoe",i))){
+        if(i != 0 && uss.ball < (Price("jivotnoe",i))){
             proc.mq.add(uin,uss.localnick + " у вас не хватает " + ((Price("jivotnoe",i))-uss.ball) + " баллов для покупки");
             return;
         }
@@ -231,7 +232,7 @@ private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
     }
     if(i == 0){proc.mq.add(uin,uss.localnick + " вы вышли из магазина"); return;}
     uss.ball -= Price("jivotnoe",i);
-    uss.animal = Tovar("jivotnoe",i);
+    uss.animal = (!uss.animal.equals("") & !cmd.psp.getBooleanProperty("some.on.off") ? (Tovar("jivotnoe",i)) : uss.animal + ", " + Tovar("jivotnoe",i));
     cmd.srv.us.updateUser(uss);
     proc.mq.add(uin,uss.localnick + " вы купили  - '" + Tovar("jivotnoe",i) + "'\nУ Вас осталось " + uss.ball + " баллов.");
 }

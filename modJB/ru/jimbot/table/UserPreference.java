@@ -42,7 +42,6 @@ public class UserPreference {
 
     public static final int STRING_TYPE = 0;
     public static final int BOOLEAN_TYPE = 1;
-//    public static final int COLOUR_TYPE = 2;
     public static final int INTEGER_TYPE = 3;
     public static final int CATEGORY_TYPE = 4;
     public static final int FILE_TYPE = 5;
@@ -57,7 +56,7 @@ public class UserPreference {
     private String key;
     private Object value;
     private String displayedKey;
-    private String displayedKey2;
+    private boolean testUser;
     private String[] availableValues;
 
     public UserPreference() {}
@@ -67,23 +66,25 @@ public class UserPreference {
 
 
     public UserPreference(int type, int maxLength, String key,
-                          String displayedKey, Object value, String displayedKey2) {
-        this(type, maxLength, key, displayedKey, value, null, displayedKey2);
+                          String displayedKey, Object value) {
+        this(type, maxLength, key, displayedKey, value, null, true);
     }
 
-    public UserPreference(int type, String key, String displayedKey, Object value, String displayedKey2) {
-        this(type, -1, key, displayedKey, value, null, displayedKey2);
+    public UserPreference(int type, String key, String displayedKey, Object value, boolean testUser) {
+        this(type, -1, key, displayedKey, value, null, testUser);
     }
 
-
+    public UserPreference(int type, String key, String displayedKey) {
+        this(type, -1, key, displayedKey, "", null, true);
+    }
 
     public UserPreference(int type, String key, String displayedKey,
-                          Object value, String[] availableValues, String displayedKey2) {
-        this(type, -1, key, displayedKey, value, availableValues, displayedKey2);
+                          Object value, String[] availableValues, boolean testUser) {
+        this(type, -1, key, displayedKey, value, availableValues, testUser);
     }
 
     public UserPreference(int type, int maxLength, String key, String displayedKey,
-                          Object value, String[] availableValues, String displayedKey2) {
+                          Object value, String[] availableValues, boolean testUser) {
         this.type = type;
         this.key = key;
         this.maxLength = maxLength;
@@ -116,7 +117,7 @@ public class UserPreference {
         }
 
         this.displayedKey = displayedKey;
-        this.displayedKey2 = displayedKey2;
+        this.testUser = testUser;
         this.availableValues = availableValues;        
     }
 
@@ -217,12 +218,12 @@ public class UserPreference {
         this.displayedKey = displayedKey;
     }
 
-    public String getDisplayedKey2() {
-    return displayedKey2;
+    public boolean getTestUser() {
+    return testUser;
     }
 
-    public void setDisplayedKey2(String displayedKey2) {
-        this.displayedKey2 = displayedKey2;
+    public void setTestUser(boolean testUser) {
+        this.testUser = testUser;
     }
 
 
@@ -242,20 +243,6 @@ public class UserPreference {
         this.collapsed = collapsed;
     }
 
-    public static boolean testCATEGORY(boolean user, String category){
-    if(user){
-    if(category.equalsIgnoreCase("db")) return true;    
-    }
-    return false;
-    }
-
-    public static boolean testKEY(boolean user, String key){
-    if(user){
-    if(key.equalsIgnoreCase("db.host") || key.equalsIgnoreCase("db.user") ||
-    key.equalsIgnoreCase("db.pass") || key.equalsIgnoreCase("db.dbname")) return true;
-    }
-    return false;
-    }
 
 }
 

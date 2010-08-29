@@ -185,6 +185,12 @@ out="Ok";
 ((ChatCommandProc)srv.cmd).addCommand("!делреклама",new Cmd("!делреклама","$n",78));
 ((ChatCommandProc)srv.cmd).addCommand("!листреклама",new Cmd("!листреклама","$n",79));
 ((ChatCommandProc)srv.cmd).addCommand("!датьбалы",new Cmd("!датьбалы","$n $n",80));
+((ChatCommandProc)srv.cmd).addCommand("!забратьбалы",new Cmd("!забратьбалы","$n $n",81));
+((ChatCommandProc)srv.cmd).addCommand("!зарплата",new Cmd("!зарплата","",82));
+((ChatCommandProc)srv.cmd).addCommand("!предупреждение",new Cmd("!предупреждение","$n $s",83));
+((ChatCommandProc)srv.cmd).addCommand("!нотист",new Cmd("!нотист","$n",84));
+((ChatCommandProc)srv.cmd).addCommand("!число",new Cmd("!число","$n $n",85));
+((ChatCommandProc)srv.cmd).addCommand("!всеадмины",new Cmd("!всеадмины","",86));
 
 
 

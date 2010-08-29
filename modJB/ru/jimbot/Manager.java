@@ -483,4 +483,51 @@ public class Manager {
 		else
 			return false;
 	}
+
+        /**
+         * Удаление файлов с логами
+         */
+
+    public void deleteLogs(){
+    File log = new File("./log/");
+    if(!log.exists()) return;
+    if(!log.isDirectory()) return;
+    File[] all = log.listFiles();
+    if(all.length > 0)
+    for(int i = 0; i < all.length; i++){
+    if(all[i].isFile())
+    MainProps.deleteFile("./log/"+all[i].getName());
+    }
+    for(String n:Manager.getInstance().getServiceNames()){
+    File logs = new File("./log/"+n+"/");
+    if(!logs.exists()) return;
+    if(!logs.isDirectory()) return;
+    File[] alls = logs.listFiles();
+    if(alls.length > 0)
+    for(int i = 0; i < alls.length; i++){
+    if(alls[i].isFile())
+    MainProps.deleteFile("./log/"+n+"/"+alls[i].getName());
+    }
+    services.get(n).getDB().executeQuery(" TRUNCATE `events` ");
+    services.get(n).getDB().executeQuery(" TRUNCATE `log` ");
+    }
+    }
+    
+    /**
+     * Проверка, включена ли авто чистка логов
+     * @return
+     */
+
+    public static boolean isDeleteLog(){
+    return MainProps.getBooleanProperty("dellog.on.off");
+    }
+
+    /**
+     * Время автоматической чистки логов
+     * @return
+     */
+
+    public static Integer timeDeleteLog(){
+    return MainProps.getIntProperty("dellog.time");
+    }
 }

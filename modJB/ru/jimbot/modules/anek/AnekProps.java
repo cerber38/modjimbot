@@ -87,28 +87,28 @@ public class AnekProps implements AbstractProps {
 
     public UserPreference[] getUserPreference(){
         UserPreference[] p = {
-            new UserPreference(UserPreference.CATEGORY_TYPE,"main", "Основные настройки","",""),
-            new UserPreference(UserPreference.BOOLEAN_TYPE,"main.StartBot","Запускать анекдотный бот",getBooleanProperty("main.StartBot"),""),
-            new UserPreference(UserPreference.CATEGORY_TYPE,"anek", "Настройки анекдотного бота","",""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"icq.status","ICQ статус",getIntProperty("icq.status"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"icq.xstatus","x-статус (0-37)",getIntProperty("icq.xstatus"),""),
-            new UserPreference(UserPreference.STRING_TYPE,"icq.STATUS_MESSAGE1","Сообщение x-статуса 1",getStringProperty("icq.STATUS_MESSAGE1"),""),
-            new UserPreference(UserPreference.STRING_TYPE,"icq.STATUS_MESSAGE2","Сообщение x-статуса 2",getStringProperty("icq.STATUS_MESSAGE2"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"icq.AUTORETRY_COUNT","Число переподключений движка при обрыве",getIntProperty("icq.AUTORETRY_COUNT"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"bot.pauseIn","Пауза для входящих сообщений",getIntProperty("bot.pauseIn"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"bot.pauseOut","Пауза для исходящих сообщений",getIntProperty("bot.pauseOut"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"bot.msgOutLimit","Ограничение очереди исходящих",getIntProperty("bot.msgOutLimit"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"chat.MaxOutMsgSize","Максимальный размер одного исходящего сообщения",getIntProperty("chat.MaxOutMsgSize"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"chat.MaxOutMsgCount","Максимальное число частей исходящего сообщения",getIntProperty("chat.MaxOutMsgCount"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"bot.pauseRestart","Пауза перед перезапуском коннекта",getIntProperty("bot.pauseRestart"),""),
-            new UserPreference(UserPreference.STRING_TYPE,"bot.adminUIN","Админские UIN",getStringProperty("bot.adminUIN"),""),
-            new UserPreference(UserPreference.BOOLEAN_TYPE,"bot.useAds","Использовать рекламу в боте",getBooleanProperty("bot.useAds"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"bot.adsRate","Частота рекламы",getIntProperty("bot.adsRate"),""),
-            new UserPreference(UserPreference.CATEGORY_TYPE,"db", "Настройки mySQL","",""),
-            new UserPreference(UserPreference.STRING_TYPE,"db.host","Хост БД",getStringProperty("db.host"),""),
-            new UserPreference(UserPreference.STRING_TYPE,"db.user","Пользователь",getStringProperty("db.user"),""),
-            new UserPreference(UserPreference.PASS_TYPE,"db.pass","Пароль",getStringProperty("db.pass"),""),
-            new UserPreference(UserPreference.STRING_TYPE,"db.dbname","Название базы данных",getStringProperty("db.dbname"),"")
+            new UserPreference(UserPreference.CATEGORY_TYPE,"main", "Основные настройки"),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"main.StartBot","Запускать анекдотный бот",getBooleanProperty("main.StartBot"),true),
+            new UserPreference(UserPreference.CATEGORY_TYPE,"anek", "Настройки анекдотного бота"),
+            new UserPreference(UserPreference.INTEGER_TYPE,"icq.status","ICQ статус",getIntProperty("icq.status"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"icq.xstatus","x-статус (0-37)",getIntProperty("icq.xstatus"),true),
+            new UserPreference(UserPreference.STRING_TYPE,"icq.STATUS_MESSAGE1","Сообщение x-статуса 1",getStringProperty("icq.STATUS_MESSAGE1"),true),
+            new UserPreference(UserPreference.STRING_TYPE,"icq.STATUS_MESSAGE2","Сообщение x-статуса 2",getStringProperty("icq.STATUS_MESSAGE2"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"icq.AUTORETRY_COUNT","Число переподключений движка при обрыве",getIntProperty("icq.AUTORETRY_COUNT"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"bot.pauseIn","Пауза для входящих сообщений",getIntProperty("bot.pauseIn"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"bot.pauseOut","Пауза для исходящих сообщений",getIntProperty("bot.pauseOut"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"bot.msgOutLimit","Ограничение очереди исходящих",getIntProperty("bot.msgOutLimit"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"chat.MaxOutMsgSize","Максимальный размер одного исходящего сообщения",getIntProperty("chat.MaxOutMsgSize"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"chat.MaxOutMsgCount","Максимальное число частей исходящего сообщения",getIntProperty("chat.MaxOutMsgCount"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"bot.pauseRestart","Пауза перед перезапуском коннекта",getIntProperty("bot.pauseRestart"),true),
+            new UserPreference(UserPreference.STRING_TYPE,"bot.adminUIN","Админские UIN",getStringProperty("bot.adminUIN"),true),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"bot.useAds","Использовать рекламу в боте",getBooleanProperty("bot.useAds"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"bot.adsRate","Частота рекламы",getIntProperty("bot.adsRate"),true),
+            new UserPreference(UserPreference.CATEGORY_TYPE,"db", "Настройки mySQL"),
+            new UserPreference(UserPreference.STRING_TYPE,"db.host","Хост БД",getStringProperty("db.host"),false),
+            new UserPreference(UserPreference.STRING_TYPE,"db.user","Пользователь",getStringProperty("db.user"),false),
+            new UserPreference(UserPreference.PASS_TYPE,"db.pass","Пароль",getStringProperty("db.pass"),false),
+            new UserPreference(UserPreference.STRING_TYPE,"db.dbname","Название базы данных",getStringProperty("db.dbname"),false)
         };
         return p;
     }
@@ -123,10 +123,10 @@ public class AnekProps implements AbstractProps {
 
     public UserPreference[] getUINPreference(){
         UserPreference[] p = new UserPreference[uinCount()*2+1];
-        p[0] = new UserPreference(UserPreference.CATEGORY_TYPE,"conn", "Настройки UINов для подключения","","");
+        p[0] = new UserPreference(UserPreference.CATEGORY_TYPE,"conn", "Настройки UINов для подключения");
         for(int i=0;i<uinCount();i++){
-            p[i*2+1] = new UserPreference(UserPreference.STRING_TYPE,"conn.uin" + i,"UIN" + i,getProperty("conn.uin" + i,""),"");
-            p[i*2+2] = new UserPreference(UserPreference.PASS_TYPE,"conn.pass" + i,"Password" + i,getProperty("conn.pass" + i, ""),"");
+            p[i*2+1] = new UserPreference(UserPreference.STRING_TYPE,"conn.uin" + i,"UIN" + i,getProperty("conn.uin" + i,""),true);
+            p[i*2+2] = new UserPreference(UserPreference.PASS_TYPE,"conn.pass" + i,"Password" + i,getProperty("conn.pass" + i, ""),true);
         }
         return p;
     }

@@ -65,6 +65,13 @@ public class ChatServer extends AbstractServer{
     public void start() {
         us = new UserWork(getName());
     	WorkScript.getInstance(getName()).startScript("start", "", this);
+        String[] icq = new String[ChatProps.getInstance(this.getName()).uinCount()];
+        String[] pass = new String[ChatProps.getInstance(this.getName()).uinCount()];
+        for(int i=0;i<ChatProps.getInstance(this.getName()).uinCount();i++){
+        icq[i] = ChatProps.getInstance(this.getName()).getUin(i);
+        pass[i] = ChatProps.getInstance(this.getName()).getPass(i);
+        }
+        con.uins = new UINmanager(icq, pass, con, ChatProps.getInstance(this.getName()).getBooleanProperty("chat.IgnoreOfflineMsg"), ChatProps.getInstance(this.getName()), this.getName());
         if(!con.server.equals("")) {
             con.uins.start();
         }
@@ -76,7 +83,7 @@ public class ChatServer extends AbstractServer{
         isRun = true;
         ((ChatCommandProc)this.cmd).radm.start();
         if(ChatProps.getInstance(this.getName()).getBooleanProperty("vic.on.off"))
-        ((ChatCommandProc)this.cmd).Quiz.start();       
+        ((ChatCommandProc)this.cmd).Quiz.start();    
         if(ChatProps.getInstance(this.getName()).getBooleanProperty("auto_status.on.off"))
         ((ChatCommandProc)this.cmd).xstatus.start();
     }
@@ -88,6 +95,7 @@ public class ChatServer extends AbstractServer{
         inq.stop();
         cq.stop();   	
         if(!con.server.equals("")) con.uins.stop();
+        con.uins = null;
         /*Убьем остальные потоки*/
         if(((ChatCommandProc)this.cmd).Quiz.isStart()) ((ChatCommandProc)this.cmd).Quiz.stop();
         ((ChatCommandProc)this.cmd).radm.stop();

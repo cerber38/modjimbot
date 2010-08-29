@@ -47,8 +47,7 @@ int xStatusId;
 String xStatusText;
 private boolean connected = false;
 
-public IcqProtocol(AbstractProps props)
-{
+public IcqProtocol(AbstractProps props){
 this.props = props;
 server = MainProps.getServer();
 port = MainProps.getPort();
@@ -57,24 +56,24 @@ props.getIntProperty("bot.pauseRestart"),
 props.getIntProperty("bot.msgOutLimit"));
 }
 
-public AbstractProps getProps()
-{
+public AbstractProps getProps(){
 return props;
 }
 
-public int getOuteqSize()
-{
+public int getOuteqSize(){
 return mq.size();
 }
 
 public void connect() {
+Log.getLogger(serviceName).info("Connect uin - " + screenName);
 mq.start();
 con = new OscarConnection(server, port, screenName, password);
 con.addOurStatusListener(this);
 con.addMessagingListener(this);
 con.addXStatusListener(this);
 con.connect();
-connected = true;
+// TODO: не всегда срабатывают слушатели onAuthorizationFailed(), onLogin(), поток остается весеть
+//connected = true;
 }
 
 public void reConnect(){
@@ -84,9 +83,7 @@ con.removeOurStatusListener(this);
 con.removeMessagingListener(this);
 con.removeXStatusListener(this);
 con = null;
-}
-catch (Exception e)
-{
+}catch (Exception e){
 e.printStackTrace();
 }
 con = new OscarConnection(server, port, screenName, password);
@@ -105,17 +102,14 @@ con.removeOurStatusListener(this);
 con.removeMessagingListener(this);
 con.removeXStatusListener(this);
 con = null;
-}
-catch (Exception ex)
-{
+}catch (Exception ex){
 ex.printStackTrace();
 }
 }
 
 
 public void getMsg(String sendSN, String recivSN, String msg,
-boolean isOffline)
-{
+boolean isOffline){
 protList.getMsg(sendSN, recivSN, msg, isOffline);
 }
 
@@ -125,14 +119,10 @@ if(con == null) return false;
 return connected;
 }
 
-public void sendMsg(String sn, String msg)
-{
-try
-{
+public void sendMsg(String sn, String msg){
+try{
 OscarInterface.sendBasicMessage(con, sn, msg);
-}
-catch (ConvertStringException e)
-{
+}catch (ConvertStringException e){
 Log.getLogger(serviceName).info("ERROR send message: " + msg);
 e.printStackTrace();
 }
@@ -146,20 +136,17 @@ return props.getBooleanProperty("chat.isAuthRequest");
 public void authRequest(String uin, String msg){}
 
 
-public void onIncomingMessage(IncomingMessageEvent e)
-{
-if(MainProps.isIgnor(e.getSenderID()))
-{
+public void onIncomingMessage(IncomingMessageEvent e){
+if(MainProps.isIgnor(e.getSenderID())){
 Log.getLogger(serviceName).flood2("IGNORE LIST: " + e.getMessageId() + "->" + screenName + ": " + e.getMessage());
 return;
 }
-if(e.getSenderID().equals("1"))
-{
+if(e.getSenderID().equals("1")){
 Log.getLogger(serviceName).error("Ошибка совместимости клиента ICQ. Будет произведена попытка переподключения...");
 try{
 connected = false;
-}
-catch (Exception ex) {ex.printStackTrace();
+}catch (Exception ex) {
+ex.printStackTrace();
 }
 return;
 }
@@ -177,14 +164,12 @@ protList.getMsg(e.getSenderID(), screenName, e.getMessage(), false);
  CANT_REGISTER_ERROR     = 7; "Can't register on the ICQ network. Reconnect in a few minutes."
  */
 
-public void onAuthorizationFailed(LoginErrorEvent e)
-{
-Log.getLogger(serviceName).error("Авторизация с сервером ICQ не удалась. Причина: " +  e.getErrorMessage());
+public void onAuthorizationFailed(LoginErrorEvent e){
+Log.getLogger(serviceName).error("На uin`не " + screenName +  " вторизация с сервером ICQ не удалась. Причина: " +  e.getErrorMessage());
 connected = false;
 }
 
-public void onStatusChange(StatusEvent e)
-{
+public void onStatusChange(StatusEvent e){
 Log.getLogger(serviceName).debug("StatusEvent: " + e.getStatusMode());
 }
 
@@ -262,13 +247,11 @@ proc.mq.add(uin, s);
  */
 
 public void setXStatus( int n, String text ){
-if ( n >= 0 && n <= 37 )
-{
+if ( n >= 0 && n <= 37 ){
 xStatusId = n;
 props.setIntProperty( "icq.xstatus", xStatusId );
 }
-if ( !text.equals( "" ) )
-{
+if ( !text.equals( "" ) ){
 xStatusText = text;
 props.setStringProperty("icq.STATUS_MESSAGE2", xStatusText);
 }

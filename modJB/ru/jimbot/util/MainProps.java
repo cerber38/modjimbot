@@ -28,13 +28,13 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Vector;
+import ru.jimbot.modules.chat.ChatProps;
 import ru.jimbot.table.UserPreference;
 
 /**
@@ -43,12 +43,9 @@ import ru.jimbot.table.UserPreference;
  * @author Prolubnikov Dmitry
  */
 public class MainProps {
-    public static final String VERSION = "jImBot v.0.4.0 (c)Spec (06/07/2009)\nBy modifying - fraer72\nVersion update - pre-release 3 (5/08/2010)";
-    public static final int VER_INT = 18;
-    private static int ver_no = 0;
-    public static final int testtime = 30000;
-    private static long ver_last_read = 0;
-    private static String ver_desc = "";
+    /*Оставьте хоть какую нибудь благодарность авторам, не изменяя эту строчку внизу.*/
+    public static final String VERSION = "jImBot v.0.4.0 (c)Spec (06/07/2009)\nBy modifying - fraer72\nVersion update - pre-release 4 (29/08/2010)";
+
     public static final String PROG_TITLE = "jImBot";
     public static final String PROPS_FILE = "./jimbot.xml";
     public static final String ENCODING = "windows-1251";
@@ -87,28 +84,38 @@ public class MainProps {
         setStringProperty("srv.serviceType0","anek");
         setBooleanProperty("main.checkNewVer", true);
         setBooleanProperty("log.service", true);
+        setBooleanProperty("dellog.on.off", false);
+        setIntProperty("dellog.time", 5 );
+        setBooleanProperty("avto.db.on.off", true);
+        setStringProperty("db.pass","");
     }
     
     public static UserPreference[] getUserPreference(){
         UserPreference[] p = {
-            new UserPreference(UserPreference.CATEGORY_TYPE,"main", "Основные настройки","",""),
-            new UserPreference(UserPreference.BOOLEAN_TYPE,"log.service","Включить/Выключить посервисное логирирование",getBooleanProperty("log.service"),""),
-            new UserPreference(UserPreference.BOOLEAN_TYPE,"main.checkNewVer","Уведомлять о новых версиях",getBooleanProperty("main.checkNewVer"),""),
-            new UserPreference(UserPreference.BOOLEAN_TYPE,"main.autoStart","Автозапуск при загрузке",getBooleanProperty("main.autoStart"),""),
-            new UserPreference(UserPreference.BOOLEAN_TYPE,"main.StartHTTP","Запускать HTTP сервер",getBooleanProperty("main.StartHTTP"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"http.delay","Время жизни HTTP сессии",getIntProperty("http.delay"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"http.maxErrLogin","Число ошибочных входов для блокировки",getIntProperty("http.maxErrLogin"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"http.timeErrLogin","Допустимый период между ошибками",getIntProperty("http.timeErrLogin"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"http.timeBlockLogin","Время блокировки входа",getIntProperty("http.timeBlockLogin"),""),
-            new UserPreference(UserPreference.CATEGORY_TYPE,"main", "Настройки прокси","",""),
-            new UserPreference(UserPreference.STRING_TYPE,"main.Socks5ProxyHost","Прокси хост",getStringProperty("main.Socks5ProxyHost"),""),
-            new UserPreference(UserPreference.STRING_TYPE,"main.Socks5ProxyPort","Прокси порт",getStringProperty("main.Socks5ProxyPort"),""),
-            new UserPreference(UserPreference.STRING_TYPE,"main.Socks5ProxyUser","Прокси пользователь",getStringProperty("main.Socks5ProxyUser"),""),
-            new UserPreference(UserPreference.STRING_TYPE,"main.Socks5ProxyPass","Прокси пароль",getStringProperty("main.Socks5ProxyPass"),""),
-            new UserPreference(UserPreference.CATEGORY_TYPE,"bot", "Настройки бота","",""),
-            new UserPreference(UserPreference.STRING_TYPE,"icq.serverDefault","ICQ Сервер 1",getStringProperty("icq.serverDefault"),""),
-            new UserPreference(UserPreference.INTEGER_TYPE,"icq.portDefault","ICQ Порт 1",getIntProperty("icq.portDefault"),""),
-            new UserPreference(UserPreference.BOOLEAN_TYPE,"icq.md5login","Безопасный логин",getBooleanProperty("icq.md5login"),"")
+            new UserPreference(UserPreference.CATEGORY_TYPE,"main", "Основные настройки"),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"main.checkNewVer","Уведомлять о новых версиях",getBooleanProperty("main.checkNewVer"),true),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"main.autoStart","Автозапуск при загрузке",getBooleanProperty("main.autoStart"),true),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"main.StartHTTP","Запускать HTTP сервер",getBooleanProperty("main.StartHTTP"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"http.delay","Время жизни HTTP сессии",getIntProperty("http.delay"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"http.maxErrLogin","Число ошибочных входов для блокировки",getIntProperty("http.maxErrLogin"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"http.timeErrLogin","Допустимый период между ошибками",getIntProperty("http.timeErrLogin"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"http.timeBlockLogin","Время блокировки входа",getIntProperty("http.timeBlockLogin"),true),
+            new UserPreference(UserPreference.CATEGORY_TYPE,"main", "Настройки прокси"),
+            new UserPreference(UserPreference.STRING_TYPE,"main.Socks5ProxyHost","Прокси хост",getStringProperty("main.Socks5ProxyHost"),true),
+            new UserPreference(UserPreference.STRING_TYPE,"main.Socks5ProxyPort","Прокси порт",getStringProperty("main.Socks5ProxyPort"),true),
+            new UserPreference(UserPreference.STRING_TYPE,"main.Socks5ProxyUser","Прокси пользователь",getStringProperty("main.Socks5ProxyUser"),true),
+            new UserPreference(UserPreference.STRING_TYPE,"main.Socks5ProxyPass","Прокси пароль",getStringProperty("main.Socks5ProxyPass"),true),
+            new UserPreference(UserPreference.CATEGORY_TYPE,"bot", "Настройки бота"),
+            new UserPreference(UserPreference.STRING_TYPE,"icq.serverDefault","ICQ Сервер 1",getStringProperty("icq.serverDefault"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"icq.portDefault","ICQ Порт 1",getIntProperty("icq.portDefault"),true),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"icq.md5login","Безопасный логин",getBooleanProperty("icq.md5login"),true),
+            new UserPreference(UserPreference.CATEGORY_TYPE,"log", "Настройки логов"),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"log.service","Включить/Выключить посервисное логирирование",getBooleanProperty("log.service"),true),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"dellog.on.off","Включить/Выключить авто-очистку логов",getBooleanProperty("dellog.on.off"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"dellog.time","Интервал чистки логов(в часах)",getIntProperty("dellog.time"),true),
+            new UserPreference(UserPreference.CATEGORY_TYPE,"db_create", "Настройки авто создании базы"),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"avto.db.on.off","Включить/Выключить авто создании базы данных",getBooleanProperty("avto.db.on.off"),true),
+            new UserPreference(UserPreference.PASS_TYPE,"db.pass","Пароль root`a",getStringProperty("db.pass"),false)
         };
         return p;
     }
@@ -151,6 +158,79 @@ public class MainProps {
         } catch (Exception ex){
             ex.printStackTrace();
         }
+    }
+
+    /**
+     * Загрузка уинов с паролями
+     * @param services
+     * @return
+     */
+
+    public static String[] loadUinList(String services){
+    String s = "";
+    try{
+    BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream("./services/" + services + "/uins.txt"), ENCODING));
+    while (r.ready()){
+    s += r.readLine() + '\n';
+    }
+    r.close();
+    } catch (Exception ex){
+    ex.printStackTrace();
+    }
+    return s.trim().split("\n");
+    }
+
+    /**
+     * Проверка есть ли уины с паролями в файле
+     * @param services
+     * @return
+     */
+
+    public static boolean isUins(String services){
+    return ChatProps.getInstance(services).loadText("./services/" + services + "/uins.txt").equals("");
+    }
+
+    /**
+     * Проверка на существование файла с паролями
+     * @param services
+     * @return
+     */
+
+    public static boolean isUins2(String services){
+    return new File("./services/" + services + "/uins.txt").exists();
+    }
+
+    /**
+     * Создание файла с паролями
+     * @param services
+     */
+
+    public static void uinsAddFile(String services){
+    try{
+    new File("./services/" + services + "/uins.txt").createNewFile();
+    } catch (Exception ex){
+    ex.printStackTrace();
+    }
+    }
+    
+    /**
+     * Очистим файл
+     * @param services
+     */
+
+    public static void uinsRecreate(String services){
+    deleteFile("./services/" + services + "/uins.txt");
+    uinsAddFile(services);
+    }
+
+    /**
+     * Удаление файла
+     * @param name
+     */
+
+    public static void deleteFile(String name) {
+    File i = new File (name);
+      if (i.exists()) i.delete();
     }
     
     /**
@@ -573,7 +653,6 @@ public class MainProps {
         File file = new File(fileName);
         try {
             FileOutputStream fo = new FileOutputStream(file);
-//            appProps.store(fo,"jImBot properties");
             appProps.storeToXML(fo, "jImBot properties");
             fo.close();
             Log.getDefault().info("Save preferences ok");
@@ -585,13 +664,14 @@ public class MainProps {
     
     /**
      * Читает текстовый файл по URL
-     * @param url
+     * @param file - фаил
+     * @param encoding - кодировка
      * @return
      */
-    public static String getStringFromHTTP(String u){
+    public static String getStringFromHTTP(String file, String encoding){
         String s = "";
         try {
-            URL url = new URL(u);
+            URL url = new URL(file);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty ( "User-agent", "JimBot/0.4 (Java" + 
                     "; U;" + System.getProperty("os.name") + " " + System.getProperty("os.arch") + " " + System.getProperty("os.version") +
@@ -606,87 +686,32 @@ public class MainProps {
             bout.close();
             bis.close();
             conn.disconnect();
-            s = bout.toString("windows-1251");
+            s = bout.toString(encoding);
         } catch (Exception ex) {
             Log.getDefault().error("Ошибка HTTP при чтении новой версии", ex);
         }
         return s;
     }
+
+     /**
+      * Создание файла
+      * @param Type
+      * @param Way
+      * @param text
+      * @param encoding
+      * @throws UnsupportedEncodingException
+      */
     
 
-    /**
-     * Проверка на новую версию
-     * @return
-     */
-    public static boolean checkNewVersion() {
-        if(!getBooleanProperty("main.checkNewVer")) return false;
-        if(ver_no==0)
-            readNewVer();
-        if((System.currentTimeMillis()-ver_last_read)>24*3600000)
-            readNewVer();
-        return ver_no>VER_INT;
-    }
-    
-    /**
-     * Возвращает описание новой версии
-     * @return
-     */
-    public static String getNewVerDesc() {
-        return ver_desc;
-    }
-    
-    /**
-     * Читает информацию о новой версии с сайта
-     */
-    private static void readNewVer() {
-        String s = getStringFromHTTP("http://jimbot.ru/ver.txt");
-        ver_no = VER_INT;
-        ver_desc = "";
-        ver_last_read = System.currentTimeMillis();
-        if(s.equals("")) return;
-        try {
-            BufferedReader r = new BufferedReader(new StringReader(s));
-            String sd = r.readLine();
-            if(!sd.equals("#JimBot version file")) return;
-            ver_no = Integer.parseInt(r.readLine());
-            String cnt = r.readLine();
-            counter(cnt);
-            if(ver_no>VER_INT)
-                while(r.ready()){
-                    String st = r.readLine();
-                    if(st==null) break;
-                    if(!st.equals(""))
-                        if(Integer.parseInt(st.split("#")[0])==ver_no)
-                            ver_desc += st.split("#")[1] + '\n';
-                }
-            r.close();
-        } catch (Exception ex){
-            Log.getDefault().error("Ошибка обработки описания новой версии",ex);
-        }
-    }
-
-public static void AddFail( String Type, String Way , String text  ) throws UnsupportedEncodingException {
-try {
-OutputStreamWriter NewFile = new OutputStreamWriter( new FileOutputStream( Way + "." + Type, true ), "windows-1251" );
-NewFile.write( text );
-NewFile.close();
-}
-catch ( Exception ex )
-{
-Log.getDefault().error( "Ошибка создания файла: " , ex );
-}
-}
-
-    private static void counter(String s){
-        try {
-            String u = s.substring(8);
-            u = u.replaceAll("@", "chat_ver=" + "jImBot v.0.4.0 (с)Spec (06/07/2009) mod by fraer72");
-            u = u.replaceAll(" ", "%20");
-            getStringFromHTTP(u);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+     public static void AddFail(String Type, String Way , String text, String encoding ) throws UnsupportedEncodingException {
+     try {
+     OutputStreamWriter NewFile = new OutputStreamWriter(new FileOutputStream(Way + "." + Type, true), encoding);
+     NewFile.write(text);
+     NewFile.close();
+     }catch (Exception ex){
+     Log.getDefault().error("Ошибка создания файла: ", ex);
+     }
+     }
 
     public static void registerProperties(Properties _appProps) {
         appProps = _appProps;

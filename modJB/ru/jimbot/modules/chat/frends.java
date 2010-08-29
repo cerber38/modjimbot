@@ -118,7 +118,7 @@ proc.mq.add(uin,us.localnick + " пользователь " + u.localnick + " у
 "\nВоспользуйтесь командой !заявки что бы просматреть её");
 return;
 }
-if(getCountFrends(us.id, id) > 1 || getCountFrends(id, us.id) > 1)
+if(getCountFrends(us.id, id) >= 1 || getCountFrends(id, us.id) >= 1)
 {
 proc.mq.add(uin,us.localnick + " пользователь " + u.localnick + " уже находится у тебя в друзьях");
 return;
