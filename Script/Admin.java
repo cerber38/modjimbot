@@ -22,33 +22,28 @@ import java.sql.*;
 
     
      // Тест на приветствие
-    public boolean testHi(String s)
-	{
+    public boolean testHi(String s){
     String t = "прив;прев;здоров;здрас;здрав;хай;хой;хелл;добр;даро;салям";
     return adm.test(s,t.split(";"));
     }
-    public String getHi(String name)
-	{
+    public String getHi(String name){
     String[] s = {"Привет","Хай","Приветствую","Здравствуй","Здоров","Ааа... Это снова ты, привет"};
     return name + " " + s[adm.getRND(s.length)];
     }
 
     // Тест на прощание
-    public boolean testBYE(String s)
-	{
+    public boolean testBYE(String s){
     String t = "пока;покеда;счастливо;удачи;до свидания;гуд бай";
     return adm.test(s,t.split(";"));
     }
-    public String getBYE(String name)
-	{
+    public String getBYE(String name){
     String[] s = {"пока","покеда","счастливо","удачи","до свидания","гуд бай","ариведерчи","иди уже","вали уже"};
     return name + " " + s[adm.getRND(s.length)];
     }
 
 
     // Тест на вопрос (1)
-    public boolean testQuestion1(String s)
-	{
+    public boolean testQuestion1(String s){
     String t = "чё делаешь;что делаешь;че делаешь;чем маешься;чем занимаешься;че творишь;что творишь;чем занята";
     return adm.test(s,t.split(";"));
     }
@@ -58,54 +53,53 @@ import java.sql.*;
     }
 
     // Тест на вопрос (2)
-    public boolean testQuestion2(String s)
-	{
+    public boolean testQuestion2(String s){
     String t = "как дела;как она;как оно;как жизнь;как жизнь молодая;как поживаешь;как житуха;как ты";
     return adm.test(s,t.split(";"));
     }
-    public String getQuestion2(String name)
-	{
+    public String getQuestion2(String name){
     String[] s = {"Пока не родила!","Неплохо...","Замечательно:)","Нормально!","Лучше всех, а ти???"};
     return name + " " + s[adm.getRND(s.length)];
     }
 
     // Тест на вопрос (3)
-    public boolean testQuestion3(String s)
-	{
+    public boolean testQuestion3(String s){
     String t = "почему";
     return adm.test(s,t.split(";"));
     }
-    public String getQuestion3(String name)
-	{
+    public String getQuestion3(String name){
     String[] s = {"Потому что, гладиолус!","Потому!","Всё тебе расскажи, да покажи, да дай попробовать!"};
     return name + " " + s[adm.getRND(s.length)];
     }
 
     // Тест на вопрос (4)
-    public boolean testQuestion4(String s)
-    {
+    public boolean testQuestion4(String s){
     String t = "?;когда;зачем;где;куда;кого;кому;кто;чем";
     return adm.test(s,t.split(";"));
     }
-    public String getQuestion4(String name)
-    {
+    public String getQuestion4(String name){
     String[] s = {"Лишних вопросов не задавай!","Много будешь знать, плохо будешь спать","Я воздержусь от ответа"};
     return name + " " + s[adm.getRND(s.length)];
     }
 
     // Тест на оскорбление админа
-    public boolean testSKD(String s)
-    {
+    public boolean testSKD(String s){
     String t = "туп;лох;чмо;пид;шалав;шлюх;проститут;сука;мраз;грубиян;твар;пиз;гавн;говн;олен;дура;урод;черт;овца;шлюшка;овечка;свин;коза;каза";
     return adm.test(s,t.split(";"));
     }
-    public String getSKD(String name)
-    {
+    public String getSKD(String name){
     String[] s = {"Сам такой!","И ты не лучше","Ты че ахуел!","Заткнись сука!!! Сейчас полетишь!","Что больше сказать нечего?! Шлюшка","А за щеку возмёшь???"};
     return name + " " + s[adm.getRND(s.length)];
     }
 	
-    /*ИНФОРМАТОР*/
+     // Тест на рекламу
+    public boolean testAdvertisement(String s){
+    String t = "реклама";
+    return adm.test(s,t.split(";"));
+    }
+
+	
+    /**          ИНФОРМАТОР           **/
 
     public String getInfo(){
     try {
@@ -130,46 +124,38 @@ import java.sql.*;
     if(us.state==adm.srv.us.STATE_CHAT)
     rid.add(us.room);
     }
-    for (int i:rid)
-    {
+    for (int i:rid){
     adm.say(getInfo(), i); // Оповещение будет во все комнаты
     }
     }
     }	
 	
+	/**                              **/
+	
     if (adm.mq.isEmpty()) return;
     MsgElement ms = adm.mq.poll();
-    if(adm.srv.getProps().getBooleanProperty("adm.useMatFilter") &&
-    adm.testMat1(adm.changeChar(ms.msg))&& 
-	ms.room != adm.srv.getProps().getIntProperty("room.tyrma") && 
+    if(adm.srv.getProps().getBooleanProperty("adm.useMatFilter") && adm.testMat1(adm.changeChar(ms.msg)) && 
+	(!adm.srv.getProps().getBooleanProperty("radm.close.on.off") ? (false) : ms.room != adm.srv.getProps().getIntProperty("room.tyrma")) &&
 	!adm.srv.getProps().testAdmin(ms.uin)) {
-    int i=0;
-	//ПОНИЖЕНИЕ РЕЙТИНГА ЗА МАТ
-	if(adm.srv.getProps().getBooleanProperty("minus.ball.mat.on.off"))
+    int i = 0;
+	if(adm.srv.getProps().getBooleanProperty("minus.ball.mat.on.off")){
 	adm.srv.us.getUser(ms.uin).ball -= adm.srv.getProps().getIntProperty("minus.ball.mat");
 	adm.srv.us.updateUser(adm.srv.us.getUser(ms.uin));
-	// ОПОВЕЩЕНИЕ(ПРЕДУПРЕЖДЕНИЕ) ЗА МАТ
-	boolean test = true; // ВКЛЮЧИТЬ/ВЫКЛЮЧИТЬ
-	String nick_m = adm.srv.us.getUser(ms.uin).localnick;
-	String id_m = "|" + Integer.toString(adm.srv.us.getUser(ms.uin).id) + "|";
-	String msg = "off mat :)";
-	if(test){
-	adm.say(id_m + nick_m + " " + msg, ms.room);
 	}
-    if(!adm.uins.containsKey(ms.uin))
-	{
+	if(adm.srv.getProps().getBooleanProperty("radm.mat.warn")) adm.say(adm.getWarning(Integer.toString(adm.srv.us.getUser(ms.uin).id), adm.srv.us.getUser(ms.uin).localnick), ms.room);
+    if(!adm.uins.containsKey(ms.uin)){
     adm.uins.put(ms.uin,i);
-    } 
-	else 
-	{
+    } else {
     i=adm.uins.get(ms.uin);
     i++;
     adm.uins.put(ms.uin,i);
     }
     
-	if(i>=3) 
-	{ 
-	adm.close(ms.uin);
+	if(i>=3) { 
+	if(adm.srv.getProps().getBooleanProperty("radm.close.on.off"))
+	adm.Сlose(ms.uin);
+	else
+	adm.Kick(ms.proc, ms.uin);
     }	
     return;
     }
@@ -177,108 +163,97 @@ import java.sql.*;
     if(!adm.srv.getProps().getBooleanProperty("adm.useSayAdmin"))
     return;  
 	
-	// АДМИН НЕ ДОЛЖЕН РЕАГИРОВАТЬ В КОМНАТЕ ГДЕ ПРОХОДИТ ВИКТОРИНА
 	/*
 	 * Проверяем включена викторина или нет
 	 */
-    if( adm.srv.getProps().getBooleanProperty("vic.on.off"))
+    if(adm.srv.getProps().getBooleanProperty("vic.on.off") && !adm.srv.getProps().getBooleanProperty("radm.vic.room"))
 	{
 	/*
 	 * Проверяем комнату
 	 */
 	if(((ChatCommandProc)adm.srv.cmd).Quiz.TestRoom(ms.room))
-	{
-	return;// Если комната викторины
-	} 
+	return;// Если комната викторины и реакция в ней запрещена
     }	
 	
 	// Тест на приветствие
-    if(adm.testName(ms.msg) && testHi(ms.msg))
-	{
+    if(adm.testName(ms.msg) && testHi(ms.msg)){
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
     adm.say(getHi(adm.srv.us.getUser(ms.uin).localnick), ms.room);
     return;
     }
 	
     // Тест на прощание
-    if(adm.testName(ms.msg) && testBYE(ms.msg))
-	{
+    if(adm.testName(ms.msg) && testBYE(ms.msg)){
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
     adm.say(getBYE(adm.srv.us.getUser(ms.uin).localnick), ms.room);
     return;
     }
     
 	// Тест на оскорбление админа
-    if(adm.testName(ms.msg) && testSKD(ms.msg))
-	{
+    if(adm.testName(ms.msg) && testSKD(ms.msg)){
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
     adm.say(getSKD(adm.srv.us.getUser(ms.uin).localnick), ms.room);
     return;
     }
 	
 	// Тест на вопрос (1)
-	if(adm.testName(ms.msg) && testQuestion1(ms.msg))
-	{
+	if(adm.testName(ms.msg) && testQuestion1(ms.msg)){
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
     adm.say(getQuestion1(adm.srv.us.getUser(ms.uin).localnick), ms.room);
     return;
     }
 	
 	// Тест на вопрос (2)
-    if(adm.testName(ms.msg) && testQuestion2(ms.msg))
-	{
+    if(adm.testName(ms.msg) && testQuestion2(ms.msg)){
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
     adm.say(getQuestion2(adm.srv.us.getUser(ms.uin).localnick), ms.room);
     return;
     }
 
 	// Тест на вопрос (3)
-    if(adm.testName(ms.msg) && testQuestion3(ms.msg))
-	{
+    if(adm.testName(ms.msg) && testQuestion3(ms.msg)){
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
     adm.say(getQuestion3(adm.srv.us.getUser(ms.uin).localnick), ms.room);
     return;
     }
     
 	// Тест на вопрос (4)
-    if(adm.testName(ms.msg) && testQuestion4(ms.msg))
-	{
+    if(adm.testName(ms.msg) && testQuestion4(ms.msg)){
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
     adm.say(getQuestion4(adm.srv.us.getUser(ms.uin).localnick), ms.room);
     return;
     }
 	
 	// Тест на стат
-    if(adm.testName(ms.msg) && adm.testStat(ms.msg))
-	{
+    if(adm.testName(ms.msg) && adm.testStat(ms.msg)){
     if(!adm.srv.us.authorityCheck(ms.uin, "adminstat")) return;
     adm.sayStat(ms.room);
     return;
     }
+	
+	// Тест на рекламу
+    if(adm.testName(ms.msg) && testAdvertisement(ms.msg) && adm.srv.getProps().getBooleanProperty("advertisement.on.off")){
+    if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
+    adm.say(adm.srv.us.db.getAdvertisement(), ms.room);
+    return;
+    }	
     
     // Тест на обращение к админу    
     if(adm.testName(ms.msg)){
     if(!adm.srv.us.authorityCheck(ms.uin, "adminsay")) return;
-    if(adm.testFlood(ms.uin))
-	{
+    if(adm.testFlood(ms.uin)){
     adm.lastCount++;
-    if(adm.lastCount == (adm.srv.getProps().getIntProperty("adm.maxSayAdminCount")-1))
-	{
-    adm.say("Достали... ща закрою!", ms.room);
-    } 
-	else if(adm.lastCount >= adm.srv.getProps().getIntProperty("adm.maxSayAdminCount"))
-	{
+    if(adm.lastCount == (adm.srv.getProps().getIntProperty("adm.maxSayAdminCount")-1)){
+    adm.say(adm.getWarning(), ms.room);
+    } else if(adm.lastCount >= adm.srv.getProps().getIntProperty("adm.maxSayAdminCount")){
     ((ChatCommandProc)adm.srv.cmd).akick(ms.proc,ms.uin);
-    adm.lastCount =0;
-    } 
-	else 
-	{
+    adm.lastCount = 0;
+    } else {
     adm.say(adm.srv.us.getUser(ms.uin).localnick + " " + adm.getAdmin(), ms.room);
     }
-    } 
-	else 
-	{
+    } else {
     adm.say(adm.srv.us.getUser(ms.uin).localnick + " " + adm.getAdmin(), ms.room);
     }
     }
     return;
+
