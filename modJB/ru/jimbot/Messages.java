@@ -145,6 +145,33 @@ private Properties props = null;
         }
     }
 
+        /**
+         * XXXXXXX
+         * @param u - user
+         * @return false - М
+         * @param position - в зависимости от позиции выводим текст
+         */
+
+        public String getWBS(Users u, Integer position) {
+        boolean test;
+        if (u.homepage.indexOf('м') == 1 & u.homepage.equals(""))
+        test = false;
+        else 
+        test = false;
+
+        switch (position){
+        case 1:
+        return test ? "вошел(а)" : "вошел";
+        case 2:
+        return test ? "Ты должен(а)" : "Ты должен";
+        case 3:
+        return test ? "вышла(а)" : "вышел";
+        }
+        return "";
+        }
+        
+        
+
         private String test_clan(Users uss){
         String clan = "";
         ChatServer srv = ( ChatServer ) Manager.getInstance().getService( ServiceName );

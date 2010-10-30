@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package ru.jimbot.modules.chat;
+package ru.jimbot.util;
 
 import java.io.File;
 import java.text.DateFormat;

@@ -13,6 +13,7 @@ import ru.jimbot.modules.Cmd;
 import ru.jimbot.modules.CommandExtend;
 import ru.jimbot.modules.CommandParser;
 import ru.jimbot.protocol.IcqProtocol;
+import ru.jimbot.util.MainProps;
 
     /**
      * Магазин раличных товаров
@@ -21,14 +22,16 @@ import ru.jimbot.protocol.IcqProtocol;
 
     public class Shop2 {
     private HashMap<String, Cmd> commands = new HashMap<String, Cmd>();
-    private HashMap<String, CommandExtend> BredMap;
+    private HashMap<String, CommandExtend> ComShop;
     private CommandParser parser;
-    private ChatCommandProc cmd;
+    private ChatServer srv;
+    private ChatProps psp;
 
-    public Shop2(ChatCommandProc c){
+    public Shop2(ChatServer srv, ChatProps psp){
     parser = new CommandParser(commands);
-    cmd = c;
-    BredMap = new HashMap<String, CommandExtend>();
+    this.srv = srv;
+    this.psp = psp;
+    ComShop = new HashMap<String, CommandExtend>();
     init();
     }
 
@@ -39,6 +42,7 @@ import ru.jimbot.protocol.IcqProtocol;
     commands.put("!зоо", new Cmd("!зоо","",4));
     commands.put("!делтовар", new Cmd("!делтовар","$c $n",5));
     commands.put("!аддтовар", new Cmd("!аддтовар","$c $n $s",6));
+    commands.put("!reset", new Cmd("!reset","",7));
     }
 
    /**
@@ -57,12 +61,20 @@ import ru.jimbot.protocol.IcqProtocol;
     public boolean commandShop2(IcqProtocol proc, String uin, String mmsg) {
     String tmsg = mmsg.trim();
     int tp = 0;
-    if(BredMap.containsKey(uin))
-    if(!BredMap.get(uin).isExpire())
-    tp = parser.parseCommand(BredMap.get(uin).getCmd());
+    if(ComShop.containsKey(uin + "_reset"))
+    if(!ComShop.get(uin + "_reset").isExpire())
+    commandResetPurchases(proc, uin, tmsg);
     else {
     tp = parser.parseCommand(tmsg);
-    BredMap.remove(uin);
+    ComShop.remove(uin + "_reset");
+    }else
+    tp = parser.parseCommand(tmsg);
+    if(ComShop.containsKey(uin))
+    if(!ComShop.get(uin).isExpire())
+    tp = parser.parseCommand(ComShop.get(uin).getCmd());
+    else {
+    tp = parser.parseCommand(tmsg);
+    ComShop.remove(uin);
     }else
     tp = parser.parseCommand(tmsg);
     int tst=0;
@@ -90,6 +102,9 @@ import ru.jimbot.protocol.IcqProtocol;
     case 6:
     Add(proc, uin, parser.parseArgs(tmsg));
     break;
+    case 7:
+    commandResetPurchases(proc, uin, mmsg);
+    break;
 
     default:
     f = false;
@@ -98,11 +113,11 @@ import ru.jimbot.protocol.IcqProtocol;
     }
 
 private void MagAvto(IcqProtocol proc, String uin, Vector v, String mmsg) {
-    if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
-    Users uss = cmd.srv.us.getUser(uin);
+    if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
+    Users uss = srv.us.getUser(uin);
     int i = 0;
     boolean AVTO = false;
-    if(BredMap.containsKey(uin)){
+    if(ComShop.containsKey(uin)){
         try{
             i = Integer.parseInt(mmsg);
         } catch(NumberFormatException e){
@@ -118,26 +133,26 @@ private void MagAvto(IcqProtocol proc, String uin, Vector v, String mmsg) {
             return;
         }
         AVTO = true;
-        BredMap.remove(uin);
+        ComShop.remove(uin);
     }
     if(!AVTO){
         proc.mq.add(uin,ListTovar("avto"));
-        BredMap.put(uin, new CommandExtend(uin, mmsg, mmsg,v, 2*60000));
+        ComShop.put(uin, new CommandExtend(uin, mmsg, mmsg,v, 2*60000));
         return;
     }
     if(i == 0){proc.mq.add(uin,uss.localnick + " вы вышли из магазина"); return;}
     uss.ball -= Price("avto",i);
-    uss.car = (!uss.car.equals("") & !cmd.psp.getBooleanProperty("some.on.off") ? (Tovar("avto",i)) : uss.car + ", " + Tovar("avto",i));
-    cmd.srv.us.updateUser(uss);
+    uss.car = (!uss.car.equals("") & !psp.getBooleanProperty("some.on.off") ? (Tovar("avto",i)) : uss.car + ", " + Tovar("avto",i));
+    srv.us.updateUser(uss);
     proc.mq.add(uin,uss.localnick + " вы купили  - '" + Tovar("avto",i) + "'\nУ Вас осталось " + uss.ball + " баллов.");
 }
 
 private void MagDom(IcqProtocol proc, String uin, Vector v, String mmsg) {
-    if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
-    Users uss = cmd.srv.us.getUser(uin);
+    if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
+    Users uss = srv.us.getUser(uin);
     int i = 0;
     boolean DOM = false;
-    if(BredMap.containsKey(uin)){
+    if(ComShop.containsKey(uin)){
         try{
             i = Integer.parseInt(mmsg);
         } catch(NumberFormatException e){
@@ -153,26 +168,26 @@ private void MagDom(IcqProtocol proc, String uin, Vector v, String mmsg) {
             return;
         }
         DOM = true;
-        BredMap.remove(uin);
+        ComShop.remove(uin);
     }
     if(!DOM){
         proc.mq.add(uin,ListTovar("dom"));
-        BredMap.put(uin, new CommandExtend(uin, mmsg, mmsg,v, 2*60000));
+        ComShop.put(uin, new CommandExtend(uin, mmsg, mmsg,v, 2*60000));
         return;
     }
     if(i == 0){proc.mq.add(uin,uss.localnick + " вы вышли из магазина"); return;}
     uss.ball -= Price("dom",i);
-    uss.home = (!uss.home.equals("") & !cmd.psp.getBooleanProperty("some.on.off") ? (Tovar("dom",i)) : uss.home + ", " + Tovar("dom",i));
-    cmd.srv.us.updateUser(uss);
+    uss.home = (!uss.home.equals("") & !psp.getBooleanProperty("some.on.off") ? (Tovar("dom",i)) : uss.home + ", " + Tovar("dom",i));
+    srv.us.updateUser(uss);
     proc.mq.add(uin,uss.localnick + " вы купили  - '" + Tovar("dom",i) + "'\nУ Вас осталось " + uss.ball + " баллов.");
 }
 
 private void MagOdej(IcqProtocol proc, String uin, Vector v, String mmsg) {
-    if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
-    Users uss = cmd.srv.us.getUser(uin);
+    if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
+    Users uss = srv.us.getUser(uin);
     int i = 0;
     boolean ODEJ = false;
-    if(BredMap.containsKey(uin)){
+    if(ComShop.containsKey(uin)){
         try{
             i = Integer.parseInt(mmsg);
         } catch(NumberFormatException e){
@@ -188,26 +203,26 @@ private void MagOdej(IcqProtocol proc, String uin, Vector v, String mmsg) {
             return;
         }
         ODEJ = true;
-        BredMap.remove(uin);
+        ComShop.remove(uin);
     }
     if(!ODEJ){
         proc.mq.add(uin,ListTovar("odejda"));
-        BredMap.put(uin, new CommandExtend(uin, mmsg, mmsg,v, 2*60000));
+        ComShop.put(uin, new CommandExtend(uin, mmsg, mmsg,v, 2*60000));
         return;
     }
     if(i == 0){proc.mq.add(uin,uss.localnick + " вы вышли из магазина"); return;}
     uss.ball -= Price("odejda",i);
-    uss.clothing = (!uss.clothing.equals("") & !cmd.psp.getBooleanProperty("some.on.off") ? (Tovar("odejda",i)) : uss.clothing + ", " + Tovar("odejda",i));
-    cmd.srv.us.updateUser(uss);
+    uss.clothing = (!uss.clothing.equals("") & !psp.getBooleanProperty("some.on.off") ? (Tovar("odejda",i)) : uss.clothing + ", " + Tovar("odejda",i));
+    srv.us.updateUser(uss);
     proc.mq.add(uin,uss.localnick + " вы купили  - '" + Tovar("odejda",i) + "'\nУ Вас осталось " + uss.ball + " баллов.");
 }
 
 private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
-    if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
-    Users uss = cmd.srv.us.getUser(uin);
+    if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
+    Users uss = srv.us.getUser(uin);
     int i = 0;
     boolean JIV = false;
-    if(BredMap.containsKey(uin)){
+    if(ComShop.containsKey(uin)){
         try{
             i = Integer.parseInt(mmsg);
         } catch(NumberFormatException e){
@@ -223,28 +238,28 @@ private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
             return;
         }
         JIV = true;
-        BredMap.remove(uin);
+        ComShop.remove(uin);
     }
     if(!JIV){
         proc.mq.add(uin,ListTovar("jivotnoe"));
-        BredMap.put(uin, new CommandExtend(uin, mmsg, mmsg,v, 2*60000));
+        ComShop.put(uin, new CommandExtend(uin, mmsg, mmsg,v, 2*60000));
         return;
     }
     if(i == 0){proc.mq.add(uin,uss.localnick + " вы вышли из магазина"); return;}
     uss.ball -= Price("jivotnoe",i);
-    uss.animal = (!uss.animal.equals("") & !cmd.psp.getBooleanProperty("some.on.off") ? (Tovar("jivotnoe",i)) : uss.animal + ", " + Tovar("jivotnoe",i));
-    cmd.srv.us.updateUser(uss);
+    uss.animal = (!uss.animal.equals("") & !psp.getBooleanProperty("some.on.off") ? (Tovar("jivotnoe",i)) : uss.animal + ", " + Tovar("jivotnoe",i));
+    srv.us.updateUser(uss);
     proc.mq.add(uin,uss.localnick + " вы купили  - '" + Tovar("jivotnoe",i) + "'\nУ Вас осталось " + uss.ball + " баллов.");
 }
 
     /*
      * Список товаров
      */
-    public String ListTovar(String table) {
+    private String ListTovar(String table) {
     String list = "Здравствуйте я могу Вам предложить:\n" +
     "Номер ~ Название » Цена(баллов)\n";
     try{
-    PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("select id, tovar, price from " + table);
+    PreparedStatement pst = (PreparedStatement) srv.us.db.getDb().prepareStatement("select id, tovar, price from " + table);
     ResultSet rs = pst.executeQuery();
     while(rs.next()){
     list += rs.getInt(1) + " ~ " + rs.getString(2) +  " » " + rs.getInt(3) + '\n';
@@ -262,10 +277,10 @@ private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
      * Добавить товар
      */
     private void Add(IcqProtocol proc, String uin, Vector v) {
-    if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
-    if(!cmd.auth(proc,uin, "gift")) return;
+    if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
+    if(!((ChatCommandProc)srv.cmd).auth(proc,uin, "gift")) return;
     try{
-        Users uss = cmd.srv.us.getUser(uin);
+        Users uss = srv.us.getUser(uin);
         String table = (String)v.get(0);
         int price = (Integer)v.get(1);
         String tovar = (String)v.get(2);
@@ -290,7 +305,7 @@ private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
         proc.mq.add(uin,uss.localnick + " вы не указали название товара для продажи");
         return;
         }
-        if (cmd.radm.testMat1(cmd.radm.changeChar(tovar))){
+        if (((ChatCommandProc)srv.cmd).radm.testMat1(((ChatCommandProc)srv.cmd).radm.changeChar(tovar))){
         proc.mq.add(uin,uss.localnick + " в названии товара мат 'МАТ'");
         return;
         }
@@ -310,10 +325,10 @@ private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
      * Удалить товар
      */
     private void Del(IcqProtocol proc, String uin, Vector v) {
-    if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
-    if(!cmd.auth(proc,uin, "gift")) return;
+    if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
+    if(!((ChatCommandProc)srv.cmd).auth(proc,uin, "gift")) return;
     try{
-        Users uss = cmd.srv.us.getUser(uin);
+        Users uss = srv.us.getUser(uin);
         String table = (String)v.get(0);
         int id = (Integer)v.get(1);
         String table2 = table.toLowerCase();//опустим регистр
@@ -330,17 +345,17 @@ private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
         return;
         }
         proc.mq.add(uin,uss.localnick + " товар '" + Tovar(table2,id) + "' успешно удален");
-        cmd.srv.us.db.executeQuery("DELETE FROM " + table2 + " WHERE id=" + id);
-        cmd.srv.us.db.executeQuery("REPAIR TABLE " + table2);
+        srv.us.db.executeQuery("DELETE FROM " + table2 + " WHERE id=" + id);
+        srv.us.db.executeQuery("REPAIR TABLE " + table2);
         }catch (Exception ex){
         ex.printStackTrace();
         proc.mq.add(uin,"При удалении товара возникла ошибка - "+ex.getMessage());
         }
         }
 
-   public boolean TestTable(String table) {
+   private boolean TestTable(String table) {
     try{
-    PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("SELECT * FROM " + table + " WHERE 0");
+    PreparedStatement pst = (PreparedStatement) srv.us.db.getDb().prepareStatement("SELECT * FROM " + table + " WHERE 0");
     ResultSet rs = pst.executeQuery();
     rs.close();
     pst.close();
@@ -350,16 +365,16 @@ private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
     return true;
     }
 
-    public int getCount(String table, int id){
+    private int getCount(String table, int id){
     String q = "SELECT count(*) FROM " + table + " WHERE id="+id;
-    Vector<String[]> v = cmd.srv.us.db.getValues(q);
+    Vector<String[]> v = srv.us.db.getValues(q);
     return Integer.parseInt(v.get(0)[0]);
     }
 
     public int Price(String table, int id) {
     int price = 0;
     try{
-    PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("select price from " + table + " where id=" + id);
+    PreparedStatement pst = (PreparedStatement) srv.us.db.getDb().prepareStatement("select price from " + table + " where id=" + id);
     ResultSet rs = pst.executeQuery();
     if(rs.next()){
         price += rs.getInt(1);
@@ -372,10 +387,10 @@ private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
     return price;
     }
 
-    public String Tovar(String table, int id) {
+    private String Tovar(String table, int id) {
     String tovar = "";
     try{
-    PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("select tovar from " + table + " where id=" + id);
+    PreparedStatement pst = (PreparedStatement) srv.us.db.getDb().prepareStatement("select tovar from " + table + " where id=" + id);
     ResultSet rs = pst.executeQuery();
     if(rs.next()){
         tovar += rs.getString(1);
@@ -388,9 +403,9 @@ private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
     return tovar;
     }
 
-    public void AddBD(String table, String tovar, int price) {
+    private void AddBD(String table, String tovar, int price) {
     try {
-    PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("insert into " + table + " values(null, ?, ?)");
+    PreparedStatement pst = (PreparedStatement) srv.us.db.getDb().prepareStatement("insert into " + table + " values(null, ?, ?)");
     pst.setString(1,tovar);
     pst.setInt(2,price);
     pst.execute();
@@ -398,6 +413,168 @@ private void MagJivot(IcqProtocol proc, String uin, Vector v, String mmsg) {
     }catch (Exception ex){
     ex.printStackTrace();
     }
+    }
+
+    /**
+     * Удалени не нужных покупок
+     * @param proc
+     * @param uin
+     * @param mmsg
+     */
+
+
+    private void commandResetPurchases (IcqProtocol proc, String uin, String mmsg){
+    Users uss = srv.us.getUser(uin);
+    Vector v = new Vector();
+    String s = "";
+    if(!ComShop.containsKey(uin + "_reset")){
+        ComShop.put(uin + "_reset", new CommandExtend(uin, "0", "0", v, 2*60000));
+        proc.mq.add(uin,uss.localnick + " укажите категорию товара: \n 1) Автосалон \n 2) Недвижимость \n 3) Бутик \n 4) Зоо \n\n " +
+                "Для выхода пошлите 0");
+        return;
+    }
+    /*1. Шаг*/
+    if(Integer.parseInt(ComShop.get(uin + "_reset").getMsg()) == 0){
+        /*Проверим ответ*/
+        if(!MainProps.testInteger(mmsg)){
+        proc.mq.add(uin,uss.localnick + " категория товара указан не верно!");
+        return;
+        }
+        if(Integer.parseInt(mmsg) < 0 || Integer.parseInt(mmsg) > 4){
+        proc.mq.add(uin,uss.localnick + " категория товара указан не верно!");
+        return;
+        }
+        switch(Integer.parseInt(mmsg)){
+            case 0:
+            proc.mq.add(uin,uss.localnick + " команда завершена!");
+            ComShop.remove(uin + "_reset");
+            break;
+            case 1:
+            if(uss.car.equals("")){
+            proc.mq.add(uin,uss.localnick + " у вас нет покупок в автосалоне!");
+            ComShop.remove(uin + "_reset");
+            return;
+            }
+            String[] some = uss.car.split(",");
+            s += "Список ваших покупок в автосалоне:\n";
+            for(int i=0; i<some.length; i++)
+            s += i+1 + ") " + some[i].trim() + "\n";
+            s += "Укажите номер для удаленя\nДля выхода пошлите 0";
+            proc.mq.add(uin,s);
+            v.add(1);
+            ComShop.put(uin + "_reset", new CommandExtend(uin, "", "1", v, 2*60000));
+            break;
+            case 2:
+            if(uss.home.equals("")){
+            proc.mq.add(uin,uss.localnick + " у вас нет покупок в магазине недвижимости!");
+            ComShop.remove(uin);
+            return;
+            }
+            String[] some2 = uss.home.split(",");
+            s += "Список ваших покупок в магазине недвижимости:\n";
+            for(int i=0; i<some2.length; i++)
+            s += i+1 + ") " + some2[i].trim() + "\n";
+            s += "Укажите номер для удаленя\nДля выхода пошлите 0";
+            proc.mq.add(uin,s);
+            v.add(2);
+            ComShop.put(uin + "_reset", new CommandExtend(uin, "", "1", v, 2*60000));
+            break;
+            case 3:
+            if(uss.clothing.equals("")){
+            proc.mq.add(uin,uss.localnick + " у вас нет покупок в магазине одежды!");
+            ComShop.remove(uin);
+            return;
+            }
+            String[] some3 = uss.clothing.split(",");
+            s += "Список ваших покупок в магазине одежды:\n";
+            for(int i=0; i<some3.length; i++)
+            s += i+1 + ") " + some3[i].trim() + "\n";
+            s += "Укажите номер для удаленя\nДля выхода пошлите 0";
+            proc.mq.add(uin,s);
+            v.add(3);
+            ComShop.put(uin + "_reset", new CommandExtend(uin, "", "1", v, 2*60000));
+            break;
+            case 4:
+            if(uss.animal.equals("")){
+            proc.mq.add(uin,uss.localnick + " у вас нет покупок в зоо магазине!");
+            ComShop.remove(uin);
+            return;
+            }
+            String[] some4 = uss.animal.split(",");
+            s += "Список ваших покупок в магазине одежды:\n";
+            for(int i=0; i<some4.length; i++)
+            s += i+1 + ")" + some4[i] + "\n";
+            s += "Укажите номер для удаленя\nДля выхода пошлите 0";
+            proc.mq.add(uin,s);
+            v.add(4);
+            ComShop.put(uin + "_reset", new CommandExtend(uin, "", "1", v, 2*60000));
+            break;
+        }
+            return;
+    }
+    /*2. Шаг*/
+    if(Integer.parseInt(ComShop.get(uin + "_reset").getMsg()) == 1){
+        /*Проверим ответ*/
+        if(!MainProps.testInteger(mmsg)){
+        proc.mq.add(uin,uss.localnick + " номер покупки указан не верно!");
+        return;
+        }
+        if(Integer.parseInt(mmsg) == 0){
+        proc.mq.add(uin,uss.localnick + " команда завершена!");
+        ComShop.remove(uin + "_reset");
+        return;
+        }
+    v = ComShop.get(uin + "_reset").getData();
+        switch((Integer)v.get(0)){
+            case 1:
+            if((Integer.parseInt(mmsg)-1) < 0 || (Integer.parseInt(mmsg)-1) > uss.car.split(",").length){
+            proc.mq.add(uin,uss.localnick + " номер покупки указан не верно!");
+            return;
+            }
+            if(uss.car.split(",").length == 1)
+                uss.car = "";
+            else
+                uss.car = uss.car.replace("," + uss.car.split(",")[(Integer.parseInt(mmsg)-1)], "");                      
+            proc.mq.add(uin,uss.localnick + " покупка успешно удалена из списка!");
+            break;
+            case 2:
+            if((Integer.parseInt(mmsg)-1) < 0 || (Integer.parseInt(mmsg)-1) > uss.home.split(",").length){
+            proc.mq.add(uin,uss.localnick + " номер покупки указан не верно!");
+            return;
+            }
+            if(uss.home.split(",").length == 1)
+                uss.home = "";
+            else
+                uss.home = uss.home.replace("," + uss.home.split(",")[(Integer.parseInt(mmsg)-1)], "");
+            proc.mq.add(uin,uss.localnick + " покупка успешно удалена из списка!");
+            break;
+            case 3:
+            if((Integer.parseInt(mmsg)-1) < 0 || (Integer.parseInt(mmsg)-1) > uss.clothing.split(",").length){
+            proc.mq.add(uin,uss.localnick + " номер покупки указан не верно!");
+            return;
+            }
+            if(uss.clothing.split(",").length == 1)
+                uss.clothing = "";
+            else
+                uss.clothing = uss.clothing.replace("," + uss.clothing.split(",")[(Integer.parseInt(mmsg)-1)], "");
+            proc.mq.add(uin,uss.localnick + " покупка успешно удалена из списка!");
+            break;
+            case 4:
+            if((Integer.parseInt(mmsg)-1) < 0 || (Integer.parseInt(mmsg)-1) > uss.animal.split(",").length){
+            proc.mq.add(uin,uss.localnick + " номер покупки указан не верно!");
+            return;
+            }
+            if(uss.animal.split(",").length == 1)
+                uss.animal = "";
+            else
+                uss.animal = uss.animal.replace("," + uss.animal.split(",")[(Integer.parseInt(mmsg)-1)], "");
+            break;
+        }
+        ComShop.remove(uin + "_reset");
+        srv.us.updateUser(uss);
+    }
+
+
     }
 
 }

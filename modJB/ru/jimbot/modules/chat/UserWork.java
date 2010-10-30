@@ -1517,4 +1517,11 @@ public class UserWork {
         return s;
         }
 
+
+        public int getCountGame(int id) {
+        String q = "SELECT count(*) FROM `events` WHERE user_id="+id+" and type='MILLIONER' and (to_days( now( ) ) - to_days( time )) <1";
+        Vector<String[]> v = db.getValues(q);
+        return Integer.parseInt(v.get(0)[0]);
+        }
+
 }

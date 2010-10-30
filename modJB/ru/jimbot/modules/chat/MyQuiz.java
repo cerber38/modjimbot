@@ -570,7 +570,7 @@ if(rooms.equals("")){
     psp.setStringProperty("vic.room", Integer.toString(room));
     psp.save();
 }else{
-    psp.setStringProperty("vic.room", ";" + Integer.toString(room));
+    psp.setStringProperty("vic.room", rooms +";" + Integer.toString(room));
     psp.save();
 }
 QuizInfo quiz = new QuizInfo(count, room, Random_ID(), System.currentTimeMillis());

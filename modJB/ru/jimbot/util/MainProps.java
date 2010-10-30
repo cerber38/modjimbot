@@ -31,6 +31,8 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Vector;
@@ -118,6 +120,19 @@ public class MainProps {
             new UserPreference(UserPreference.PASS_TYPE,"db.pass","Пароль root`a",getStringProperty("db.pass"),false)
         };
         return p;
+    }
+
+
+    /**
+     * Вернет текущюю дату
+     * @return
+     */
+
+    public static String currentData(){
+        Date date = new Date(System.currentTimeMillis());
+        Calendar currentCalendar = Calendar.getInstance();
+        currentCalendar.setTime(date);
+        return currentCalendar.get(Calendar.DAY_OF_MONTH) + "/" + (currentCalendar.get(Calendar.MONTH) + 1)  + "/" + currentCalendar.get(Calendar.YEAR);
     }
     
     /**
@@ -434,7 +449,7 @@ public class MainProps {
     public static String getServiceType(int i) {
     	return getStringProperty("srv.serviceType"+i);
     }
-    
+
     public static int addService(String name, String type){
     	int c = getServicesCount();
     	setIntProperty("srv.servicesCount", c+1);
@@ -712,6 +727,23 @@ public class MainProps {
      Log.getDefault().error("Ошибка создания файла: ", ex);
      }
      }
+
+
+    /**
+     * Число?
+     * @param msg
+     * @return
+     */
+
+    public static boolean testInteger(String msg){
+    Integer answer;
+    try{
+    answer = Integer.parseInt(msg);
+    }catch(NumberFormatException e){
+    return false;
+    }
+    return true;
+    }
 
     public static void registerProperties(Properties _appProps) {
         appProps = _appProps;

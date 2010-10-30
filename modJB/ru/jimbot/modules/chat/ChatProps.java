@@ -28,7 +28,6 @@ import java.util.Properties;
 import ru.jimbot.modules.AbstractProps;
 import ru.jimbot.table.UserPreference;
 import ru.jimbot.util.Log;
-import ru.jimbot.util.MainProps;
 
 /**
  *
@@ -256,6 +255,9 @@ public class ChatProps implements AbstractProps {
         setIntProperty("number.increase", 2);
         setIntProperty("number.room", 6);
         setIntProperty("number.max.rate", 50);
+        setIntProperty("vial.fraza.leght", 50 );
+        setIntProperty("theme.leght", 250 );
+        setIntProperty("rob.msg", 250 ); 
     }
 
     public UserPreference[] getUserPreference(){
@@ -346,6 +348,7 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.INTEGER_TYPE,"minus.ball.kick","На сколько понижать рейтинг при кике",getIntProperty("minus.ball.kick"),true),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"advertisement.on.off","Включить/Выключить рекламу",getBooleanProperty("advertisement.on.off"),true),
         new UserPreference(UserPreference.INTEGER_TYPE,"ball.respekt","Количество балов для повышения рейтинга пользователю",getIntProperty("ball.respekt"),true),
+        new UserPreference(UserPreference.INTEGER_TYPE,"theme.leght","Максимальная длина темы в чате",getIntProperty("theme.leght"),true),
         //банрум
         new UserPreference(UserPreference.CATEGORY_TYPE,"banroom", "Настройки закрытия в комнате"),
         new UserPreference(UserPreference.INTEGER_TYPE,"room.tyrma","Комната Тюрьма в чате",getIntProperty("room.tyrma"),true),
@@ -419,6 +422,7 @@ public class ChatProps implements AbstractProps {
         new UserPreference(UserPreference.CATEGORY_TYPE,"but", "Настройки бутылочки =)"),
         new UserPreference(UserPreference.INTEGER_TYPE,"room.igra.bytilochka","Комната игры",getIntProperty("room.igra.bytilochka"),true),
         new UserPreference(UserPreference.INTEGER_TYPE,"time.igra.bytilochkat","Интервал игры",getIntProperty("time.igra.bytilochka"),true),
+        new UserPreference(UserPreference.INTEGER_TYPE,"vial.fraza.leght","Длина фразы при добавлении",getIntProperty("vial.fraza.leght"),true),
         //Настройки свадьбы
         new UserPreference(UserPreference.CATEGORY_TYPE,"wedding", "Настройки свадьбы"),
         new UserPreference(UserPreference.BOOLEAN_TYPE,"wedding.floor.on.off","Включить/Выключить проверку пола",getBooleanProperty("wedding.floor.on.off"),true),
@@ -478,6 +482,7 @@ public class ChatProps implements AbstractProps {
           new UserPreference(UserPreference.BOOLEAN_TYPE, "radm.close.random", "Включить/Выключить рандомное время закрытия", getBooleanProperty("radm.close.random"),true),
           new UserPreference(UserPreference.BOOLEAN_TYPE, "radm.mat.warn", "Включить/Выключить оповещение о мате", getBooleanProperty("radm.mat.warn"),true),
           new UserPreference(UserPreference.BOOLEAN_TYPE, "radm.vic.room", "Включить/Выключить разговор админ бота в комнате с викториной", getBooleanProperty("radm.vic.room"),true),
+          new UserPreference(UserPreference.BOOLEAN_TYPE, "rob.msg", "Максимальная длина фразы для админ бота при добавлении", getBooleanProperty("rob.msg"),true),
           // Предупрежения
           new UserPreference(UserPreference.CATEGORY_TYPE, "notice", "Настройки предупреждений"),
           new UserPreference(UserPreference.INTEGER_TYPE, "notice.limit", "Лимит предупреждений", getIntProperty("notice.limit"),true),

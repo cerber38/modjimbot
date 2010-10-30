@@ -398,6 +398,6 @@ pst.close();
 }catch (Exception ex){
 ex.printStackTrace();
 }
-return frends + "\nЧто бы просматреть всех друзей набери !аллдруг <id>";
+return frends + "\nЧто бы просмотреть всех друзей набери !аллдруг <id>";
 }
 }

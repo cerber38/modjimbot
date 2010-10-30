@@ -49,7 +49,7 @@ public class CommandExtend {
 		msg = _msg;
 		data = _data;
 	}
-	
+
 	public String getMsg(){
 		return msg;
 	}

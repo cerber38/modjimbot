@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+[/p/<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
 <entry key="ChatCommandProc.parse.0">Если ты не бот, то ответь на пример: {0} =?
@@ -125,6 +125,7 @@
 <entry key="ChatCommandProc.commandAdm.0">Пустое сообщение</entry>
 <entry key="ChatCommandProc.commandAdm.1">Сообщение сохранено</entry>
 <entry key="ChatCommandProc.commandAdm.2">Ошибка добавления</entry>
+<entry key="ChatCommandProc.commandAdm.3">В сообщении мат!</entry>
 <entry key="ChatCommandProc.commandLRoom.0">Список комнат в чате:</entry>
 <entry key="ChatCommandProc.commandCrRoom.0">Такая комната уже существует!</entry>
 <entry key="ChatCommandProc.commandCrRoom.1">Комната {0} успешно создана!</entry>

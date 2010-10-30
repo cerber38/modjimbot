@@ -85,6 +85,17 @@ public class MainPage extends HttpServlet {
     }
 
     /**
+     * Проверка имени сервиса
+     * @param ServiceName
+     * @return
+     */
+
+
+    private boolean testServiceName(String ServiceName) {
+    return ServiceName.indexOf(" ") >= 0;
+    }
+
+    /**
      * Проверка сессия для пользователя
      * @param id
      * @param user
@@ -102,10 +113,7 @@ public class MainPage extends HttpServlet {
      * @return
      */
     public String timeIn(){
-    String s = "";
-    Date date = new Date();
-    s = date.getHours() + ":" + date.getMinutes() + "   0" + date.getDate() +"/"+date.getMonth()+"/"+date.getYear();
-    return s;
+    return MainProps.currentData();
     }
 
     /**
@@ -965,6 +973,10 @@ public class MainPage extends HttpServlet {
     		printMsg(con,"srvs_create","Сервис с таким именем уже существует!");
     		return;
     	}
+        if(testServiceName(ns)){
+            printMsg(con,"srvs_create","В имени сервиса не должно быть пробелов!");
+            return;
+        }
     	if(type==null){
     		printMsg(con,"srvs_create","Необходимо выбрать тип сервиса!");
     		return;
