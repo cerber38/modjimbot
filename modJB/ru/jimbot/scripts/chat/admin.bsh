@@ -142,7 +142,7 @@ import java.sql.*;
 	adm.srv.us.getUser(ms.uin).ball -= adm.srv.getProps().getIntProperty("minus.ball.mat");
 	adm.srv.us.updateUser(adm.srv.us.getUser(ms.uin));
 	}
-	if(adm.srv.getProps().getBooleanProperty("radm.mat.warn")) adm.say(adm.getWarning(Integer.toString(adm.srv.us.getUser(ms.uin).id), adm.srv.us.getUser(ms.uin).localnick), ms.room);
+	if(adm.srv.getProps().getBooleanProperty("radm.mat.warn")) adm.say(adm.getWarning(adm.srv.us.getUser(ms.uin).id, adm.srv.us.getUser(ms.uin).localnick), ms.room);
     if(!adm.uins.containsKey(ms.uin)){
     adm.uins.put(ms.uin,i);
     } else {
@@ -246,7 +246,7 @@ import java.sql.*;
     if(adm.lastCount == (adm.srv.getProps().getIntProperty("adm.maxSayAdminCount")-1)){
     adm.say(adm.getWarning(), ms.room);
     } else if(adm.lastCount >= adm.srv.getProps().getIntProperty("adm.maxSayAdminCount")){
-    ((ChatCommandProc)adm.srv.cmd).akick(ms.proc,ms.uin);
+   ((ChatCommandProc)adm.srv.cmd).akick(ms.proc,ms.uin,"предупреждал...");
     adm.lastCount = 0;
     } else {
     adm.say(adm.srv.us.getUser(ms.uin).localnick + " " + adm.getAdmin(), ms.room);

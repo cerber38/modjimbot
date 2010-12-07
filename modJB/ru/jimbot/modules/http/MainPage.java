@@ -1415,6 +1415,8 @@ public class MainPage extends HttpServlet {
     con.print("<P>%VIC_USERS_COUNT% - максимальное количество пользователей которое может играть в викторину.</P>");
     con.print("<P>%SOCIAL_STATUS% - социальный статус.</P>");
     con.print("<P>%NOTICE% - количество предупреждений.</P>");
+    con.print("<P>%TEXT_IN% - рандомный текст при входе.</P>");
+    con.print("<P>%TEXT_OUT% - рандомный текст при выходе..</P>");
     con.print("<b>exitChat:</b>");
     con.print("<P>%NICK% - ник пользователя.</P>");
     con.print("<P>%ID% - id пользователя.</P>");

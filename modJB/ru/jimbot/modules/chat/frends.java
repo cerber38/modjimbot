@@ -22,12 +22,13 @@ import ru.jimbot.protocol.IcqProtocol;
 public class frends {
 private HashMap<String, Cmd> commands = new HashMap<String, Cmd>();
 private CommandParser parser;
-private ChatCommandProc cmd;
+private ChatServer srv;
+private ChatProps psp;
 
-public frends(ChatCommandProc c)
-{
+public frends (ChatServer srv, ChatProps psp){
 parser = new CommandParser(commands);
-cmd = c;
+this.srv = srv;
+this.psp = psp;
 init();
 }
 
@@ -95,62 +96,53 @@ return f;
  */
 
 private void commandDemand(IcqProtocol proc, String uin, Vector v) {
-if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
+if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
 try{
 int id = (Integer)v.get(0);
-Users us = cmd.srv.us.getUser(uin);
-Users u = cmd.srv.us.getUser(id);
-long z = cmd.srv.us.db.getLastIndex("demand");
-int max_id = (int) z;
+Users us = srv.us.getUser(uin);
+Users u = srv.us.getUser(id);
 if(id==us.id){
 proc.mq.add(uin,us.localnick +" нельзя создавать заявку самому себе");
 return;
 }
-if((getCountDemand(us.id, id) > 1 || getCountDemand(us.id, id) == 1))
-{
+if((getCountDemand(us.id, id) > 1 || getCountDemand(us.id, id) == 1)){
 proc.mq.add(uin,us.localnick + " вы уже создали заявку на дружбу с пользователем "
 + u.localnick + ", ждите её расмотрения");
 return;
 }
-if((getCountDemand2(us.id, id) > 1 || getCountDemand2(us.id, id) == 1))
-{
+if((getCountDemand2(us.id, id) > 1 || getCountDemand2(us.id, id) == 1)){
 proc.mq.add(uin,us.localnick + " пользователь " + u.localnick + " уже создал заявку на дружбу с вами." +
 "\nВоспользуйтесь командой !заявки что бы просматреть её");
 return;
 }
-if(getCountFrends(us.id, id) >= 1 || getCountFrends(id, us.id) >= 1)
-{
+if(getCountFrends(us.id, id) >= 1 || getCountFrends(id, us.id) >= 1){
 proc.mq.add(uin,us.localnick + " пользователь " + u.localnick + " уже находится у тебя в друзьях");
 return;
 }
-DemandBd(max_id, us.id, id, "D"+id);
+DemandBd((int)srv.us.db.getLastIndex("demand"), us.id, id, "D"+id);
 proc.mq.add(uin,us.localnick + " вы успешно создали заявку, ждите когда пользователь "
 + u.localnick + " расмотрит её");
 if(u.state==UserWork.STATE_CHAT){
-cmd.srv.getIcqProcess(u.basesn).mq.add(u.sn,u.localnick + " у вас 1 новая заявка.");
+srv.getIcqProcess(u.basesn).mq.add(u.sn,u.localnick + " у вас 1 новая заявка.");
 }
-}
-catch (Exception ex)
-{
+}catch (Exception ex){
 ex.printStackTrace();
 proc.mq.add(uin,"При создании заявки возникла ошибка - "+ex.getMessage());
 }
 }
 
-public void commandDemands(IcqProtocol proc, String uin)
-{
-if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
+private void commandDemands(IcqProtocol proc, String uin){
+if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
 try {
-Users us = cmd.srv.us.getUser(uin);
+Users us = srv.us.getUser(uin);
 proc.mq.add(uin,commandListDemand(us.id));
 } catch (Exception ex) {ex.printStackTrace();
 proc.mq.add(uin,ex.getMessage());
 }
 }
 
-public void commandAllFrends(IcqProtocol proc, String uin, Vector v)
-{
-if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
+private void commandAllFrends(IcqProtocol proc, String uin, Vector v){
+if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
 try {
 int id = (Integer)v.get(0);
 proc.mq.add(uin,commandListFrends(id));
@@ -164,28 +156,23 @@ proc.mq.add(uin,ex.getMessage());
  */
 
 private void commandConfirm(IcqProtocol proc, String uin, Vector v) {
-if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
+if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
 try{
 int id = (Integer)v.get(0);
-Users u = cmd.srv.us.getUser(id);
-Users us = cmd.srv.us.getUser(uin);
-long z = cmd.srv.us.db.getLastIndex("frends");
-int max_id = (int) z;
-if(getCountDemand2(us.id, id) == 0)
-{
+Users u = srv.us.getUser(id);
+Users us = srv.us.getUser(uin);
+if(getCountDemand2(us.id, id) == 0){
 proc.mq.add(uin,us.localnick + " такой заявки не существует.");
 return;
 }
-FrendsBd(max_id, id, us.id, "F"+us.id);
-FrendsBd((max_id+1), us.id, id, "F"+id);
-cmd.srv.us.db.executeQuery("DELETE FROM demand WHERE frend_id=" + us.id + " and user_id="+id);
+FrendsBd((int)srv.us.db.getLastIndex("frends"), id, us.id, "F"+us.id);
+FrendsBd(((int)srv.us.db.getLastIndex("frends")+1), us.id, id, "F"+id);
+srv.us.db.executeQuery("DELETE FROM demand WHERE frend_id=" + us.id + " and user_id="+id);
 proc.mq.add(uin,"Пользователь " + u.localnick + " успешно добавлен в друзья");
 if(u.state==UserWork.STATE_CHAT){
-cmd.srv.getIcqProcess(u.basesn).mq.add(u.sn,"Пользователь " + us.localnick + " расмотрел заявку и добавил тебя к себе в друзья");
+srv.getIcqProcess(u.basesn).mq.add(u.sn,"Пользователь " + us.localnick + " расмотрел заявку и добавил тебя к себе в друзья");
 }
-}
-catch (Exception ex)
-{
+}catch (Exception ex){
 ex.printStackTrace();
 proc.mq.add(uin,"При подтверждении заявки возникла ошибка - "+ex.getMessage());
 }
@@ -196,24 +183,21 @@ proc.mq.add(uin,"При подтверждении заявки возникла
  */
 
 private void commandNot_To_Confirm(IcqProtocol proc, String uin, Vector v) {
-if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
+if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
 try{
 int id = (Integer)v.get(0);
-Users u = cmd.srv.us.getUser(id);
-Users us = cmd.srv.us.getUser(uin);
-if(getCountDemand2(us.id, id) == 0)
-{
+Users u = srv.us.getUser(id);
+Users us = srv.us.getUser(uin);
+if(getCountDemand2(us.id, id) == 0){
 proc.mq.add(uin,us.localnick + " такой заявки не существует.");
 return;
 }
-cmd.srv.us.db.executeQuery("DELETE FROM demand WHERE frend_id=" + us.id + " and user_id="+id);
+srv.us.db.executeQuery("DELETE FROM demand WHERE frend_id=" + us.id + " and user_id="+id);
 proc.mq.add(uin,us.localnick + " заявка " + id + " откланенна");
 if(u.state==UserWork.STATE_CHAT){
-cmd.srv.getIcqProcess(u.basesn).mq.add(u.sn,"Твоя заявка полюзователю " + us.localnick + ", надобавление в друзбя, отклонена");
+srv.getIcqProcess(u.basesn).mq.add(u.sn,"Твоя заявка полюзователю " + us.localnick + ", надобавление в друзбя, отклонена");
 }
-}
-catch (Exception ex)
-{
+}catch (Exception ex){
 ex.printStackTrace();
 proc.mq.add(uin,"При отклонении заявки возникла ошибка - "+ex.getMessage());
 }
@@ -224,30 +208,26 @@ proc.mq.add(uin,"При отклонении заявки возникла ош�
  */
 
 private void commandDelFrends(IcqProtocol proc, String uin, Vector v) {
-if(!cmd.isChat(proc,uin) && !cmd.psp.testAdmin(uin)) return;
+if(!((ChatCommandProc)srv.cmd).isChat(proc,uin) && !psp.testAdmin(uin)) return;
 try{
 int id = (Integer)v.get(0);
-Users u = cmd.srv.us.getUser(id);
-Users us = cmd.srv.us.getUser(uin);
-if(u.id==0)
-{
+Users u = srv.us.getUser(id);
+Users us = srv.us.getUser(uin);
+if(u.id==0){
 proc.mq.add(uin,us.localnick + " пользователь не найден");
 return;
 }
-if(getCountFrends(us.id, id) == 0)
-{
+if(getCountFrends(us.id, id) == 0){
 proc.mq.add(uin,us.localnick + " пользователь " + u.localnick + " не находится в ваших друзьях");
 return;
 }
-cmd.srv.us.db.executeQuery("DELETE FROM frends WHERE frend_id=" + id + " and user_id="+us.id);
-cmd.srv.us.db.executeQuery("DELETE FROM frends WHERE frend_id=" + us.id + " and user_id="+id);
+srv.us.db.executeQuery("DELETE FROM frends WHERE frend_id=" + id + " and user_id="+us.id);
+srv.us.db.executeQuery("DELETE FROM frends WHERE frend_id=" + us.id + " and user_id="+id);
 proc.mq.add(uin,"Пользователь " + u.localnick + " успешно удален из друзей");
 if(u.state==UserWork.STATE_CHAT){
-cmd.srv.getIcqProcess(u.basesn).mq.add(u.sn,"Пользователь " + us.localnick + " удалил тебя из друзей");
+srv.getIcqProcess(u.basesn).mq.add(u.sn,"Пользователь " + us.localnick + " удалил тебя из друзей");
 }
-}
-catch (Exception ex)
-{
+}catch (Exception ex){
 ex.printStackTrace();
 proc.mq.add(uin,"При удалении друга возникла ошибка - "+ex.getMessage());
 }
@@ -257,21 +237,18 @@ proc.mq.add(uin,"При удалении друга возникла ошибк�
  * Листинг друзей
  */
 public String commandListFrends(int id) {
-Users u = cmd.srv.us.getUser(id);
+Users u = srv.us.getUser(id);
 String list = "Все друзья пользователя " + u.localnick +
 "Ид|Ник|Рейтинг\n";
 try{
-PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("select frend_id from frends WHERE user_id=" + id);
+PreparedStatement pst = (PreparedStatement) srv.us.db.getDb().prepareStatement("select frend_id from frends WHERE user_id=" + id);
 ResultSet rs = pst.executeQuery();
-while(rs.next())
-{
-list += "|" + cmd.srv.us.getUser(rs.getInt(1)).id + "|" + cmd.srv.us.getUser(rs.getInt(1)).localnick +  " » " + "|" + cmd.srv.us.getUser(rs.getInt(1)).ball + "|" + '\n';
+while(rs.next()){
+list += "|" + srv.us.getUser(rs.getInt(1)).id + "|" + srv.us.getUser(rs.getInt(1)).localnick +  " » " + "|" + srv.us.getUser(rs.getInt(1)).ball + "|" + '\n';
 }
 rs.close();
 pst.close();
-}
-catch (Exception ex)
-{
+}catch (Exception ex){
 ex.printStackTrace();
 }
 return list;
@@ -283,17 +260,14 @@ return list;
 public String commandListDemand(int id) {
 String list = "Заявки:\nId(Заявки)|Nick|\n";
 try{
-PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("select user_id from demand WHERE frend_id=" + id);
+PreparedStatement pst = (PreparedStatement) srv.us.db.getDb().prepareStatement("select user_id from demand WHERE frend_id=" + id);
 ResultSet rs = pst.executeQuery();
-while(rs.next())
-{
-list += "|" + cmd.srv.us.getUser(rs.getInt(1)).id + "|" + cmd.srv.us.getUser(rs.getInt(1)).localnick + '\n';
+while(rs.next()){
+list += "|" + srv.us.getUser(rs.getInt(1)).id + "|" + srv.us.getUser(rs.getInt(1)).localnick + '\n';
 }
 rs.close();
 pst.close();
-}
-catch (Exception ex)
-{
+}catch (Exception ex){
 ex.printStackTrace();
 }
 list += "Команда !подтвердить <id(Заявки)> для подтвержедения заявки";
@@ -301,10 +275,10 @@ list += "\nКоманда !отклонить <id(Заявки)> для подт
 return list;
 }
 
-//INSERT INTO `frends` VALUES (0, 0, 0, "")
+
 public void FrendsBd(int id, int user_id, int frend_id, String type) {
 try {
-PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("insert into frends values(?, ?, ?, ?)");
+PreparedStatement pst = (PreparedStatement) srv.us.db.getDb().prepareStatement("insert into frends values(?, ?, ?, ?)");
 pst.setInt(1,id);
 pst.setInt(2,user_id);
 pst.setInt(3,frend_id);
@@ -318,10 +292,9 @@ ex.printStackTrace();
 }
 }
         
-//INSERT INTO `demand` VALUES (0, 0, "")
 public void DemandBd(int id, int user_id, int frend_id, String type) {
 try {
-PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("insert into demand values(?, ?, ?, ?)");
+PreparedStatement pst = (PreparedStatement) srv.us.db.getDb().prepareStatement("insert into demand values(?, ?, ?, ?)");
 pst.setInt(1,id);
 pst.setInt(2,user_id);
 pst.setInt(3,frend_id);
@@ -338,40 +311,36 @@ ex.printStackTrace();
 /*
  * Проверка пользователь уже друг?
  */
-public int getCountFrends(int id, int id2)
-{
+public int getCountFrends(int id, int id2){
 String q = "SELECT count(*) FROM `frends` WHERE user_id="+id+" and type='F"+id2+"'";
-Vector<String[]> v = cmd.srv.us.db.getValues(q);
+Vector<String[]> v = srv.us.db.getValues(q);
 return Integer.parseInt(v.get(0)[0]);
 }
 
 /*
  * Проверка на повторную заявку
  */
-public int getCountDemand(int id, int id2)
-{
+public int getCountDemand(int id, int id2){
 String q = "SELECT count(*) FROM `demand` WHERE user_id="+id+" and frend_id="+id2+" and type='D"+id2+"'";
-Vector<String[]> v = cmd.srv.us.db.getValues(q);
+Vector<String[]> v = srv.us.db.getValues(q);
 return Integer.parseInt(v.get(0)[0]);
 }
 
 /*
  * Проверка на повторную заявку
  */
-public int getCountDemand2(int id, int id2)
-{
+public int getCountDemand2(int id, int id2){
 String q = "SELECT count(*) FROM `demand` WHERE user_id="+id2+" and frend_id="+id+" and type='D"+id+"'";
-Vector<String[]> v = cmd.srv.us.db.getValues(q);
+Vector<String[]> v = srv.us.db.getValues(q);
 return Integer.parseInt(v.get(0)[0]);
 }
 
 /*
  * Максимальное количество друзей
  */
-public int MaxFrends(int id)
-{
+public int MaxFrends(int id){
 String q = "SELECT count(*) frend_id FROM `frends` WHERE user_id="+id;
-Vector<String[]> v = cmd.srv.us.db.getValues(q);
+Vector<String[]> v = srv.us.db.getValues(q);
 return Integer.parseInt(v.get(0)[0]);
 }
 
@@ -382,16 +351,16 @@ return Integer.parseInt(v.get(0)[0]);
  */
 public String Random_Frends(int id)
 {
-Users u = cmd.srv.us.getUser(id);
+Users u = srv.us.getUser(id);
 if(MaxFrends(u.id) == 0) return "Нет друзей";
 String frends = "Шесть случайных друзей пользователя:\n";
 frends += "Всего друзей |" + MaxFrends(u.id) + "|\n";
 frends += "Ид|Ник|Рейтинг\n";
 try{
-PreparedStatement pst = (PreparedStatement) cmd.srv.us.db.getDb().prepareStatement("select frend_id from frends WHERE user_id=" + id + " ORDER BY RAND( ) LIMIT 0 , 6");
+PreparedStatement pst = (PreparedStatement) srv.us.db.getDb().prepareStatement("select frend_id from frends WHERE user_id=" + id + " ORDER BY RAND( ) LIMIT 0 , 6");
 ResultSet rs = pst.executeQuery();
 while(rs.next()){
-frends += "|" + cmd.srv.us.getUser(rs.getInt(1)).id + "|" + cmd.srv.us.getUser(rs.getInt(1)).localnick +  " » " + "|" + cmd.srv.us.getUser(rs.getInt(1)).ball + "|" + '\n';
+frends += "|" + srv.us.getUser(rs.getInt(1)).id + "|" + srv.us.getUser(rs.getInt(1)).localnick +  " » " + "|" + srv.us.getUser(rs.getInt(1)).ball + "|" + '\n';
 }
 rs.close();
 pst.close();

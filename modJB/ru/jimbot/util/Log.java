@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import org.apache.log4j.*;
-import ru.jimbot.modules.chat.ChatProps;
 
 /**
  *  <p>Logger wrapper class.<br>

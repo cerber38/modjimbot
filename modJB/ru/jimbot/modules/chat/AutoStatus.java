@@ -32,9 +32,11 @@ private int number = 0;
 private String text = "";
 private boolean testType = false;
 public boolean isStart = false;
+private ChatProps psp;
 
-public AutoStatus(ChatServer s) {
-        srv = s;
+public AutoStatus(ChatServer srv, ChatProps psp) {
+        this.srv = srv;
+        this.psp = psp;
 }
 
 
@@ -52,8 +54,8 @@ if(text.trim().equals("")){
 Log.getLogger(srv.getName()).error("Не правельный текст статуса в автосмене");
 return; // Если текст не верный!
 }
-ChatProps.getInstance(srv.getName()).setIntProperty( "icq.xstatus", number );
-ChatProps.getInstance(srv.getName()).setStringProperty("icq.STATUS_MESSAGE2", text);
+psp.setIntProperty( "icq.xstatus", number );
+psp.setStringProperty("icq.STATUS_MESSAGE2", text);
 Manager.getInstance().getService(srv.getName()).getProps().save();
 // Перебираем все уины
 for(int uins = 0; uins < srv.con.uins.count(); uins++)
@@ -105,7 +107,7 @@ th=null;
             Log.getLogger(srv.getName()).talk("Change auto x-status dump");
             testType = true;
         }
-       if((System.currentTimeMillis() - time)>ChatProps.getInstance(srv.getName()).getIntProperty( "auto_status.time")*60000){
+       if((System.currentTimeMillis() - time)>psp.getIntProperty( "auto_status.time")*60000){
            if(getCountStatus() == 0){
             time = System.currentTimeMillis();
             Log.getLogger(srv.getName()).error("Нет статусов в бд для автосмены");

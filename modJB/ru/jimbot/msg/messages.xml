@@ -1,4 +1,4 @@
-[/p/<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
 <entry key="ChatCommandProc.parse.0">Если ты не бот, то ответь на пример: {0} =?
@@ -35,7 +35,7 @@
 <entry key="ChatCommandProc.commandInfo.6">Рейтинг - {0}</entry>
 <entry key="ChatCommandProc.commandInfo.7">Правильных ответов в викторине - {0}</entry>
 <entry key="ChatCommandProc.commandInfo.8">Пользователь в бане :)</entry>
-<entry key="ChatCommandProc.commandInfo.9">Пользователь не в чате</entry>
+<entry key="ChatCommandProc.commandInfo.9">Пользователь не в чате,последний раз пользователь заходил в чат - {0} </entry>
 <entry key="ChatCommandProc.commandInfo.10">Пользователь в чате, в {0} комнате</entry>
 <entry key="ChatCommandProc.commandInfo.11">Пользователь закрыт в Тюрьме, осталось сидеть {0} минут</entry>
 <entry key="ChatCommandProc.commandInfo.12">Пользователь в кике, осталось сидеть {0} минут</entry>
@@ -122,6 +122,7 @@
 <entry key="ChatCommandProc.commandRoom.8">%NICK% такой комнаты не существует! Некуда переходить.</entry>
 <entry key="ChatCommandProc.commandRoom.9">%NICK% викторина работает с %VIC_GAME_TIME_0% и до %VIC_GAME_TIME_1% часов.</entry>
 <entry key="ChatCommandProc.commandRoom.10">%NICK% в викторину могут играть максимум %VIC_USERS_COUNT% человек.</entry>
+<entry key="ChatCommandProc.commandRoom.11">%NICK% это личная комнат, вы не можете в нее войти!.</entry>
 <entry key="ChatCommandProc.commandAdm.0">Пустое сообщение</entry>
 <entry key="ChatCommandProc.commandAdm.1">Сообщение сохранено</entry>
 <entry key="ChatCommandProc.commandAdm.2">Ошибка добавления</entry>
@@ -145,14 +146,15 @@
 <entry key="ChatCommandProc.commandgoChat.7">Для входа в %CHAT_NAME% выберете комнату(только цифру)</entry>
 <entry key="ChatCommandProc.commandgoChat.8">!помощь - помощь чата</entry>
 <entry key="ChatCommandProc.commandgoChat.9">Чтобы бот видел ваш статус - авторизуйте его</entry>
-<entry key="ChatCommandProc.commandgoChat.10">%NICK% вошел(а) в чат *HI*</entry>
+<entry key="ChatCommandProc.commandgoChat.10">%NICK% %TEXT_IN%</entry>
 <entry key="ChatCommandProc.commandgoChat.11">%NICK% вы вошли в чат</entry>
 <entry key="ChatCommandProc.commandgoChat.12">Данный номер слишком загружен, вы будете автоматически переведены на ближайший свободный номер.</entry>
 <entry key="ChatCommandProc.commandgoChat.13">Сообщения теперь будут приходить с номера %NEW_CHAT_UIN%</entry>
 <entry key="ChatCommandProc.commandgoChat.14">%NICK% викторина работает с %VIC_GAME_TIME_0% и до %VIC_GAME_TIME_1% часов. Выберете другую комнату.</entry>
 <entry key="ChatCommandProc.commandgoChat.15">%NICK% в викторину могут играть максимум %VIC_USERS_COUNT% человек. Выберете другую комнату.</entry>
 <entry key="ChatCommandProc.commandgoChat.16">%NICK% вы вошли в чат невидимым</entry>
-<entry key="ChatCommandProc.commandexitChat.0">%NICK%  ушел(ушла) из чата</entry>
+<entry key="ChatCommandProc.commandgoChat.17">%NICK% это личная комнат, вы не можете в нее войти!.</entry>
+<entry key="ChatCommandProc.commandexitChat.0">%NICK%  %TEXT_OUT%</entry>
 <entry key="ChatCommandProc.commandexitChat.1">Приходите еще *BYE*</entry>
 <entry key="ChatCommandProc.commandexitChat.2">%NICK% вы вышли из чат невидимым</entry>
 <entry key="ChatCommandProc.tkick.0">Пинок на {0}  минут, {1}{2}</entry>

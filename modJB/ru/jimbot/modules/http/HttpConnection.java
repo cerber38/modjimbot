@@ -93,25 +93,4 @@ public class HttpConnection {
         os = response.getOutputStream();
     }
 
-    public static void HttpPost(String messages){
-    try {
-    String message = URLEncoder.encode(messages, "UTF-8");
-    URL url = new URL("http://modjb.toch72.ru/start.php?message="+message);
-    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-    connection.setDoOutput(true);
-    connection.setRequestMethod("POST");
-    OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
-    writer.close();
-    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-    // OK
-    } else {
-    // Server returned HTTP error code.
-    }
-    } catch (MalformedURLException e) {
-    // ...
-    } catch (IOException e) {
-    // ...
-    }
-    }
-
 }

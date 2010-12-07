@@ -38,7 +38,6 @@ import ru.jimbot.modules.Cmd;
 import ru.jimbot.modules.CommandExtend;
 import ru.jimbot.modules.CommandParser;
 import ru.jimbot.modules.FloodElement;
-import ru.jimbot.modules.NewExtend;
 import ru.jimbot.modules.WorkScript;
 import ru.jimbot.protocol.IcqProtocol;
 import ru.jimbot.util.Log;
@@ -72,7 +71,6 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     // Счетчики для контроля флуда: одинаковых сообщений, отброшеных сообщений
     private ConcurrentHashMap <String, FloodElement> floodMap, floodMap2, floodNoReg;
     private HashMap<String, CommandExtend> comMap;
-    private HashMap<String, NewExtend> comNew;
     // Храним время для игры бутылочка
     private long VialTime = System.currentTimeMillis();
     // Для хранения доступных объектов авторизации
@@ -83,6 +81,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     private ConcurrentHashMap <String,Integer> Wedding_ID;// Хранит ид свадьбы
     private ConcurrentHashMap <String,Integer> Wedding_STATUS;// Хранит статус пользователей при свадьбе
     private HashMap<String, AboutExtend> About;// Храним данные при заполнении анкеты
+    private ConcurrentHashMap <String,Integer> pr;
+    private HashMap<String, antiadvertising> antiadvertising;
 
     class KickInfo {
         public int id=0;
@@ -113,22 +113,23 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         floodMap2 = new ConcurrentHashMap <String, FloodElement>();
         floodNoReg = new ConcurrentHashMap <String, FloodElement>();
         comMap = new HashMap<String, CommandExtend>();
-        comNew = new HashMap<String, NewExtend>();
         warnFlag = new HashSet<String>();
-        shop = new Shop(this);
+        shop = new Shop(srv, psp);
         if(psp.getBooleanProperty("shop2.on.off"))
         shop2 = new Shop2(srv, psp);
-        frends = new frends(this);
-        clan = new ClanCommand(this);
-        gift = new Gift(this);
-        voting = new Voting(s);
+        frends = new frends(srv, psp);
+        clan = new ClanCommand(srv, psp);
+        gift = new Gift(srv, psp);
+        voting = new Voting(srv, psp);
         WeddingInfo = new ConcurrentHashMap<Integer, WeddingInfo>();
         Wedding_ID = new ConcurrentHashMap<String, Integer>();
         Wedding_STATUS = new ConcurrentHashMap<String, Integer>();
+        antiadvertising = new HashMap<String, antiadvertising>();
         About = new HashMap<String, AboutExtend>();
+        pr = new ConcurrentHashMap<String, Integer>();
         Quiz = new MyQuiz(s);
         radm = new RobAdmin(srv);
-        xstatus = new AutoStatus(srv);
+        xstatus = new AutoStatus(srv, psp);
         init();
     }
     
@@ -195,6 +196,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         authObj.put("advertisement_work","Работа с рекламой");
         authObj.put("ballwork","Дать/Забрать балы");
         authObj.put("notice_work","Работа с предупреждениями");
+        authObj.put("personal_room","Назначить/Убрать личную комнату пользователю");
     	
        	commands.put("!help", new Cmd("!help","",1));
         commands.put("!справка", new Cmd("!справка", "", 1));
@@ -332,7 +334,12 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         commands.put("!нотист",new Cmd("!нотист","$n",84));
         commands.put("!число",new Cmd("!число","$n $n",85));
         commands.put("!всеадмины",new Cmd("!всеадмины","",86));
+        commands.put("!лкомната",new Cmd("!лкомната","$n $n",87));
+        commands.put("!рлкомната",new Cmd("!рлкомната","$n",88));
+        commands.put("!пригласить",new Cmd("!пригласить","$n",89));
         WorkScript.getInstance(srv.getName()).installAllChatCommandScripts(this);
+        commands.put("!оботе",new Cmd("!оботе","",90));
+        commands.put("!about",new Cmd("!about","",90));
     }
     
     /**
@@ -397,7 +404,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     firstStartScript=true;
     }
     }catch (Exception ex){
-    ex.printStackTrace();
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }
      /**
@@ -501,20 +508,20 @@ public class ChatCommandProc extends AbstractCommandProcessor {
 
       // Если это не команда - выводим приветствие, иначе обрабатываем команду
       boolean captcha = false; // Второй заход в процедуру после ответа?
-      if(srv.us.getUser(uin).state != UserWork.STATE_CAPTCHA && tmsg.charAt(0) != '!' && comNew.containsKey(uin)){
-      if(comNew.get(uin).getMsg().equalsIgnoreCase(mmsg)){
+      if(srv.us.getUser(uin).state != UserWork.STATE_CAPTCHA && tmsg.charAt(0) != '!' && comMap.containsKey(uin)){
+      if(comMap.get(uin).getMsg().equalsIgnoreCase(mmsg)){
       captcha = true;
-      comNew.remove(uin);
+      comMap.remove(uin);
       }else{
       proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.parse.6"));
-      comNew.remove(uin);
+      comMap.remove(uin);
       return;
       }
       }
       if(!captcha){
       String s = getCaptcha();
       proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.parse.0", new Object[] {s.split("=")[0],psp.getIntProperty("chat.floodTimeLimitNoReg")}));
-      comNew.put(uin, new NewExtend(uin, mmsg, s.split("=")[1],new Vector(), 5*60000));
+      comMap.put(uin, new CommandExtend(uin, mmsg, s.split("=")[1],new Vector(), 5*60000));
       return;
       }
       proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.parse.1", new Object[] {psp.getStringProperty("chat.name"),psp.getIntProperty("chat.floodTimeLimitNoReg")}));
@@ -542,17 +549,18 @@ public class ChatCommandProc extends AbstractCommandProcessor {
             }
             if (testFlood(proc,uin)) return;// Если пользователь был кикнут за флуд
 
-            if(psp.getBooleanProperty("messages.script.on.off"))
+            if(srv.us.getUser(uin).state==UserWork.STATE_CHAT & psp.getBooleanProperty("messages.script.on.off"))
             mmsg = WorkScript.getInstance(srv.getName()).startMessagesScript(mmsg, srv, uin);
-            if(psp.getBooleanProperty("antiadvertising.on.off") & !psp.testAdmin(uin))
-            mmsg = antiadvertising(mmsg);
+            if(srv.us.getUser(uin).state==UserWork.STATE_CHAT & psp.getBooleanProperty("antiadvertising.on.off") & !psp.testAdmin(uin))
+            mmsg = antiadvertising(mmsg, uin);
             if(mmsg.equals("")) return; // Сообщение было удалено в скрипте или в анте рекламе
             int tp = 0;
             if(About.containsKey(uin))
             if(!About.get(uin).isExpire()){
             InteractiveQuestions(proc, uin, mmsg, About.get(uin).getCommand());
             return;
-            }
+            } else
+            About.remove(uin);
             if(comMap.containsKey(uin))
             if(!comMap.get(uin).isExpire())
             tp = parser.parseCommand(comMap.get(uin).getCmd());
@@ -562,33 +570,24 @@ public class ChatCommandProc extends AbstractCommandProcessor {
             }else
             tp = parser.parseCommand(tmsg);
             /********************************/
-            if(comNew.containsKey(uin))
-            if(!comNew.get(uin).isExpire())
-            tp = parser.parseCommand(comNew.get(uin).getCmd());
-            else{
-            tp = parser.parseCommand(tmsg);
-            comNew.remove(uin);
-            }else
-            tp = parser.parseCommand(tmsg);
-            /********************************/
-            if (comNew.containsKey("Wedding_"+uin)){
-            if (!comNew.get("Wedding_"+uin).isExpire()){
+            if (comMap.containsKey("Wedding_"+uin)){
+            if (!comMap.get("Wedding_"+uin).isExpire()){
             TestWedding(uin, mmsg, parser.parseArgs(mmsg));
             }else{
             tp = parser.parseCommand(tmsg); 
-            comNew.remove("Wedding_"+uin);
+            comMap.remove("Wedding_"+uin);
             Wedding_ID.remove("Wedding_"+uin);
             Wedding_STATUS.remove("Wedding_"+uin);
             }
             }else 
             tp = parser.parseCommand(tmsg);
             /********************************/
-            if (comNew.containsKey("goChat_"+uin)){
-            if (!comNew.get("goChat_"+uin).isExpire()){
-            tp = parser.parseCommand(comNew.get("goChat_"+uin).getCmd());
+            if (comMap.containsKey("goChat_"+uin)){
+            if (!comMap.get("goChat_"+uin).isExpire()){
+            tp = parser.parseCommand(comMap.get("goChat_"+uin).getCmd());
             }else{
             tp = parser.parseCommand(tmsg);
-            comNew.remove("goChat_"+uin);
+            comMap.remove("goChat_"+uin);
             Wedding_ID.remove("goChat_"+uin);
             Wedding_STATUS.remove("goChat_"+uin);
             }
@@ -653,7 +652,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
                 try{
                 kickAll(proc, uin);
                 } catch (Exception ex) {
-                ex.printStackTrace();
+                Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
                 }
                 break;
            case 13:
@@ -895,6 +894,18 @@ public class ChatCommandProc extends AbstractCommandProcessor {
            case 86:
                 commandAdminiAll(proc, uin);
                 break;
+           case 87:
+                commandAppointPrivateRoom(proc, uin, parser.parseArgs(tmsg));
+                break;
+           case 88:
+                commandCleanPrivateRoom(proc, uin, parser.parseArgs(tmsg));
+                break;
+           case 89:
+                commandInvitationPrivateRoom(proc, uin, parser.parseArgs(tmsg));
+                break;
+           case 90:
+                proc.mq.add(uin,MainProps.getAbout());
+                break;
                 default:
      //Дополнительные команды из других классов
      if(scr.commandExec(proc, uin, tmsg)) return;
@@ -910,16 +921,17 @@ public class ChatCommandProc extends AbstractCommandProcessor {
      try{
      if(psp.getBooleanProperty("replace.nick.on.off")) mmsg = replaceNick(mmsg);
      if(mmsg.substring(0, 1).equals("!")){proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.parse.3"));return;}
-     } catch (Exception ex){ex.printStackTrace();}
+     } catch (Exception ex){
+     Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
+     }
      String s = "";
      if(mmsg.indexOf("/me")==0)
      s = mmsg.replaceFirst("/me", "*" + srv.us.getUser(uin).localnick);
      else
-     if(psp.getBooleanProperty("id.on.off")){
-     s += srv.us.getUser(uin).localnick + "|" + srv.us.getUser(uin).id + "|" + psp.getStringProperty("chat.delimiter")+" " + mmsg;
-     }else{
+     if(psp.getBooleanProperty("id.on.off"))
+     s += srv.us.getUser(uin).localnick + "|" + srv.us.getUser(uin).id + "|"  + psp.getStringProperty("chat.delimiter")+" " + mmsg;
+     else
      s += srv.us.getUser(uin).localnick + psp.getStringProperty("chat.delimiter")+" " + mmsg;
-     }
      if(s.length()>psp.getIntProperty("chat.MaxMsgSize")){
      s = s.substring(0,psp.getIntProperty("chat.MaxMsgSize"));
      proc.mq.add(uin,"Слишком длинное сообщение было обрезано: " + s);
@@ -928,7 +940,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
      s = s.replace('\r',' ');
      Log.getLogger(srv.getName()).info("CHAT: " + uin + "<" + srv.us.getUser(uin).id +"> ["+srv.us.getUser(uin).room +"]>>" + s);
      srv.us.db.log(srv.us.getUser(uin).id,uin,"OUT", s, srv.us.getUser(uin).room);
-     srv.cq.addMsg(s, uin, srv.us.getUser(uin).room);
+     srv.cq.addMsg(s + (psp.getBooleanProperty("divided.between.on.off") ? "\n" + psp.getStringProperty("divided.between") : ""), uin, srv.us.getUser(uin).room);
      if(psp.getBooleanProperty("adm.useAdmin")) radm.parse(proc,uin,s,srv.us.getUser(uin).room);
      if(psp.getBooleanProperty("vic.on.off")) Quiz.parse(uin,mmsg,srv.us.getUser(uin).room);
      }else{
@@ -943,7 +955,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
      }
      }
      } catch (Exception ex) {
-     ex.printStackTrace();
+     Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
      }
      }
     
@@ -981,25 +993,63 @@ public class ChatCommandProc extends AbstractCommandProcessor {
      * Анти-Реклама
      * @author fraer72
      * @param msg
-     * @v 0.5
+     * @v 0.7
      */
 
-    private String antiadvertising(String msg){
-    Integer maxCnt = psp.getIntProperty("antiadvertising.integer.cnt"); // Максимально число цифр в сообщении
-    Integer Cnt = 0;
+    private String antiadvertising(String msg, String uin){
+    int maxCnt = psp.getIntProperty("antiadvertising.integer.cnt"); // Максимально число цифр в сообщении
+    int Cnt = 0;
+    String s = "";
     String[] number = psp.getStringProperty("antiadvertising.number").split(";");
     String delimiters = psp.getStringProperty("antiadvertising.delimiters");
     StringTokenizer st = new StringTokenizer(msg, delimiters);
     while(st.hasMoreTokens()){  // Перебираем сообщение
-    String s = st.nextToken();
-    for (int i = 0 ;i < number.length; i++){
+    s = st.nextToken();
+    for (int i = 0 ;i < number.length; i++)
     if(s.toLowerCase().indexOf(number[i]) != -1 & s.toLowerCase().indexOf("%") == -1)
     Cnt++;
+    }
     if(Cnt > maxCnt)
     msg = msg.replace(s, "*"); // Если выше максимального, закроем
+    else if (psp.getBooleanProperty("antiadvertising.send.on.off") & Cnt != 0) {
+    if(!antiadvertising.containsKey(uin))
+        antiadvertising.put(uin, new antiadvertising(System.currentTimeMillis(), 0));
+    if(antiadvertising.get(uin).testTime()){
+        if(antiadvertising.get(uin).getCnt() == psp.getIntProperty("antiadvertising.messages.cnt")-1){
+        // Частая отправка, закроем
+        msg = msg.replace(s, "*");
+        antiadvertising.remove(uin);
+        }else
+        antiadvertising.get(uin).setCnt();
+    }else
+        antiadvertising.remove(uin);
     }
-    }
+    System.out.print(msg + "\n");
     return msg;
+    }
+
+    class antiadvertising {
+
+        private long time = 0;
+        private int cnt = 0;
+
+        public antiadvertising(long time, int cnt){
+        this.time = time;
+        this.cnt = cnt;
+        }
+
+        public boolean testTime(){
+        return (System.currentTimeMillis()-time) < psp.getIntProperty("antiadvertising.time");
+        }
+
+        public void setCnt(){
+        cnt++;
+        }
+
+        public int getCnt(){
+        return cnt;
+        }
+
     }
 
 
@@ -1153,8 +1203,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
      changeBaseUin(uin,s);
      proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandGo.1", new Object[] {s}));
      }catch (Exception ex){
-     ex.printStackTrace();
-     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
+     Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
      }
      }
     
@@ -1174,8 +1223,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
       changeBaseUin(uin,psp.getUin(k));
       proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandGo.1", new Object[] {psp.getUin(k)}));
       }catch (Exception ex){
-      ex.printStackTrace();
-      proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
+      Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
       }
       }
 
@@ -1219,7 +1267,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     if(uss.state==-1)
     info += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.8");
     if(uss.state==1)
-    info += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.9");
+    info += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.9", new Object[] {srv.us.statVxodVixod("STATE_IN", uss.id)});
     if(uss.state==2)
     info+= "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.10", new Object[] {uss.room});
     if(testClosed(uss.sn)>1)
@@ -1228,8 +1276,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     info += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.12", new Object[] {testKick(uss.sn)});
     proc.mq.add(uin,info);
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.13", new Object[] {ex.getMessage()}));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandInfo.13", new Object[] {ex.getMessage()}));
     }
     }
     
@@ -1275,8 +1322,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandKick.3", new Object[] {t}));
     }
     } catch (Exception ex) {
-    ex.printStackTrace();
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
     }
     }
     
@@ -1293,8 +1339,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     int id = (Integer)v.get(0);
     proc.mq.add(uin, srv.us.getUserNicks(id));
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
     }
     }
     
@@ -1311,8 +1356,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     int id = (Integer)v.get(0);
     proc.mq.add(uin, srv.us.getUserAuthInfo(id));
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
     }
     }
     
@@ -1350,7 +1394,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     else
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandSetgroup.4"));
     } catch (Exception ex){
-    ex.printStackTrace();proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
     }
     }
     
@@ -1381,8 +1425,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     else
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandGrant.4"));
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
     }
     }
     
@@ -1418,8 +1461,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     else
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandRevoke.5"));
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
     }
     }
     
@@ -1474,8 +1516,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandBan.6", new Object[] {i}));
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandBan.7", new Object[] {srv.us.getUser(i).localnick,srv.us.getUser(i).id,m,srv.us.getUser(uin).localnick,srv.us.getUser(uin).id}), i, srv.us.getUser(i).room);
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
     }
     }
     
@@ -1505,8 +1546,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandUban.1", new Object[] {i}));
     }            
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
     }
     }
     
@@ -1600,8 +1640,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
      InteractiveQuestions(proc, uin, mmsg, true);
      }
      }catch (Exception ex){
-     ex.printStackTrace();
-     Log.getLogger(srv.getName()).talk(uin + " Ошбка регистрации " + ex.getMessage());
+     Log.getLogger(srv.getName()).error(uin + " Ошбка регистрации " + ex.getMessage());
      }
      }
 
@@ -1635,12 +1674,12 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     if (!srv.us.authorityCheck(us.id, "invisible")) {
     if(us.room == room){
     cnt++;
-    s += us.id + " - " +  us.localnick + (!psp.getBooleanProperty("symbols.on.off") ? "" : (srv.us.getSymbol(us.group))) + "|" + us.ball + "|" + (us.status.equals("") ? "" : ("|" + us.status + "|")) + '\n';
+    s += us.id + " - " + (srv.us.getClan(us.clansman).getSymbol().equals("") || !psp.getBooleanProperty("Clan.Symbol") ? "" : "[" + srv.us.getClan(us.clansman).getSymbol() + "] ")  +  us.localnick + (!psp.getBooleanProperty("symbols.on.off") ? "" : (srv.us.getSymbol(us.group))) + "|" + us.ball + "|" + (us.status.equals("") ? "" : ("|" + us.status + "|")) + '\n';
     }
     } else if (psp.testAdmin(uin)) {
     if(us.room == room){
     cnt++;
-    s += us.id + " - " +  us.localnick + (!psp.getBooleanProperty("symbols.on.off") ? "" : (srv.us.getSymbol(us.group))) + "|" + us.ball + "|" + (us.status.equals("") ? "" : ("|" + us.status + "|")) + " - Скрывается " + '\n';
+    s += us.id + " - " + (srv.us.getClan(us.clansman).getSymbol().equals("") || !psp.getBooleanProperty("Clan.Symbol") ? "" : "[" + srv.us.getClan(us.clansman).getSymbol() + "] ")  +  us.localnick + (!psp.getBooleanProperty("symbols.on.off") ? "" : (srv.us.getSymbol(us.group))) + "|" + us.ball + "|" + (us.status.equals("") ? "" : ("|" + us.status + "|")) + " - Скрывается " + '\n';
     }
     }
     }
@@ -1678,10 +1717,10 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     Users us = srv.us.getUser(user[k]);
     if (!srv.us.authorityCheck(us.id, "invisible")) {
     cnt++;
-    s += us.id + " - " + us.localnick + (!psp.getBooleanProperty("symbols.on.off") ? "" : (srv.us.getSymbol(us.group))) + " ["+ us.room + "] " + "[" + us.ball + "]" + (us.status.equals("") ? "" : ("[" + us.status + "]")) + '\n';
+    s += us.id + " - " + (srv.us.getClan(us.clansman).getSymbol().equals("") || !psp.getBooleanProperty("Clan.Symbol") ? "" : "[" + srv.us.getClan(us.clansman).getSymbol() + "] ") + " " +  us.localnick + (!psp.getBooleanProperty("symbols.on.off") ? "" : (srv.us.getSymbol(us.group))) + " ["+ us.room + "] " + "[" + us.ball + "]" + (us.status.equals("") ? "" : ("[" + us.status + "]")) + '\n';
     } else if (psp.testAdmin(uin)) {
     cnt++;
-    s += us.id + " - " + us.localnick + (!psp.getBooleanProperty("symbols.on.off") ? "" : (srv.us.getSymbol(us.group))) + " ["+ us.room + "] " + "[" + us.ball + "]" + (us.status.equals("") ? "" : ("[" + us.status + "]")) + " - Скрывается " + '\n';
+    s += us.id + " - " + (srv.us.getClan(us.clansman).getSymbol().equals("") || !psp.getBooleanProperty("Clan.Symbol") ? "" : "[" + srv.us.getClan(us.clansman).getSymbol() + "] ") + " " +  us.localnick + (!psp.getBooleanProperty("symbols.on.off") ? "" : (srv.us.getSymbol(us.group))) + " ["+ us.room + "] " + "[" + us.ball + "]" + (us.status.equals("") ? "" : ("[" + us.status + "]")) + " - Скрывается " + '\n';
     }
     }
     s += "\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAA.2", new Object[] {cnt});
@@ -1707,6 +1746,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.0"));
     return;
     }
+    if(psp.getBooleanProperty("antiadvertising.on.off") & psp.getBooleanProperty("antiadvertising.pm.on.off") & !psp.testAdmin(uin))
+    txt = antiadvertising(txt, uin);
     Users uss = srv.us.getUser(no);
     if(uss == null){
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.1"));
@@ -1738,9 +1779,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     }
     }
     }catch (Exception ex){
-    ex.printStackTrace();
-    Log.getLogger(srv.getName()).talk(uin + " Private msg error: " + tmsg);
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.7"));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.7"));
     }
     }
     
@@ -1761,6 +1800,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.0"));
     return;
     }
+    if(psp.getBooleanProperty("antiadvertising.on.off") & psp.getBooleanProperty("antiadvertising.pm.on.off") & !psp.testAdmin(uin))
+    txt = antiadvertising(txt, uin);
     if(fsn.equals("")) {
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandPP.0"));
     return;
@@ -1793,9 +1834,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     }
     }
     }catch (Exception ex){
-    ex.printStackTrace();
-    Log.getLogger(srv.getName()).talk(uin + " Private msg error: " + tmsg);
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.7"));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandP.7"));
     }
     }
     
@@ -1835,8 +1874,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     proc.mq.add(s, "", 1);
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandGetinfo.0", new Object[] {s}));
     } catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandGetinfo.1"));
+    Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandGetinfo.1"));
     }
     }
     
@@ -1868,7 +1906,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
    srv.us.db.event(uss.id, uin, "PASS", u.id, u.sn, "Пытался ввести пароль");
    return;
    }
-   if( srv.us.getRoom(i).getUser_id() != 0 && srv.us.getRoom(i).getUser_id() != uss.clansman && !psp.testAdmin(uin) ){
+   if(srv.us.getRoom(i).getUser_id() != 0 && srv.us.getRoom(i).getUser_id() != uss.clansman && !psp.testAdmin(uin) ){
    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_Room("ChatCommandProc.commandRoom.4", i, uss));
    return;
    }
@@ -1880,6 +1918,10 @@ public class ChatCommandProc extends AbstractCommandProcessor {
    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_Room("ChatCommandProc.commandRoom.10", i, uss));
    return;
    }
+   if(srv.us.getRoom(i).checkPersonal() & i != uss.personal_room & !testPrivateRoom(uin, i)){
+   proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_Room("ChatCommandProc.commandRoom.11", i, uss));
+   return;
+   }
    if (qauth(proc, uin, "anyroom") || srv.us.checkRoom(i)){
    if (!srv.us.authorityCheck(uss.id,"invisible")){
    srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_Room("ChatCommandProc.commandRoom.5", i, uss), uin, uss.room);
@@ -1887,6 +1929,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
    uss.room = i;
    srv.us.updateUser(uss);
    srv.cq.changeUserRoom(uin, i);
+   if(pr.containsKey(uin) & testPrivateRoom(uin, i))
+   pr.remove(uin);
    if (!srv.us.authorityCheck(uss.id,"invisible")){
    srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_Room("ChatCommandProc.commandRoom.6", i, uss), uin, uss.room);
    }
@@ -1895,8 +1939,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_Room("ChatCommandProc.commandRoom.8", i, uss));
    }
    }catch (Exception ex){
-   ex.printStackTrace();
-   proc.mq.add(uin, Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
+   Log.getLogger(srv.getName()).error(Messages.getInstance(srv.getName()).getString("ChatCommandProc.err", new Object[] {ex.getMessage()}));
    }
    }
 
@@ -1911,8 +1954,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     try {
     proc.mq.add(uin,srv.us.getKickHist());
     } catch (Exception ex) {
-    ex.printStackTrace();
-    proc.mq.add(uin,ex.getMessage());            
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }
     
@@ -1951,10 +1993,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     }
     }
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAdm.1"));
-    }
-    catch (Exception ex) {
-    ex.printStackTrace();
-    Log.getLogger(srv.getName()).talk("Error save msg: " + ex.getMessage());
+    }catch (Exception ex) {
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     proc.mq.add(uin,Messages.getInstance(srv.getName()).getString("ChatCommandProc.commandAdm.2"));
     }
     }
@@ -1969,8 +2009,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     try {
     proc.mq.add(uin,srv.us.getBanHist());
     }catch (Exception ex) {
-    ex.printStackTrace();
-    proc.mq.add(uin,ex.getMessage());
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }
     
@@ -2261,7 +2300,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     if (uss.state==UserWork.STATE_CHAT) return; //Юзер уже в чате
     String pass = "";
     if (uss.state==UserWork.STATE_NO_CHAT){
-    if(comNew.containsKey("goChat_"+uin)){
+    if(comMap.containsKey("goChat_"+uin)){
     try{
     room = Integer.parseInt(mmsg);
     }catch(NumberFormatException e){
@@ -2290,22 +2329,30 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     return;
     }
 
-    if(psp.getBooleanProperty("vic.on.off") & psp.getBooleanProperty("vic.time_game.on.off") & Quiz.TestRoom(room) & !psp.testAdmin(uin) & !Quiz.testHours()){
+    if(psp.getBooleanProperty("vic.on.off"))
+    if(psp.getBooleanProperty("vic.time_game.on.off") & Quiz.TestRoom(room) & !psp.testAdmin(uin) & !Quiz.testHours()){
     proc.mq.add(uin, Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.14", room, uss));
     return;
     }
-    
-    if(psp.getBooleanProperty("vic.on.off") & Quiz.TestRoom(room) & !psp.testAdmin(uin) & Quiz.AllUsersRoom(room) >= psp.getIntProperty("vic.users.cnt")){
+
+    if(psp.getBooleanProperty("vic.on.off"))
+    if(Quiz.TestRoom(room) & !psp.testAdmin(uin) & Quiz.AllUsersRoom(room) >= psp.getIntProperty("vic.users.cnt")){
     proc.mq.add(uin, Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.15", room, uss));
     return;
     }
-       
+  
+    if(srv.us.getRoom(room).checkPersonal() & room != uss.personal_room & !testPrivateRoom(uin, room)){
+    proc.mq.add(uin,Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.17", room, uss));
+    return;
+    }
+
     if(!psp.testAdmin(uin)&& !srv.us.checkRoom(room)){
     proc.mq.add(uin, Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.6", room, uss));
     return;
     }
+
     room_in_chat = true;
-    comNew.remove("goChat_"+uin);
+    comMap.remove("goChat_"+uin);
     }
     //TODO список комнат перед входом в чат
     Set<Integer> rid = srv.us.getRooms();
@@ -2327,15 +2374,16 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     }
     String Advertisement = (srv.us.db.getAdvertisement().equals("") || !psp.getBooleanProperty("advertisement.on.off") ?  "" : ("\n\n" + Messages.getInstance(srv.getName()).getString("Advertisement.0", new Object[] {srv.us.db.getAdvertisement()})));
     proc.mq.add(uin, list + "\n----\n" + Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.8", room, uss) + Advertisement);
-    comNew.put("goChat_"+uin, new NewExtend(uin, mmsg, mmsg, v, 2*60000));
+    comMap.put("goChat_"+uin, new CommandExtend(uin, mmsg, mmsg, v, 2*60000));
     return;
     }
-    Log.getLogger(srv.getName()).info("Add contact " + uin);
     if(proc.isNoAuthUin(uin)) proc.mq.add(uin, Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.9", room, uss), 2);
     proc.addContactList(uin);
     uss.state = UserWork.STATE_CHAT;
     uss.basesn = proc.baseUin;
     uss.room=room;
+    if(pr.containsKey(uin) & testPrivateRoom(uin, room))
+    pr.remove(uin);
     srv.us.updateUser(uss);
     if (!srv.us.authorityCheck(uss.id,"invisible")){
     srv.cq.addMsg(Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.10", room, uss), uss.sn, uss.room);
@@ -2395,12 +2443,14 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     if (uss.state==UserWork.STATE_NO_CHAT) {
     if(proc.isNoAuthUin(uin)) proc.mq.add(uin, Messages.getInstance(srv.getName()).getString_goChat("ChatCommandProc.commandgoChat.9", uss.room, uss), 2);
     proc.addContactList(uin);
-    if(psp.getBooleanProperty("vic.on.off") & psp.getBooleanProperty("vic.time_game.on.off") &  Quiz.TestRoom(uss.room) & !psp.testAdmin(uin) & !Quiz.testHours()){
+    if(psp.getBooleanProperty("vic.on.off"))
+    if(psp.getBooleanProperty("vic.time_game.on.off") &  Quiz.TestRoom(uss.room) & !psp.testAdmin(uin) & !Quiz.testHours())
     uss.room = 0;
-    }
-    if(psp.getBooleanProperty("vic.on.off") &  Quiz.TestRoom(uss.room) & !psp.testAdmin(uin) & Quiz.AllUsersRoom(uss.room) > psp.getIntProperty("vic.users.cnt")){
+    if(psp.getBooleanProperty("vic.on.off"))
+    if(Quiz.TestRoom(uss.room) & !psp.testAdmin(uin) & Quiz.AllUsersRoom(uss.room) > psp.getIntProperty("vic.users.cnt"))
     uss.room = 0;
-    }   
+    if(srv.us.getRoom(uss.room).checkPersonal() & uss.room != uss.personal_room)
+    uss.room = 0;
     uss.state = UserWork.STATE_CHAT;
     uss.basesn = proc.baseUin;
     srv.us.updateUser(uss);
@@ -2554,7 +2604,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         Vector a = srv.us.getUsers(UserWork.STATE_CHAT);
         for(int i=0;i<a.size();i++){
             Users uss = (Users)a.get(i);
-            if(!uss.sn.equalsIgnoreCase(uin)) kick(proc, uss.sn);
+            if(!uss.sn.equalsIgnoreCase(uin) || !psp.testAdmin(uss.sn)) kick(proc, uss.sn);
         }
     }
     
@@ -2570,9 +2620,6 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         uss.wedding = 0;
         srv.us.updateUser(wedding);
         srv.us.updateUser(uss);
-        // Удалим из КЛ
-        Log.getLogger(srv.getName()).info("Delete contact " + uin);
-        proc.RemoveContactList(uin);
         srv.getIcqProcess(uss.basesn).mq.add(uss.sn,Messages.getInstance(srv.getName()).getString("ChatCommandProc.ban.0") +
         (psp.getBooleanProperty("chat.isShowKickReason") ? ("\n" + Messages.getInstance(srv.getName()).getString("ChatCommandProc.ban.1", new Object[] {m})) : ""));
     }
@@ -2740,7 +2787,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         return;
         }
         srv.cq.addMsg(u.localnick + "|" + u.id + "|" + " заперт в комнате: " + srv.us.getRoom(psp.getIntProperty("room.tyrma")).getName() + "|" + psp.getIntProperty("room.tyrma") + "| на " + time + " минут по причине: " + r + ", пользователем: " + srv.us.getUser(uin).localnick, u.sn, u.room);
-        String nick = u.localnick + "(Зек)";
+        String nick = u.localnick + Messages.getInstance(srv.getName()).getString("RobAdmin.close.0");
         if(testClosed(u.sn) == 0){
         u.localnick = nick;
         srv.us.db.event(u.id, uin, "REG", 0, "", nick);
@@ -2769,8 +2816,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        try{
        proc.mq.add(uin, "Всего пользователей в тюрьме: " + srv.us.statBanroomColCount() + srv.us.getZakHist());
        }catch (Exception ex){
-       ex.printStackTrace();
-       proc.mq.add(uin, ex.getMessage());
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -2936,8 +2982,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     proc.mq.add(uin, "Ты должен " + getMessages + " пользователя(ю) " + u.localnick + "|" + u.id + "|");
     VialTime = System.currentTimeMillis();
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin, "Ошибка - " + ex.getMessage());
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }
 
@@ -2959,8 +3004,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     srv.us.db.AddAButilochka((int)srv.us.db.getLastIndex("butilochka"), sn);
     proc.mq.add(uin, "Фраза успешно добавленна в БД\nФраз в БД: " + (int)srv.us.db.getLastIndex("butilochka"));
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin,"При добавлении фразы возникла ошибка: " + ex.getMessage());
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }else{
     proc.mq.add(uin, "Слишком длинная фраза (> " + psp.getIntProperty("vial.fraza.leght") + "). Фраза не сохранена");
@@ -2982,8 +3026,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     }
     proc.mq.add(uin, "В данный момент в чате online :\nИд|Ник|Комната\n" + list);
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin, "Ошибка " + ex.getMessage());
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }
 
@@ -2993,8 +3036,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     try{
     proc.mq.add(uin, srv.us.allAdmins());
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin, "Ошибка " + ex.getMessage());
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }
 
@@ -3037,8 +3079,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     proc.mq.add(uin,"Ник успешно изменен");
     } else proc.mq.add(uin,"Слишком длинный ник(>"+ psp.getIntProperty("max.chnick")+" ). Ник не изменён.");
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin,"Ошибка - "+ex.getMessage());
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }
 
@@ -3073,8 +3114,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     proc.mq.add(uin, "Рейтинг пользователя " + u.localnick + "|" + u.id + "| повышен");
     srv.getIcqProcess(u.basesn).mq.add(u.sn, "Пользователь " + us.localnick + "|" + us.id + "| повысил тебе рейтинг, он составляет " + u.ball + " баллов");
     } catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin, "Ошибка " + ex.getMessage());
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }
 
@@ -3107,8 +3147,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         proc.mq.add(uin, "Рейтинг пользователя " + u.localnick + "|" + u.id + "| понижен");
         srv.getIcqProcess(u.basesn).mq.add(u.sn, "Пользователь " + us.localnick + "|" + us.id + "| понизил тебе рейтинг, он составляет " + u.ball + " баллов");
         } catch (Exception ex){
-        ex.printStackTrace();
-        proc.mq.add(uin, "Ошибка " + ex.getMessage());
+        Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
         }
         }
 
@@ -3138,9 +3177,9 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        if (!isChat(proc, uin) && !psp.testAdmin(uin)) return;
        if(!auth(proc,uin, "admlist")) return;
        try{
-       proc.mq.add(uin, srv.us.getVseAdmMsg());
+       cutsend(proc, uin, srv.us.getVseAdmMsg());
        }catch (Exception ex){
-       ex.printStackTrace();proc.mq.add(uin, "Ошибка " + ex.getMessage());
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -3161,8 +3200,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     radm.AddAdmin((int) srv.us.db.getLastIndex("robadmin"),sn);
     proc.mq.add(uin, "Фраза успешно добавленна в БД\nФраз в БД: " + (int)srv.us.db.getLastIndex("robadmin"));
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin,"При добавлении фразы возникла ошибка: " + ex.getMessage());
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }else{
     proc.mq.add(uin, "Слишком длинная фраза (> " + psp.getIntProperty("rob.msg") + "). Фраза не сохранена");
@@ -3204,8 +3242,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
    }
    proc.mq.add(uin,"Статус чата изменён успешно");
    }catch (Exception ex){
-   ex.printStackTrace();
-   proc.mq.add(uin,"Произошла ошибка при смене статуса");
+   Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
    }
    }else{
    proc.mq.add(uin,"Числа должно быть от 1 до 34");
@@ -3258,9 +3295,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     srv.us.updateUser(uss);
     proc.mq.add(uin, "Вы сменили статус на |" + lstatus + "|");
     }catch (Exception ex){
-    ex.printStackTrace();
-    Log.getLogger(srv.getName()).talk("Error save msg: " + ex.getMessage());
-    proc.mq.add(uin, "Ошибка смены статуса пользователя " + ex.getMessage());
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }
 
@@ -3274,8 +3309,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     try {
     proc.mq.add(uin, srv.us.getUbanHist());
     }catch (Exception ex){
-    ex.printStackTrace();
-    proc.mq.add(uin, ex.getMessage());
+    Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
     }
     }
 
@@ -3314,6 +3348,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         String s = (String)v.get(1);
         Users us = srv.us.getUser(uin);
         Users uss = srv.us.getUser(i);
+        if(psp.getBooleanProperty("antiadvertising.on.off") & psp.getBooleanProperty("antiadvertising.in.on.off") & !psp.testAdmin(uin))
+        s = antiadvertising(s, uin);
         if(uss.id == 0){
         proc.mq.add(uin,"Такого пользователя не существует");
         return;
@@ -3348,8 +3384,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         }
         }
         }catch (Exception ex){
-        ex.printStackTrace();
-        proc.mq.add(uin,"Ошибка "+ex.getMessage());
+        Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
         }
         }
 
@@ -3370,6 +3405,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         proc.mq.add(uin,srv.us.getUser(uin).localnick  + " Необходимо добавить сообщение!\nПример: !пригласить <uin> давай к нам");
         return;
         }
+        if(psp.getBooleanProperty("antiadvertising.on.off") & psp.getBooleanProperty("antiadvertising.in.on.off") & !psp.testAdmin(uin))
+        s = antiadvertising(s, uin);
         if (radm.testMat1(radm.changeChar(s))){
         proc.mq.add(uin,"В сообщении ''МАТ''");
         return;
@@ -3395,8 +3432,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         }
         }
         }catch (Exception ex){
-        ex.printStackTrace();
-        proc.mq.add(uin,"Ошибка "+ex.getMessage());
+        Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
         }
         }
 
@@ -3418,8 +3454,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         allRoomMsg(uin, "System Messages: " + smsg);
         proc.mq.add(uin, "Сообщение отправленно успешно");
         } catch (Exception ex){
-        ex.printStackTrace();
-        proc.mq.add(uin, "Ошибка - " + ex.getMessage());
+        Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
         }
         }
 
@@ -3430,12 +3465,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
          */
 
         private void commandDelAdmMsg(IcqProtocol proc, String uin) {
-        if (!isChat(proc, uin) && !psp.testAdmin(uin)){
-        return;
-        }
-        if (!auth(proc, uin, "deladmmsg")){
-        return;
-        }
+        if(!isChat(proc, uin) && !psp.testAdmin(uin))return;
+        if(!auth(proc, uin, "deladmmsg"))return;    
         srv.us.db.executeQuery( " TRUNCATE `admmsg` " );
         proc.mq.add(uin, "Таблицы \"admmsg\" очищена" );
         }
@@ -3555,7 +3586,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         }
         Users u = srv.us.getUser(id);
         String cmd = "Wedding_"+uin;
-        if(comNew.containsKey(cmd)){
+        if(comMap.containsKey(cmd)){
         msg = mmsg.trim();
         msg = msg.toLowerCase();
         if(!TestMsgWedding(msg)){
@@ -3563,13 +3594,13 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         return;
         }
         Wedding = true;
-        comNew.remove(cmd);
+        comMap.remove(cmd);
         }
         if(!Wedding){
         srv.getIcqProcess(uss.basesn).mq.add(uss.sn,uss.localnick + " Ты " + message0[Wedding_STATUS.get("Wedding_"+uin)] + " стать "
         + message1[Wedding_STATUS.get("Wedding_"+uin)] + " пользователя " + u.localnick + "\n" +
         " Ответ должен быть ''Да'' или ''Нет''");
-        comNew.put(cmd, new NewExtend(uin, cmd, cmd,v, 60000));
+        comMap.put(cmd, new CommandExtend(uin, cmd, cmd,v, 60000));
         return;
         }
         if(msg.equals("да")){
@@ -3741,6 +3772,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         case 0:
         proc.mq.add(uin,"Введите ваше имя :)");
         nextQuestion(about);
+        setAnswer(about, true);
         break;
         case 1:
         setName(proc, uin, mmsg, about);
@@ -3794,7 +3826,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         proc.mq.add(uin,"В имени запрещенный символы\nВведите правельно имя");
         return;
         }
-        if (radm.testMat1(radm.changeChar(msg))){
+        if (!radm.testMat1(radm.changeChar(msg))){
         proc.mq.add(uin,"В имени " + msg + " ''мат''\nВведите правельно имя");
         return;
         }
@@ -3866,7 +3898,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
   private void setCity(IcqProtocol proc, String uin, String mmsg, AboutExtend about){
         Users uss = srv.us.getUser(uin);
         String msg = RepleceMsg(mmsg);
-        if (radm.testMat1(radm.changeChar(msg))){
+        if (!radm.testMat1(radm.changeChar(msg))){
         proc.mq.add(uin,uss.lname + "в городе " + msg + " ''мат''\nУкажите свой город правельно");
         return;
         }
@@ -3978,8 +4010,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
    proc.mq.add(uin,"Вы отдали " + t + " баллов пользователю " + us.localnick + "|" + us.id + "|");
    srv.getIcqProcess(us.basesn).mq.add(us.sn,"Вам отдал " + t + " баллов пользователь " + uss.localnick + "|" + uss.id + "|");
    } catch (Exception ex) {
-   ex.printStackTrace();
-   proc.mq.add(uin,"Ошибка "+ex.getMessage());
+   Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
    }
    }
 
@@ -4020,8 +4051,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
    proc.mq.add(uin,"Статус у пользователя " + uss.localnick + " успешно убран");
    } else proc.mq.add(uin,"Слишком длинный статус (> " + psp.getIntProperty("about.user.st") + " ). Статус не изменён.");
    } catch (Exception ex) {
-   ex.printStackTrace();
-   proc.mq.add(uin,"Ошибка изменения статуса " + ex.getMessage());
+   Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
    }
    }
 
@@ -4073,8 +4103,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
                   srv.us.clearCashAuth(u.id);
           proc.mq.add(uin,"ID изменен");
        } catch (Exception ex){
-          ex.printStackTrace();
-          proc.mq.add(uin,"Ошибка "+ex.getMessage());
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
            }
 
@@ -4092,11 +4121,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        Users u = srv.us.getUser(uin);
        srv.us.grantUser(u.id, "invisible");
        proc.mq.add(uin,"Вы спрятались");
-       }
-       catch (Exception ex)
-       {
-       ex.printStackTrace();
-       proc.mq.add(uin,"Ошибка " + ex.getMessage());
+       }catch (Exception ex){
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4114,11 +4140,8 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        Users u = srv.us.getUser(uin);
        srv.us.revokeUser(u.id, "invisible");
        proc.mq.add(uin,"Вы показались");
-       }
-       catch (Exception ex)
-       {
-       ex.printStackTrace();
-       proc.mq.add(uin,"Ошибка " + ex.getMessage());
+       }catch (Exception ex){
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
        
@@ -4142,9 +4165,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        }
        proc.mq.add(uin, "Скрываются:\nИд~Ник~Комната\n" + lst);
        } catch (Exception ex) {
-       ex.printStackTrace();
-       ex.getMessage().toString();
-       proc.mq.add(uin, "Ошибка " + ex.getMessage());
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4171,8 +4192,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        proc.mq.add(uin,"Uin отправлен");
        srv.getIcqProcess(u.basesn).mq.add(u.sn,"Пользователь " + uss.localnick + " дал вам свой уин, - " + uss.sn);
        }catch (Exception ex){
-       ex.printStackTrace();
-       proc.mq.add(uin,"Ошибка " + ex.getMessage().toString());
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4207,8 +4227,9 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        List += "Одежда - " + (u.clothing.equals("") || u.clothing == null ? "Голый" : (u.clothing)) + '\n';
        List += "Животное - " + (u.animal.equals("") || u.animal == null ? "Нету" : (u.animal)) + '\n';
        }
-       if( u.clansman != 0 )
-       List += (  u.id != srv.us.getClan( u.clansman ).getLeader() ? "Состоит в клане - ''" + srv.us.getClan( u.clansman ).getName() + "''" : ( "Лидер клана - ''" + srv.us.getClan( u.clansman ).getName() + "''" ) ) + '\n';
+       String clan_symbol = srv.us.getClan(u.clansman).getSymbol().equals("") || !psp.getBooleanProperty("Clan.Symbol") ? "" : "(" + srv.us.getClan(u.clansman).getSymbol() + ")";
+       if( u.clansman != 0 )      
+       List += (  u.id != srv.us.getClan(u.clansman).getLeader() ? "Состоит в клане - ''" + srv.us.getClan( u.clansman ).getName() + " " + clan_symbol + "''" : ( "Лидер клана - ''" + srv.us.getClan(u.clansman).getName() + " " + clan_symbol + "''" ) ) + '\n';
        else List += "В клане не состоит" + '\n';
        List += "Правильных ответов в викторине - " + u.answer + '\n';
        List += (u.wedding == 0 ? "В браке не состоит" : ("В браке с |" + srv.us.getUser(u.wedding).id + "|" + srv.us.getUser(u.wedding).localnick))  + '\n';
@@ -4217,8 +4238,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        List += frends.Random_Frends(id);
        proc.mq.add(uin,List);
        }catch (Exception ex){
-       ex.printStackTrace();
-       proc.mq.add(uin,"При вызове личной информации возникла ошибка - "+ex.getMessage());
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4295,7 +4315,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        srv.getIcqProcess(us.basesn).mq.add(us.sn, "Вас затащили в чат!");
        proc.mq.add(uin, "Пользователь " + us.localnick + "|" + us.id + "| затащен в чат");
        } catch (Exception ex) {
-       ex.printStackTrace();
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4314,7 +4334,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        srv.cq.addMsg(radm.NICK + " " + psp.getStringProperty("chat.delimiter") + " " + msg, "", uss.room);
        proc.mq.add(uin, "Собщение отправлено");
        } catch (Exception ex) {
-       ex.printStackTrace();
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4356,7 +4376,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        srv.us.updateUser(uss);
        }
        } catch (Exception ex) {
-       ex.printStackTrace();
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4390,7 +4410,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        proc.mq.add(uin, "Вы успешно зарегистрировали юзера");
        srv.cq.addMsg("Зарегистрировали пользователя " + uss.localnick + "|" + uss.id + "|", "", 0);
        } catch (Exception ex) {
-       ex.printStackTrace();
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4451,7 +4471,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        uss.basesn = proc.baseUin;
        srv.us.updateUser(uss);
        } catch (Exception ex) {
-       ex.printStackTrace();
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4474,7 +4494,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        srv.us.db.setAdvertisement((int)srv.us.db.getLastIndex("advertisement"), text);
        proc.mq.add(uin,"Реклама успешно добавлена");
        } catch (Exception ex) {
-       ex.printStackTrace();
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
        
@@ -4497,7 +4517,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        srv.us.db.delAdvertisement(id);
        proc.mq.add(uin,"Реклама успешно удалена");
        } catch (Exception ex) {
-       ex.printStackTrace();
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
        
@@ -4513,7 +4533,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        try{
        proc.mq.add(uin,"Листинг рекламы:\n" + srv.us.db.listAdvertisement());
        } catch (Exception ex) {
-       ex.printStackTrace();
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
        
@@ -4540,7 +4560,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        proc.mq.add(uin,"Команда успешно выполнена");
        srv.getIcqProcess(u.basesn).mq.add(u.sn, "Вам перевели " + ball + " бал(ов)");
        } catch (Exception ex) {
-       ex.printStackTrace();
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4571,7 +4591,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        proc.mq.add(uin,"Команда успешно выполнена");
        srv.getIcqProcess(u.basesn).mq.add(u.sn, "У вас забрали " + ball + " бал(ов)");
        } catch (Exception ex) {
-       ex.printStackTrace();
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4608,8 +4628,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        proc.mq.add(uin, "Вам зарплата не положенна...");
        }
        } catch (Exception ex) {
-       ex.printStackTrace();
-       proc.mq.add(uin,"Ошибка - "+ ex.getMessage());
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
        
@@ -4654,8 +4673,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        (u.notice >= psp.getIntProperty("notice.limit") ? ("") : "\nЗа " + psp.getIntProperty("notice.limit") + " предупреждения(ий) вы будите удалены из чата на " + psp.getIntProperty("notice.kick") + " минут"));
        proc.mq.add(uin,"Вы выписали предупреждение пользователю - " + u.localnick);
        } catch (Exception ex) {
-       ex.printStackTrace();
-       proc.mq.add(uin,"Ошибка - "+ ex.getMessage());
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4697,8 +4715,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
        }
        proc.mq.add(uin,srv.us.noticesUser(u.id));
        } catch (Exception ex) {
-       ex.printStackTrace();
-       proc.mq.add(uin,"Ошибка - "+ ex.getMessage());
+       Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
        }
        }
 
@@ -4744,11 +4761,156 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         srv.cq.addMsg("Пользователь" + uss.localnick + "|" + uss.id + "| проиграл " + rate + " баллов... а выпало то " + number, uss.sn, uss.room);
         }
         } catch (Exception ex) {
-        ex.printStackTrace();
-        proc.mq.add(uin,"Ошибка - " + ex.getMessage());
+        Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
         }
         }
 
+        /**
+         * Назначить личную комнату
+         * @param proc
+         * @param uin
+         * @param v
+         */
 
+
+        private void commandAppointPrivateRoom(IcqProtocol proc, String uin, Vector v){
+        if (!isChat(proc, uin)) return;
+        if (!auth(proc, uin, "personal_room")) return;
+        try{
+        int id = (Integer)v.get(0);
+        int room = (Integer)v.get(1);
+        Users u = srv.us.getUser(id);
+        if(u.id == 0) {
+        proc.mq.add(uin,"Пользователя не существует!");
+        return;
+        }
+        if(room == 0){
+        proc.mq.add(uin,"Комната под номером - " + room + " не может быть личной!");
+        return;
+        }
+        if(srv.us.checkRoom(room)){
+        proc.mq.add(uin,"Комната под номером - " + room + " уже создана!");
+        return;
+        }
+        if(srv.us.getRoom(room).getPersonal() != 0){
+        proc.mq.add(uin,"Комната под номером - " + room + " уже является личной комнотой пользователя: " +
+        srv.us.getUser(srv.us.getRoom(room).getPersonal()));
+        return;
+        }
+        Rooms r = srv.us.getRoom(room);
+        r.setName("Комната пользователя: |" + u.id + "|" + u.localnick);
+        r.setTopic("Твоя личная комната :)");
+        r.setPersonal(room);
+        srv.us.createRoom(r);
+        u.personal_room = room;
+        srv.us.updateUser(u);
+        proc.mq.add(uin,"Команда успешно выполнена");
+        if(u.state == UserWork.STATE_CHAT)
+        srv.getIcqProcess(u.basesn).mq.add(u.sn,u.localnick + " вам назначена личная комната - " + room);
+        } catch (Exception ex) {
+        Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
+        }
+        }
+        
+        /**
+         * Убрать личную комнату
+         * @param proc
+         * @param uin
+         * @param v
+         */
+
+        private void commandCleanPrivateRoom(IcqProtocol proc, String uin, Vector v){
+        if (!isChat(proc, uin)) return;
+        if (!auth(proc, uin, "personal_room")) return;
+        try{
+        int id = (Integer)v.get(0);
+        Users u = srv.us.getUser(id);
+        if(u.id == 0) {
+        proc.mq.add(uin,"Пользователя не существует!");
+        return;
+        }
+        if(u.personal_room == 0){
+        proc.mq.add(uin,"У пользователя нет личной комнаты!");
+        return;
+        }
+        Rooms r = srv.us.getRoom(u.personal_room);
+        srv.us.deleteRoom(r);
+        u.personal_room = 0;
+        srv.us.updateUser(u);
+        proc.mq.add(uin,"Команда успешно выполнена");
+        if(u.state == UserWork.STATE_CHAT)
+        srv.getIcqProcess(u.basesn).mq.add(u.sn, " у вас убрана личная комната!");
+        } catch (Exception ex) {
+        Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
+        }
+        }
+        
+        /**
+         * Пригласить в свою личную комнату
+         * @param proc
+         * @param uin
+         * @param v
+         */
+
+        private void commandInvitationPrivateRoom(IcqProtocol proc, String uin, Vector v){
+        if (!isChat(proc, uin)) return;
+        try{
+        int id = (Integer)v.get(0);
+        Users u = srv.us.getUser(id);
+        Users uss = srv.us.getUser(uin);
+        if(u.id == 0) {
+        proc.mq.add(uin,"Пользователя не существует!");
+        return;
+        }
+        if(u.state == UserWork.STATE_NO_CHAT) {
+        proc.mq.add(uin,"Пользователь не в чате!");
+        return;
+        }
+        if(uss.personal_room == 0){
+        proc.mq.add(uin,"У вас нет личной комнаты!");
+        return;
+        }
+        if(u.id == uss.id){
+        proc.mq.add(uin,"Вы не можете пригласть себя!");
+        return;
+        }
+        addPrivateRoom(u.sn, uss.personal_room);
+        proc.mq.add(uin,"Команда успешно выполнена");
+        } catch (Exception ex) {
+        Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
+        }
+        }
+
+        /**
+         * Запоминаем приглашенного
+         * @param uin
+         * @param room
+         */
+
+
+        private void addPrivateRoom(String uin, int room){
+        if(!pr.containsKey(uin)){
+        pr.put(uin, room);
+        srv.getIcqProcess(srv.us.getUser(uin).basesn).mq.add(srv.us.getUser(uin).sn,
+        srv.us.getUser(uin).localnick + " вас пргласили в комнату " + room);
+        }
+        }
+
+        /**
+         * Проверка приглашен пользователь в комнату или нет?
+         * @param uin
+         * @param room
+         * @return
+         */
+
+        private boolean testPrivateRoom(String uin, int room){
+        // если uin хозяин комнаты
+        if(srv.us.getUser(uin).personal_room == room) return true;  
+        if(!pr.containsKey(uin)) return false;
+        if(pr.get(uin) == room)
+            return true;
+        else
+            return false;
+        }
 
   }

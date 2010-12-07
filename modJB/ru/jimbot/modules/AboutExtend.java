@@ -39,6 +39,12 @@ private boolean commandReg = false;// после регистрации?
         this.order++;
         }
 
+        public void setOrder(int order){
+        if(order < 0)
+            order--;
+                    else
+                        order++;
+        }
         public boolean getAnswer(){
         return answer;
         }

@@ -26,6 +26,7 @@ import ru.caffeineim.protocols.icq.integration.events.*;
 import ru.caffeineim.protocols.icq.integration.listeners.MessagingListener;
 import ru.caffeineim.protocols.icq.integration.listeners.OurStatusListener;
 import ru.caffeineim.protocols.icq.integration.listeners.XStatusListener;
+import ru.caffeineim.protocols.icq.setting.enumerations.ClientModeEnum;
 import ru.caffeineim.protocols.icq.setting.enumerations.StatusModeEnum;
 import ru.caffeineim.protocols.icq.setting.enumerations.XStatusModeEnum;
 import ru.jimbot.modules.AbstractProps;
@@ -34,7 +35,7 @@ import ru.jimbot.util.Log;
 import ru.jimbot.util.MainProps;
 
 /**
- * @author Prolubnikov Dmitry
+ * @author Prolubnikov Dmitry, fraer72
  */
 
 public class IcqProtocol extends AbstractProtocol
@@ -67,7 +68,7 @@ return mq.size();
 public void connect() {
 Log.getLogger(serviceName).info("Connect uin - " + screenName);
 mq.start();
-con = new OscarConnection(server, port, screenName, password);
+con = new OscarConnection(server, port, screenName, password, props.getBooleanProperty("web.aware.on.off"), false);
 con.addOurStatusListener(this);
 con.addMessagingListener(this);
 con.addXStatusListener(this);
@@ -86,7 +87,7 @@ con = null;
 }catch (Exception e){
 e.printStackTrace();
 }
-con = new OscarConnection(server, port, screenName, password);
+con = new OscarConnection(server, port, screenName, password, props.getBooleanProperty("web.aware.on.off"), false);
 con.addOurStatusListener(this);
 con.addMessagingListener(this);
 con.addXStatusListener(this);
@@ -185,8 +186,8 @@ System.err.println(ex.getMessage());
 
 public void onLogin() {
 connected = true;
-OscarInterface.changeStatus(con, new StatusModeEnum(props.getIntProperty("icq.status")));
-OscarInterface.changeXStatus(con, new XStatusModeEnum(props.getIntProperty("icq.xstatus")));
+OscarInterface.changeStatus(con, new StatusModeEnum(props.getIntProperty("icq.status"), props.getBooleanProperty("ball.of.joy.on.off")));
+OscarInterface.changeXStatus(con, new XStatusModeEnum(props.getIntProperty("icq.xstatus")), new ClientModeEnum(props.getIntProperty("icq.client")));
 Log.getLogger(serviceName).talk("UIN - " + screenName + " online");
 }
 
@@ -255,7 +256,7 @@ if ( !text.equals( "" ) ){
 xStatusText = text;
 props.setStringProperty("icq.STATUS_MESSAGE2", xStatusText);
 }
-OscarInterface.changeXStatus(con, new XStatusModeEnum(xStatusId));
+OscarInterface.changeXStatus(con, new XStatusModeEnum(xStatusId), new ClientModeEnum(props.getIntProperty("icq.client")));
 }
 
 /**
@@ -264,7 +265,7 @@ OscarInterface.changeXStatus(con, new XStatusModeEnum(xStatusId));
  */
 
 public void setXStatusNumber( int number ){
-OscarInterface.changeXStatus(con, new XStatusModeEnum(number));
+OscarInterface.changeXStatus(con, new XStatusModeEnum(number), new ClientModeEnum(props.getIntProperty("icq.client")));
 }
 
     public void onMessageMissed(MessageMissedEvent e) {

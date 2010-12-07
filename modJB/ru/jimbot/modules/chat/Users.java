@@ -63,6 +63,7 @@ public class Users extends DBObject {
     public String clothing = "";
     public String animal = "";
     public int notice = 0;
+    public int personal_room = 0;
 
     /** Creates a new instance of Users */
     public Users() {
@@ -107,7 +108,8 @@ public class Users extends DBObject {
             "email","city","homepage","gender","birthyear","birthmonth","birthday",
             "age","country","language","state","basesn","createtime", "room", 
             "lastkick", "grouptime", "data", "lastclosed","ball", "answer","status","" +
-            "clansman","clangroup","wedding","car","home","clothing","animal","notice"};
+            "clansman","clangroup","wedding","car","home","clothing","animal","notice",
+            "personal_room"};
         types = new int[] {Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
             Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
             Types.INTEGER, Types.INTEGER,Types.INTEGER,Types.INTEGER,Types.INTEGER,
@@ -115,7 +117,7 @@ public class Users extends DBObject {
             Types.INTEGER, Types.TIMESTAMP, Types.TIMESTAMP, Types.TIMESTAMP, 
             Types.TIMESTAMP,Types.INTEGER,Types.INTEGER,Types.VARCHAR,Types.INTEGER,
             Types.VARCHAR,Types.INTEGER,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR
-           ,Types.VARCHAR,Types.INTEGER};
+           ,Types.VARCHAR,Types.INTEGER,Types.INTEGER};
         tableName="users";        
     }
    

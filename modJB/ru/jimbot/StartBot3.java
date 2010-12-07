@@ -57,7 +57,6 @@ public StartBot3(){}
                             s[i*2+3] = "ru.jimbot.modules.http.HTTPScriptRequest";
                         }
                         Server.startServer(s);
-                        HttpConnection.HttpPost(MainProps.VERSION);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }

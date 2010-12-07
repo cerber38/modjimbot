@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Vector;
+import ru.caffeineim.protocols.icq.integration.OscarInterface;
 import ru.jimbot.modules.chat.ChatProps;
 import ru.jimbot.table.UserPreference;
 
@@ -481,7 +482,7 @@ public class MainProps {
     }
     catch ( Exception ex )
     {
-    Log.getLogger(name).error( "Ошибка создания файла \"log4j.PROPERTIES\" " , ex );
+    Log.getLogger(name).error( "Ошибка создания файла \"log4j.properties\" " , ex );
     }
     }
 
@@ -743,6 +744,13 @@ public class MainProps {
     return false;
     }
     return true;
+    }
+
+    public static String getAbout(){
+    return VERSION +
+        "\nВерсия icq библиотеки: " + OscarInterface.getVersion() +
+        "\nПоддержка проекта: http://jimbot.ru" +
+        "\nПоддержка мода - www.toch72.ru";
     }
 
     public static void registerProperties(Properties _appProps) {

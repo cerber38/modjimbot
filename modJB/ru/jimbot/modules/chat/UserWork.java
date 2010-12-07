@@ -1072,8 +1072,7 @@ public class UserWork {
         return s;
         }
 
-        public boolean deleteRoom(Rooms r)
-        {
+        public boolean deleteRoom(Rooms r){
     	return rw.deleteRoom(r);
         }
 
@@ -1084,8 +1083,7 @@ public class UserWork {
           * @param id
           * @return
           */
-       public Clan getClan( int id )
-       {
+       public Clan getClan( int id ){
        if( rc.CheckClan( id ) )
        return rc.getClan( id );
        Clan c = new Clan();
@@ -1098,9 +1096,8 @@ public class UserWork {
          * @param id
          * @return
          */
-       public boolean CheckClan( int id )
-       {
-       return rc.CheckClan( id );
+       public boolean CheckClan(int id){
+       return rc.CheckClan(id);
        }
 
        /**
@@ -1108,9 +1105,8 @@ public class UserWork {
          * @param с
          * @return
          */
-       public boolean CreateClan( Clan c )
-       {
-       return rc.CreateClan( c );
+       public boolean CreateClan(Clan c){
+       return rc.CreateClan(c);
        }
 
        /**
@@ -1118,17 +1114,15 @@ public class UserWork {
          * @param с
          * @return
          */
-       public boolean saveClan( Clan c )
-       {
-       return rc.UpdateClan( c );
+       public boolean saveClan(Clan c){
+       return rc.UpdateClan(c);
        }
 
        /**
          * Набор ИД существующих кланов
          * @return
          */
-       public Set<Integer> getClans()
-       {
+       public Set<Integer> getClans(){
        return rc.getClans();
        }
 
@@ -1137,17 +1131,15 @@ public class UserWork {
          * @param с
          * @return
          */
-       public boolean DeleteClan( Clan c )
-       {
-       return rc.DeleteClan( c );
+       public boolean DeleteClan(Clan c){
+       return rc.DeleteClan(c);
        }
 
        /**
          * Получаем общее число кланов
          * @return
          */
-       public int getCountClan()
-       {
+       public int getCountClan(){
        return rc.getCountClan();
        }
 
@@ -1156,17 +1148,15 @@ public class UserWork {
          * Вернет true если такое название клана существует
          * @return
          */
-       public boolean testClanName( String ClanName )
-       {
-       return rc.TestClanName( ClanName );
+       public boolean testClanName(String ClanName){
+       return rc.TestClanName(ClanName);
        }
 
        /**
          * Получаем максимальный ид
          * @return
          */
-       public int getMaxId()
-       {
+       public int getMaxId(){
        return rc.getMaxId();
        }
 
@@ -1178,20 +1168,18 @@ public class UserWork {
        {
        String list = "Список кланов:\nid|Название|Лидер|Комната|Рейтинг|\n";
        try{
-       PreparedStatement pst = db.getDb().prepareStatement( "select id, name_clan,  leader_clan, room_clan, ball_clan, info_clan from clans" );
+       PreparedStatement pst = db.getDb().prepareStatement("select id, name_clan,  leader_clan, room_clan, ball_clan, info_clan, symbol_clan from clans");
        ResultSet rs = pst.executeQuery();
-       while( rs.next() )
-       {
+       while(rs.next()){
+       String symbol = getClan(getUser(rs.getInt(3)).clansman).getSymbol().equals("") || !ChatProps.getInstance(serviceName).getBooleanProperty("Clan.Symbol") ? "" : "(" + getClan(getUser(rs.getInt(3)).clansman).getSymbol() + ")";
        list += "------\n";
-       list += "|" + rs.getInt( 1 ) + "|" + rs.getString( 2 )  + "|" + getUser( rs.getInt( 3 ) ).localnick + "|" + rs.getInt( 4 ) + "|" + rs.getInt( 5 ) + "|" + "\n";
-       list += "О клане: " + rs.getString( 6 ) + "\n";
+       list += "|" + rs.getInt(1) + "|" + rs.getString(2)  + " " + symbol + "|" + getUser(rs.getInt(3)).localnick + "|" + rs.getInt(4) + "|" + rs.getInt(5) + "|" + "\n";
+       list += "О клане: " + rs.getString(6) + "\n";
        list += "------\n";
        }
        rs.close();
        pst.close();
-       }
-       catch ( Exception ex )
-       {
+       }catch (Exception ex) {
        ex.printStackTrace();
        }
        return list;
@@ -1204,17 +1192,14 @@ public class UserWork {
        public String ClanTop(){
        String s = "Вывод кланов по рейтингу:\n|id|Название|Рейтинг|\n";
        try{
-       PreparedStatement pst = db.getDb().prepareStatement( "SELECT id, name_clan, ball_clan FROM clans WHERE ball_clan > 0 ORDER BY ball_clan DESC" );
+       PreparedStatement pst = db.getDb().prepareStatement("SELECT id, name_clan, ball_clan FROM clans WHERE ball_clan > 0 ORDER BY ball_clan DESC");
        ResultSet rs = pst.executeQuery();
-       while(rs.next())
-       {
+       while(rs.next()){
        s += "|" + rs.getInt(1) + "|" + rs.getString(2) + "|" + rs.getInt(3) + "| \n";
        }
        rs.close();
        pst.close();
-       }
-       catch (Exception ex)
-       {
+       }catch (Exception ex){
        ex.printStackTrace();
        }
        return s;
@@ -1226,27 +1211,22 @@ public class UserWork {
         * @return
         */
        
-       public String ClanMemberList( int id ){
-       String s = "Список членов клана ''" + getClan( id ).getName() + "'' :\n";
-       Users uss = getUser( getClan( id ).getLeader() );
+       public String ClanMemberList(int id){
+       String s = "Список членов клана ''" + getClan(id).getName() + "'' :\n";
+       Users uss = getUser(getClan(id).getLeader());
        s += "Лидер клана: " + uss.localnick + "\n";
        s += "|id|Nick|ClanGroup|\n";
        try{
-       PreparedStatement pst = db.getDb().prepareStatement( "SELECT id FROM users WHERE clansman =" + id + " order by clansman desc" );
+       PreparedStatement pst = db.getDb().prepareStatement("SELECT id FROM users WHERE clansman =" + id + " order by clansman desc");
        ResultSet rs = pst.executeQuery();
-       while( rs.next() )
-       {
-       Users u = getUser( rs.getInt( 1 ) );
-       if ( u.id != getClan( id ).getLeader() )
-       {
+       while(rs.next()){
+       Users u = getUser(rs.getInt(1));
+       if (u.id != getClan(id).getLeader())
        s += "|" + u.id + "|" + u.localnick + "|" + u.clangroup + "|" + '\n';
-       }
        }
        rs.close();
        pst.close();
-       }
-       catch (Exception ex)
-       {
+       }catch (Exception ex){
        ex.printStackTrace();
        }
        return s;
@@ -1259,22 +1239,19 @@ public class UserWork {
         * @return
         */
 
-       public void ClanDelAllMember( int id ){
+       public void ClanDelAllMember(int id){
        try{
-       PreparedStatement pst = db.getDb().prepareStatement( "SELECT id FROM users WHERE clansman =" + id );
+       PreparedStatement pst = db.getDb().prepareStatement("SELECT id FROM users WHERE clansman =" + id);
        ResultSet rs = pst.executeQuery();
-       while( rs.next() )
-       {
-       Users u = getUser( rs.getInt( 1 ) );
+       while(rs.next()){
+       Users u = getUser(rs.getInt(1));
        u.clansman = 0;
        u.clangroup = "";
        updateUser( u );
        }
        rs.close();
        pst.close();
-       }
-       catch (Exception ex)
-       {
+       }catch (Exception ex){
        ex.printStackTrace();
        }
        }
@@ -1517,11 +1494,52 @@ public class UserWork {
         return s;
         }
 
+        /**
+         * @author Юрий
+         * Дата последнего входа/выхода
+         * @param type
+         * @param id
+         * @return
+         */
 
-        public int getCountGame(int id) {
-        String q = "SELECT count(*) FROM `events` WHERE user_id="+id+" and type='MILLIONER' and (to_days( now( ) ) - to_days( time )) <1";
-        Vector<String[]> v = db.getValues(q);
-        return Integer.parseInt(v.get(0)[0]);
+
+        public String statVxodVixod(String type, int id) {
+        String r = "";
+        try {
+        PreparedStatement pst = db.getDb().prepareStatement("SELECT time FROM events WHERE TYPE = '" + type + "' and user_id = " + id + " ORDER BY time DESC limit 0,1");
+        ResultSet rs = pst.executeQuery();
+        if (!rs.next()) {
+        r = "";
+        } else {
+        r = "" + rs.getTimestamp(1);
         }
+        rs.close();
+        pst.close();
+        } catch (Exception ex) {
+        ex.printStackTrace();
+        }
+        return r;
+        }
+        
+        /**
+         * Рандомный текст при входе/выходе
+         * @param type
+         * @return
+         */
+
+        public String getTextInOut(String type) {
+        String text = "";
+        try {
+        PreparedStatement pst =  (PreparedStatement) db.getDb().prepareStatement("SELECT text FROM text_in_out WHERE type='" + type + "' ORDER BY RAND( ) LIMIT 0 , 1");
+        ResultSet rs = pst.executeQuery();
+        if(rs.next()) text = rs.getString(1);
+        rs.close();
+        pst.close();
+        } catch (Exception ex) {
+        ex.printStackTrace();
+        }
+        return text;
+        }
+
 
 }

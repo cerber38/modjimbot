@@ -31,6 +31,7 @@ public class Rooms extends DBObject {
 	private String topic="";
 	private int user_id=0;
 	private String pass="";
+        private int personal = 0;
 	
 	public Rooms(){
 		
@@ -81,6 +82,18 @@ public class Rooms extends DBObject {
 
 	public void setPass(String pass) {
 		this.pass = pass;
+	}
+
+        public void setPersonal(int personal){
+                this.personal = personal;
+        }
+
+        public int getPersonal(){
+                return personal;
+        }
+
+	public boolean checkPersonal() {
+		return personal != 0;
 	}
 
 	@Override

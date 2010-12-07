@@ -18,11 +18,8 @@
 
 package ru.jimbot.modules;
 
-import ru.caffeineim.protocols.icq.integration.OscarInterface;
 import ru.jimbot.protocol.IcqProtocol;
 import ru.jimbot.protocol.ProtocolListener;
-import ru.jimbot.util.Log;
-import ru.jimbot.util.MainProps;
 
 
 /**
@@ -36,22 +33,9 @@ public class MsgReceiver implements ProtocolListener {
     public MsgReceiver( MsgInQueue q, IcqProtocol ip ){
     iq = q;
     iprot = ip;
-    ip.addListener( this );
+    ip.addListener(this);
     }
     public void getMsg( String sendSN, String recivSN, String msg, boolean isOffline ){
-        String[] mmsg = msg.split(" ");
-        if( mmsg[ 0 ].equalsIgnoreCase( "!about" ) || mmsg[ 0 ].equalsIgnoreCase( "!оботе" ) ){
-        if( !iq.testFlood( sendSN ) ){
-        iprot.sendMsg( sendSN, MainProps.VERSION +
-        "\nВерсия icq библиотеки: " + OscarInterface.getVersion() +
-        "\nПоддержка проекта: http://jimbot.ru" +
-        "\nПоддержка мода - www.toch72.ru");
-        Log.getLogger(iprot.serviceName).info( "CHAT COM_LOG: " + sendSN + ">> " + mmsg[ 0 ] );
-        }else{
-        Log.getLogger(iprot.serviceName).flood("FLOOD from " + sendSN + ">> " + msg);
-        }
-        return;
-        }
     iq.addMsg( iprot, sendSN, msg, isOffline );
     }
 

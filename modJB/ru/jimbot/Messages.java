@@ -116,7 +116,7 @@ private Properties props = null;
             msg = msg.replace("%SEX%", uss.homepage);// Пол пользователя
             msg = msg.replace("%AGE%", Integer.toString(uss.age));// Возраст пользователя
             msg = msg.replace("%CITY%", uss.city );// Город пользователя
-            msg = msg.replace("%CLAN%", test_clan(uss) );// Клан пользователя
+            msg = msg.replace("%CLAN%", getClan(uss) );// Клан пользователя
             msg = msg.replace("%WEDDING%", (uss.wedding == 0 ? "" : ("В браке с |" + srv.us.getUser(uss.wedding).id + "|" + srv.us.getUser(uss.wedding).localnick)) );// Брак пользователя
             msg = msg.replace("%ROOM_ID%", Integer.toString(room));// Ид комнаты в которую вошли
             msg = msg.replace("%ROOM_NAME%", srv.us.getRoom(room).getName());// Название комнаты в которую вошли
@@ -139,50 +139,28 @@ private Properties props = null;
             if(ChatProps.getInstance(ServiceName).getBooleanProperty("social.status.on.off"))
             msg = msg.replace("%SOCIAL_STATUS%", srv.us.getStatus(uss.id));
             msg = msg.replace("%NOTICE%", Integer.toString(uss.notice));
+            msg = msg.replace("%TEXT_IN%", srv.us.getTextInOut("in"));
+            msg = msg.replace("%TEXT_OUT%", srv.us.getTextInOut("out"));
             return msg;
         } catch (MissingResourceException e) {
             return '!' + key + '!';
         }
     }
-
         /**
-         * XXXXXXX
-         * @param u - user
-         * @return false - М
-         * @param position - в зависимости от позиции выводим текст
+         * Вернет клан пользователя
+         * @param uss
+         * @return
          */
 
-        public String getWBS(Users u, Integer position) {
-        boolean test;
-        if (u.homepage.indexOf('м') == 1 & u.homepage.equals(""))
-        test = false;
-        else 
-        test = false;
 
-        switch (position){
-        case 1:
-        return test ? "вошел(а)" : "вошел";
-        case 2:
-        return test ? "Ты должен(а)" : "Ты должен";
-        case 3:
-        return test ? "вышла(а)" : "вышел";
-        }
-        return "";
-        }
-        
-        
-
-        private String test_clan(Users uss){
+        private String getClan(Users uss){
         String clan = "";
-        ChatServer srv = ( ChatServer ) Manager.getInstance().getService( ServiceName );
-        if( uss.clansman != 0 )
-        {
-        clan += (  uss.id != srv.us.getClan( uss.clansman ).getLeader() ? "Состаит в клане - ''" + srv.us.getClan( uss.clansman ).getName() + "''" : ( "Лидер клана - ''" + srv.us.getClan( uss.clansman ).getName() + "''" ) );
-        }
+        ChatServer srv = (ChatServer) Manager.getInstance().getService(ServiceName);
+        String clan_symbol = srv.us.getClan(uss.clansman).getSymbol().equals("") || !ChatProps.getInstance(ServiceName).getBooleanProperty("Clan.Symbol") ? "" : "(" + srv.us.getClan(uss.clansman).getSymbol() + ")";
+        if(uss.clansman != 0)
+        clan += (uss.id != srv.us.getClan(uss.clansman).getLeader() ? "Состаит в клане - ''" + srv.us.getClan(uss.clansman).getName() + " " + clan_symbol + "''" : ("Лидер клана - ''" + srv.us.getClan(uss.clansman).getName() + " " + clan_symbol + "''"));
         else
-        {
         clan += "В клане не состаит";
-        }
         return clan;
         }
 

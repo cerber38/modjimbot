@@ -56,7 +56,7 @@ public class RoomWork {
 	public void fillCash() {
 		ResultSet rst=null;
         Statement stmt=null;
-        String q = "select id, name, topic, user_id, pass from rooms";
+        String q = "select id, name, topic, user_id, pass, personal c from rooms";
         try{
         	stmt = db.getDb().createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         	Log.getDefault().debug("EXEC: " + q);
@@ -68,6 +68,10 @@ public class RoomWork {
         		r.setTopic(rst.getString(3));
         		r.setUser_id(rst.getInt(4));
         		r.setPass(rst.getString(5));
+                        if(rst.getObject(6)==null)
+                        r.setPersonal(0);
+                        else
+                        r.setPersonal(rst.getInt(6));
         		rc.put(r.getId(), r);
         	}
         } catch (Exception ex){
@@ -94,7 +98,7 @@ public class RoomWork {
 	 * @return
 	 */
 	public boolean createRoom(Rooms r){
-        String q = "insert into rooms values(?,?,?,?,?)";
+        String q = "insert into rooms values(?,?,?,?,?,?)";
         Log.getDefault().debug("INSERT room id=" + r.getId());
         boolean f = false;
         try {
@@ -104,6 +108,7 @@ public class RoomWork {
         	pst.setString(3, r.getTopic());
         	pst.setString(4, "");
         	pst.setInt(5, r.getUser_id());
+                pst.setInt(6, r.getPersonal());
         	pst.execute();
         	pst.close();
         	rc.put(r.getId(), r);
@@ -120,16 +125,17 @@ public class RoomWork {
 	 * @return
 	 */
 	public boolean updateRoom(Rooms r, String pass) {
-		String q = "update rooms set name=?, topic=?, user_id=?, pass=? where id=?";
+		String q = "update rooms set name=?, topic=?, user_id=?, pass=?, personal=? where id=?";
 		Log.getDefault().debug("UPDATE rooms id=" + r.getId());
 		boolean f = false;
 		try {
 			PreparedStatement pst = db.getDb().prepareStatement(q);
-			pst.setInt(5, r.getId());
+			pst.setInt(6, r.getId());
 			pst.setString(1, r.getName());
         	pst.setString(2, r.getTopic());
+                pst.setInt(3, r.getUser_id());
         	pst.setString(4, pass);
-        	pst.setInt(3, r.getUser_id());
+                pst.setInt(5, r.getPersonal());
         	pst.execute();
         	pst.close();
         	rc.put(r.getId(), r);
@@ -143,8 +149,7 @@ public class RoomWork {
 	public Set<Integer> getRooms() {
 		return rc.keySet();
 	}
-        public boolean deleteRoom(Rooms r)
-        {
+        public boolean deleteRoom(Rooms r){
         String q = "delete from rooms where id=?";
         Log.getDefault().debug("DELETE room id=" + r.getId());
         boolean f = false;
