@@ -40,6 +40,7 @@ INSERT INTO `robadmin` VALUES (6, 'Не, я так не думаю');
 INSERT INTO `robadmin` VALUES (7, 'Ты серьезно?');
 INSERT INTO `robadmin` VALUES (8, 'С тобой так интересно!');
 INSERT INTO `robadmin` VALUES (9, 'Ха-ха, очень смешно...');
+CREATE TABLE `text_in_out` (`id` int(11) NOT NULL, `type` varchar(3) NOT NULL, `text` varchar(255) NOT NULL, PRIMARY KEY  (`id`)) ;
 INSERT INTO `robadmin` VALUES (10, 'Если ты высокого мения о своем интеллекте, то должен тебя разочаровать');
 INSERT INTO `text_in_out` (`id`, `type`, `text`) VALUES (0, 'in', 'вошел(а) в чат *HI*'), (1, 'out', 'ушел(ушла) из чата');
 INSERT INTO `help` ( `id` , `auth` , `command` , `info` ) VALUES ('0', 'all', '!help (!справка !помощь)', 'Справка по командам');
