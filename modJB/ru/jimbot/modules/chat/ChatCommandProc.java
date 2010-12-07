@@ -3826,7 +3826,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
         proc.mq.add(uin,"В имени запрещенный символы\nВведите правельно имя");
         return;
         }
-        if (!radm.testMat1(radm.changeChar(msg))){
+        if (radm.testMat1(radm.changeChar(msg))){
         proc.mq.add(uin,"В имени " + msg + " ''мат''\nВведите правельно имя");
         return;
         }
@@ -3898,7 +3898,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
   private void setCity(IcqProtocol proc, String uin, String mmsg, AboutExtend about){
         Users uss = srv.us.getUser(uin);
         String msg = RepleceMsg(mmsg);
-        if (!radm.testMat1(radm.changeChar(msg))){
+        if (radm.testMat1(radm.changeChar(msg))){
         proc.mq.add(uin,uss.lname + "в городе " + msg + " ''мат''\nУкажите свой город правельно");
         return;
         }

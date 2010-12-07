@@ -510,7 +510,7 @@ public class ChatProps implements AbstractProps {
           new UserPreference(UserPreference.BOOLEAN_TYPE, "radm.close.random", "Включить/Выключить рандомное время закрытия.", getBooleanProperty("radm.close.random"),true),
           new UserPreference(UserPreference.BOOLEAN_TYPE, "radm.mat.warn", "Включить/Выключить оповещение о мате.", getBooleanProperty("radm.mat.warn"),true),
           new UserPreference(UserPreference.BOOLEAN_TYPE, "radm.vic.room", "Включить/Выключить разговор админ бота в комнате с викториной.", getBooleanProperty("radm.vic.room"),true),
-          new UserPreference(UserPreference.INTEGER_TYPE, "rob.msg", "Максимальная длина фразы для админ бота при добавлении.", getBooleanProperty("rob.msg"),true),
+          new UserPreference(UserPreference.INTEGER_TYPE, "rob.msg", "Максимальная длина фразы для админ бота при добавлении.", getIntProperty("rob.msg"),true),
           // Предупрежения
           new UserPreference(UserPreference.CATEGORY_TYPE, "notice", "Настройки предупреждений:"),
           new UserPreference(UserPreference.INTEGER_TYPE, "notice.limit", "Лимит предупреждений.", getIntProperty("notice.limit"),true),
