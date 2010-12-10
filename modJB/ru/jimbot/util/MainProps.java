@@ -47,7 +47,7 @@ import ru.jimbot.table.UserPreference;
  */
 public class MainProps {
     /*Оставьте хоть какую нибудь благодарность авторам, не изменяя эту строчку внизу.*/
-    public static final String VERSION = "jImBot v.0.4.0 (c)Spec (06/07/2009)\nBy modifying - fraer72\nVersion update - pre-release 4 (29/08/2010)";
+    public static final String VERSION = "jImBot v.0.4.0 (c)Spec (06/07/2009)\nBy modifying - fraer72\nVersion modJB v0.1(29/08/2010)";
 
     public static final String PROG_TITLE = "jImBot";
     public static final String PROPS_FILE = "./jimbot.xml";
@@ -757,7 +757,7 @@ public class MainProps {
     return VERSION +
         "\nВерсия icq библиотеки: " + OscarInterface.getVersion() +
         "\nПоддержка проекта: http://jimbot.ru" +
-        "\nПоддержка мода - www.toch72.ru";
+        "\nProject - http://code.google.com/p/modjimbot/";
     }
 
     public static void registerProperties(Properties _appProps) {

@@ -107,7 +107,7 @@ public class InfoCommandProc extends AbstractCommandProcessor {
                     "\n!google <запрос> - выполняет поисковые запросы в Google, " +
                     "выдает самый первый найденный результат." +
                     "\n!weather <город> - запрос погоды с gismeteo.ru" +
-                    "\n!translate_en <text> - перевод русского текста на англиский" +
+                    "\n!translate_en <text> - перевод русского текста на английский" +
                     "\n!translate_ru <text> - перевод английского текста на русский" +
                     "\n!about - информация о программе" +
                     "\nДля получения помоши пошлите \"!help\"\n" +
