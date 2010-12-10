@@ -23,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Properties;
-import ru.jimbot.Manager;
 import ru.jimbot.modules.AbstractProps;
 import ru.jimbot.table.UserPreference;
 import ru.jimbot.util.Log;
@@ -83,6 +82,9 @@ public class AnekProps implements AbstractProps {
         setStringProperty("db.user","root");
         setStringProperty("db.pass","");
         setStringProperty("db.dbname","botdb");
+        setIntProperty("icq.client", 0 );
+        setBooleanProperty("divided.between.on.off", false);
+        setBooleanProperty("web.aware.on.off", false);
     }
 
     public UserPreference[] getUserPreference(){
@@ -94,6 +96,9 @@ public class AnekProps implements AbstractProps {
             new UserPreference(UserPreference.INTEGER_TYPE,"icq.xstatus","x-статус (0-37)",getIntProperty("icq.xstatus"),true),
             new UserPreference(UserPreference.STRING_TYPE,"icq.STATUS_MESSAGE1","Сообщение x-статуса 1",getStringProperty("icq.STATUS_MESSAGE1"),true),
             new UserPreference(UserPreference.STRING_TYPE,"icq.STATUS_MESSAGE2","Сообщение x-статуса 2",getStringProperty("icq.STATUS_MESSAGE2"),true),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"ball.of.joy.on.off","Включить шарик радости",getBooleanProperty("ball.of.joy.on.off"),true),
+            new UserPreference(UserPreference.BOOLEAN_TYPE,"web.aware.on.off","Индексировать номера в поиске(Web Aware)",getBooleanProperty("web.aware.on.off"),true),
+            new UserPreference(UserPreference.INTEGER_TYPE,"icq.client","ID icq клиента",getIntProperty("icq.client"),true),
             new UserPreference(UserPreference.INTEGER_TYPE,"icq.AUTORETRY_COUNT","Число переподключений движка при обрыве",getIntProperty("icq.AUTORETRY_COUNT"),true),
             new UserPreference(UserPreference.INTEGER_TYPE,"bot.pauseIn","Пауза для входящих сообщений",getIntProperty("bot.pauseIn"),true),
             new UserPreference(UserPreference.INTEGER_TYPE,"bot.pauseOut","Пауза для исходящих сообщений",getIntProperty("bot.pauseOut"),true),

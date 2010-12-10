@@ -34,6 +34,7 @@ import ru.jimbot.modules.AbstractServer;
 import ru.jimbot.modules.anek.AnekServer;
 import ru.jimbot.modules.chat.ChatServer;
 import ru.jimbot.modules.http.Server;
+import ru.jimbot.modules.info.InfoServer;
 import ru.jimbot.util.Log;
 import ru.jimbot.util.MainProps;
 
@@ -351,7 +352,7 @@ public class Manager {
     public void testDB(){
     	for(String s : services.keySet()){
             AbstractServer service = services.get(s);
-    		if(service.isRun){
+    		if(service.isRun & !service.getType().equals("info")){
     			try {
     				if(service.getDB().isClosed()){
     					service.getDB().getDb();
@@ -399,6 +400,8 @@ public class Manager {
 			services.put(name, new ChatServer(name));
 		} else if (type.equals("anek")){
 			services.put(name, new AnekServer(name));
+                } else if (type.equals("info")){
+			services.put(name, new InfoServer(name));
 		} else {
 			Log.getLogger(name).error("Неизвестный тип сервиса: "+type);
 		}

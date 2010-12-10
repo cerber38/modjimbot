@@ -34,6 +34,7 @@ import ru.jimbot.Manager;
 import ru.jimbot.modules.MsgStatCounter;
 import ru.jimbot.modules.chat.ChatCommandProc;
 import ru.jimbot.modules.chat.ChatServer;
+import ru.jimbot.modules.info.InfoServer;
 import ru.jimbot.table.UserPreference;
 import ru.jimbot.util.CreateService;
 import ru.jimbot.util.Log;
@@ -240,12 +241,12 @@ public class MainPage extends HttpServlet {
         for(int i=0; i<sn.length; i++){
     	s += "<TR><TH ALIGN=LEFT>" + a + ") " + sn[i] + "</TD>";
     	s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=srvs_props&ns="+sn[i]+"\">Настройки сервиса</A></TD>";
-        if(!MainProps.getType(sn[i]).equalsIgnoreCase("Anek")){
+        if(MainProps.getType(sn[i]).equalsIgnoreCase("Chat")){
         s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us + "&page=srvs_other&ns="+sn[i]+"\">Другие настройки</A></TD>";
         } else {
         s += "<TD> </TD>";
         }
-        if(!MainProps.getType(sn[i]).equalsIgnoreCase("Anek")){
+        if(MainProps.getType(sn[i]).equalsIgnoreCase("Chat")){
     	s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + "&us=" + us +  "&page=srvs_messages&ns="+sn[i]+"\">messages.xml</A></TD>";
         } else {
         s += "<TD> </TD>";
@@ -301,7 +302,7 @@ public class MainPage extends HttpServlet {
     		s += "<TR><TH ALIGN=LEFT>" + i + ") " + n + "</TD>";
     		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
     			"&page=srvs_props&ns="+n+"\">Настройки сервиса</A></TD>";
-            if(!MainProps.getType(n).equalsIgnoreCase("Anek")){
+            if(MainProps.getType(n).equalsIgnoreCase("Chat")){
             s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid + 
     			"&page=srvs_other&ns="+n+"\">Другие настройки</A></TD>";
             } else {
@@ -309,7 +310,7 @@ public class MainPage extends HttpServlet {
             }
     		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +  
 				"&page=srvs_props_uin&ns="+n+"\">Настройки UIN</A></TD>";
-            if(!MainProps.getType(n).equalsIgnoreCase("Anek")){
+            if(MainProps.getType(n).equalsIgnoreCase("Chat")){
     		s += "<TD><A HREF=\"" + con.getURI() + "?uid=" + uid +
 				"&page=srvs_messages&ns="+n+"\">messages.xml</A></TD>";
             } else {
@@ -945,8 +946,10 @@ public class MainPage extends HttpServlet {
             	"\"><INPUT TYPE=hidden NAME=\"page\" VALUE=\"srvs_create_in\">" +
             	"<INPUT TYPE=hidden NAME=\"uid\" VALUE=\"" + uid + "\">" +
             	"Имя сервиса: <INPUT TYPE=text NAME=\"ns\" size=\"40\"> <br>" +
-            	"Тип сервиса: chat <input type=radio name=\"type\" value=\"chat\"> " +
-            	"anek <input type=radio name=\"type\" value=\"anek\">" +
+            	"Тип сервиса:<br>" +
+                "chat <input type=radio name=\"type\" value=\"chat\"><br> " +
+            	"anek <input type=radio name=\"type\" value=\"anek\"><br>" +
+                "info <input type=radio name=\"type\" value=\"info\">" +
               	"<P><INPUT TYPE=submit VALUE=\"Сохранить\">");
     	con.print("<P><INPUT TYPE=button VALUE=\"Назад\" onClick=location.href=\"" + con.getURI() + "?uid=" + uid + "&page=main_page\"></FORM>");
     	con.print("</FONT></BODY></HTML>");
@@ -981,16 +984,16 @@ public class MainPage extends HttpServlet {
     		printMsg(con,"srvs_create","Необходимо выбрать тип сервиса!");
     		return;
     	}
-        MainProps.AddDirectory(ns);
+        MainProps.AddDirectory(ns, type);
         MainProps.AddLogProperties(ns);
         MainProps.uinsAddFile(ns);
-        MainProps.CopyingScript(ns, type);
-        if(!type.equalsIgnoreCase("anek"))MainProps.CopyingMessagesXml(ns);
+        if(!type.equalsIgnoreCase("info"))MainProps.CopyingScript(ns, type);
+        if(type.equalsIgnoreCase("Chat")) MainProps.CopyingMessagesXml(ns);
     	Manager.getInstance().addService(ns, type);
         Manager.getInstance().getService(ns).getProps().AddXmlConfig(ns);
     	MainProps.addService(ns, type);
     	MainProps.save();
-        if(MainProps.getBooleanProperty("avto.db.on.off")) CreateService.initMySQLService(ns);
+        if(MainProps.getBooleanProperty("avto.db.on.off") & type.equalsIgnoreCase("Chat")) CreateService.initMySQLService(ns);
     	printOkMsg(con,"main_page");
     }
     

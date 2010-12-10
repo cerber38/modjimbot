@@ -955,6 +955,7 @@ public class ChatCommandProc extends AbstractCommandProcessor {
      }
      }
      } catch (Exception ex) {
+     ex.printStackTrace();
      Log.getLogger(srv.getName()).error("Ошибка - " + ex.getMessage());
      }
      }
@@ -1024,7 +1025,6 @@ public class ChatCommandProc extends AbstractCommandProcessor {
     }else
         antiadvertising.remove(uin);
     }
-    System.out.print(msg + "\n");
     return msg;
     }
 

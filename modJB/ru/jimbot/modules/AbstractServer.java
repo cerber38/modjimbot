@@ -31,6 +31,7 @@ public class AbstractServer {
     public AbstractCommandProcessor cmd;
     public boolean isRun = false;
     private String name = "";
+    private String type = "";
     private AbstractProps props = null;
     // Для хранения промежуточных результатов между запусками скриптов бота
     public Vector res = new Vector();
@@ -63,6 +64,14 @@ public class AbstractServer {
     
     public String getName() {
     	return name;
+    }
+
+     public void setType(String type){
+    	this.type = type;
+    }
+
+    public String getType() {
+    	return type;
     }
     
     public AbstractProps getProps() {

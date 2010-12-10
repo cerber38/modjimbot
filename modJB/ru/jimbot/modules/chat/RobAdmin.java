@@ -18,8 +18,8 @@
 
 package ru.jimbot.modules.chat;
 
+import java.sql.PreparedStatement;
 import ru.jimbot.util.Time;
-import com.mysql.jdbc.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.Random;

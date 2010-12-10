@@ -139,8 +139,7 @@ private Properties props = null;
             if(ChatProps.getInstance(ServiceName).getBooleanProperty("social.status.on.off"))
             msg = msg.replace("%SOCIAL_STATUS%", srv.us.getStatus(uss.id));
             msg = msg.replace("%NOTICE%", Integer.toString(uss.notice));
-            msg = msg.replace("%TEXT_IN%", srv.us.getTextInOut("in"));
-            msg = msg.replace("%TEXT_OUT%", srv.us.getTextInOut("out"));
+            msg = msg.replace("%TEXT_IN%", srv.us.getTextInOut("in"));          
             return msg;
         } catch (MissingResourceException e) {
             return '!' + key + '!';
@@ -156,7 +155,9 @@ private Properties props = null;
         private String getClan(Users uss){
         String clan = "";
         ChatServer srv = (ChatServer) Manager.getInstance().getService(ServiceName);
-        String clan_symbol = srv.us.getClan(uss.clansman).getSymbol().equals("") || !ChatProps.getInstance(ServiceName).getBooleanProperty("Clan.Symbol") ? "" : "(" + srv.us.getClan(uss.clansman).getSymbol() + ")";
+        String clan_symbol = "";
+        if(srv.us.getClan(uss.clansman).getSymbol() == null) srv.us.getClan(uss.clansman).setSymbol("");
+        clan_symbol = srv.us.getClan(uss.clansman).getSymbol().equals("") || !ChatProps.getInstance(ServiceName).getBooleanProperty("Clan.Symbol") ? "" : "(" + srv.us.getClan(uss.clansman).getSymbol() + ")";
         if(uss.clansman != 0)
         clan += (uss.id != srv.us.getClan(uss.clansman).getLeader() ? "Состаит в клане - ''" + srv.us.getClan(uss.clansman).getName() + " " + clan_symbol + "''" : ("Лидер клана - ''" + srv.us.getClan(uss.clansman).getName() + " " + clan_symbol + "''"));
         else
@@ -166,10 +167,11 @@ private Properties props = null;
 
          public synchronized String getString_exitChat(String key, Users uss) {
         try {
-     //System.out.print("Messages >>> " + getNewBundle().getString(key));
+           ChatServer srv = ( ChatServer ) Manager.getInstance().getService( ServiceName );
             String msg = getNewBundle().getString(key);
             msg = msg.replace("%NICK%", uss.localnick);// Ник пользователя который набрал команду
             msg = msg.replace("%ID%", Integer.toString(uss.id));// Ид пользователя который набрал команду
+            msg = msg.replace("%TEXT_OUT%", srv.us.getTextInOut("out"));
             return msg;
         } catch (MissingResourceException e) {
             return '!' + key + '!';
@@ -178,7 +180,6 @@ private Properties props = null;
 
     public synchronized String getString(String key) {
         try {
-     //System.out.print("Messages >>> " + getNewBundle().getString(key));
             return getNewBundle().getString(key);
         } catch (MissingResourceException e) {
             return '!' + key + '!';
@@ -187,7 +188,6 @@ private Properties props = null;
     
     public synchronized String getString(String key, Object[] arg) {
         try {
-     //System.out.print("Messages >>> " + java.text.MessageFormat.format(getNewBundle().getString(key), arg));
             return java.text.MessageFormat.format(getNewBundle().getString(key), arg);
         } catch (MissingResourceException e) {
             return '!' + key + '!';

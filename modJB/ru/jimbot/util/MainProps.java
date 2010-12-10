@@ -476,7 +476,7 @@ public class MainProps {
     try {
     String config = Log.Log4jProperties;
     config = config.replace("$SERVICE", name);
-    OutputStreamWriter NewFile = new OutputStreamWriter( new FileOutputStream( "./services/" + name + "/log4j.PROPERTIES", true ), "windows-1251" );
+    OutputStreamWriter NewFile = new OutputStreamWriter( new FileOutputStream( "./services/" + name + "/log4j.properties", true ), "windows-1251" );
     NewFile.write( config );
     NewFile.close();
     }
@@ -491,7 +491,14 @@ public class MainProps {
      * @param name
      */
 
-    public static void AddDirectory (String name){
+    public static void AddDirectory (String name, String type){
+    if(type.equals("info")){
+    String Directory_i = "./services/" + name + "/";
+    File NEW = new File(Directory_i);
+    if(!NEW.exists())
+    NEW.mkdirs();
+    return;
+    }
     String Directory = "./services/" + name + "/scripts/command/";
     File NEW = new File(Directory);
     if(!NEW.exists())

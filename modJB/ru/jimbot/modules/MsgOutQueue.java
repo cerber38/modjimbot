@@ -18,6 +18,7 @@
 
 package ru.jimbot.modules;
 
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import ru.jimbot.protocol.IcqProtocol;
@@ -162,7 +163,7 @@ public class MsgOutQueue implements Runnable {
         }
         th=null;
     }
-    
+   
     public class Msg{
     	public static final int TYPE_MSG = 0; // Обычное сообщение
     	public static final int TYPE_AUTH = 1; // запрос авторизации

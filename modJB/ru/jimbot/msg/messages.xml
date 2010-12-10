@@ -154,7 +154,7 @@
 <entry key="ChatCommandProc.commandgoChat.15">%NICK% в викторину могут играть максимум %VIC_USERS_COUNT% человек. Выберете другую комнату.</entry>
 <entry key="ChatCommandProc.commandgoChat.16">%NICK% вы вошли в чат невидимым</entry>
 <entry key="ChatCommandProc.commandgoChat.17">%NICK% это личная комнат, вы не можете в нее войти!.</entry>
-<entry key="ChatCommandProc.commandexitChat.0">%NICK%  %TEXT_OUT%</entry>
+<entry key="ChatCommandProc.commandexitChat.0">%NICK% %TEXT_OUT%</entry>
 <entry key="ChatCommandProc.commandexitChat.1">Приходите еще *BYE*</entry>
 <entry key="ChatCommandProc.commandexitChat.2">%NICK% вы вышли из чат невидимым</entry>
 <entry key="ChatCommandProc.tkick.0">Пинок на {0}  минут, {1}{2}</entry>
